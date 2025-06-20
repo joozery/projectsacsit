@@ -106,7 +106,7 @@ const MultimediaPage = () => {
   const handleFeatureClick = (feature, itemName = '') => {
     toast({
       title: `🚧 ฟีเจอร์ "${feature}" ${itemName ? `สำหรับ "${itemName}"` : ''} ยังไม่ได้พัฒนา`,
-      description: "แต่ไม่ต้องกังวล! คุณสามารถขอให้เพิ่มฟีเจอร์นี้ในข้อความถัดไปได้! 🚀",
+      description: "แต่ไม่ต้องกังวล! ระบบจะใช้งานได้เร็วๆนี้!  🚀",
     });
   };
 
