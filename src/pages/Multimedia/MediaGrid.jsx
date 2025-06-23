@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { 
   Eye, 
   Edit, 
@@ -13,7 +12,7 @@ import {
   CalendarDays 
 } from 'lucide-react';
 
-const MediaGrid = ({ mediaItems, onEdit, onDelete, onFeatureClick }) => {
+const MediaGrid = ({ mediaItems, onEdit, onDelete, onPreview }) => {
 
   const getStatusBadge = (status) => {
     if (status === 'published') {
@@ -44,7 +43,7 @@ const MediaGrid = ({ mediaItems, onEdit, onDelete, onFeatureClick }) => {
           >
             <div 
               className="relative w-full h-48 bg-gray-200 cursor-pointer"
-              onClick={() => onFeatureClick('ดูรายละเอียด', item.name)}
+              onClick={() => onPreview(item)}
               style={{ backgroundColor: item.themeColor || '#E5E7EB' }}
             >
               {item.type === 'folder' ? (
@@ -88,17 +87,15 @@ const MediaGrid = ({ mediaItems, onEdit, onDelete, onFeatureClick }) => {
                 )}
               </div>
               <div className="flex items-center justify-end space-x-1 mt-3">
-                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100" onClick={() => onFeatureClick('ดูตัวอย่าง', item.name)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100" onClick={() => onPreview(item)}>
                   <Eye className="w-4 h-4 text-gray-500 hover:text-blue-600" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100" onClick={() => onEdit(item)}>
                   <Edit className="w-4 h-4 text-gray-500 hover:text-violet-600" />
                 </Button>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100" onClick={() => onDelete(item)}>
-                    <Trash2 className="w-4 h-4 text-gray-500 hover:text-red-600" />
-                  </Button>
-                </AlertDialogTrigger>
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-red-100" onClick={() => onDelete(item)}>
+                  <Trash2 className="w-4 h-4 text-gray-500 hover:text-red-600" />
+                </Button>
               </div>
             </div>
           </motion.div>

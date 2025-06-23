@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
@@ -75,9 +74,10 @@ const GoogleAnalytics = () => {
 
   const handleConnectAnalytics = () => {
     toast({
-      title: "🚧 เชื่อมต่อ Google Analytics",
-      description: "ฟังก์ชันการเชื่อมต่อ Google Analytics ยังไม่ได้ถูกพัฒนา กรุณาแจ้งผู้พัฒนาหากต้องการใช้งานส่วนนี้ 🚀",
+      title: "กำลังเปลี่ยนเส้นทางไปยัง Google Analytics",
+      description: "คุณจะถูกนำไปยังหน้าเว็บ Google Analytics เพื่อทำการเชื่อมต่อบัญชีของคุณ",
     });
+    window.open('https://analytics.google.com/', '_blank', 'noopener,noreferrer');
   };
 
   const handleExportReport = () => {

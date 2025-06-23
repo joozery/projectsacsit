@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MultimediaPage from '@/pages/Multimedia/index';
 

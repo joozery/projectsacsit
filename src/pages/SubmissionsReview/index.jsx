@@ -30,13 +30,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SubmissionDetailModal from './components/SubmissionDetailModal';
+import ContactSubmitterModal from './components/ContactSubmitterModal';
 
 const initialSubmissions = [
-  { id: 1, title: 'การพัฒนาระบบ AI ตรวจจับความผิดปกติในโรงงาน', author: 'สมชาย ใจดี', type: 'ผลงานวิชาการ', submissionDate: '2025-05-10', status: 'pending', score: null, reviewer: 'อ.ดร.วิชัย ประเสริฐ', eventName: 'SACIT Conference 2025' },
-  { id: 2, title: 'นวัตกรรมผ้าทอพื้นเมืองประยุกต์', author: 'สมหญิง รักไทย', type: 'ผลงานสร้างสรรค์', submissionDate: '2025-05-12', status: 'reviewed', decision: 'accepted', score: 85, reviewer: 'คุณมานี มีศิลป์', eventName: 'SACIT Creative Awards' },
-  { id: 3, title: 'ผลกระทบของโซเชียลมีเดียต่อเยาวชน', author: 'จอห์น โด', type: 'ผลงานวิชาการ', submissionDate: '2025-05-15', status: 'pending', score: null, reviewer: 'อ.ดร.สมศักดิ์ เก่งมาก', eventName: 'SACIT Conference 2025' },
-  { id: 4, title: 'ประติมากรรมจากวัสดุรีไซเคิล', author: 'เจน สมิธ', type: 'ผลงานสร้างสรรค์', submissionDate: '2025-05-18', status: 'reviewed', decision: 'rejected', score: 60, reviewer: 'คุณวิจิตร งามตา', eventName: 'SACIT Creative Awards' },
-  { id: 5, title: 'การศึกษาเปรียบเทียบอัลกอริทึม Machine Learning', author: 'ปีเตอร์ ปาร์คเกอร์', type: 'ผลงานวิชาการ', submissionDate: '2025-05-20', status: 'reviewed', decision: 'conditional_accept', score: 78, reviewer: 'อ.ดร.วิชัย ประเสริฐ', eventName: 'SACIT Conference 2025', conditions: 'โปรดแก้ไขบทคัดย่อและเพิ่มการอ้างอิงที่เกี่ยวข้องภายใน 7 วัน' },
+  { id: 1, title: 'การพัฒนาระบบ AI ตรวจจับความผิดปกติในโรงงาน', author: 'สมชาย ใจดี', email: 'somchai.j@example.com', type: 'ผลงานวิชาการ', submissionDate: '2025-05-10', status: 'pending', score: null, reviewer: 'อ.ดร.วิชัย ประเสริฐ', eventName: 'SACIT Conference 2025' },
+  { id: 2, title: 'นวัตกรรมผ้าทอพื้นเมืองประยุกต์', author: 'สมหญิง รักไทย', email: 'somying.r@example.com', type: 'ผลงานสร้างสรรค์', submissionDate: '2025-05-12', status: 'reviewed', decision: 'accepted', score: 85, reviewer: 'คุณมานี มีศิลป์', eventName: 'SACIT Creative Awards' },
+  { id: 3, title: 'ผลกระทบของโซเชียลมีเดียต่อเยาวชน', author: 'จอห์น โด', email: 'john.d@example.com', type: 'ผลงานวิชาการ', submissionDate: '2025-05-15', status: 'pending', score: null, reviewer: 'อ.ดร.สมศักดิ์ เก่งมาก', eventName: 'SACIT Conference 2025' },
+  { id: 4, title: 'ประติมากรรมจากวัสดุรีไซเคิล', author: 'เจน สมิธ', email: 'jane.s@example.com', type: 'ผลงานสร้างสรรค์', submissionDate: '2025-05-18', status: 'reviewed', decision: 'rejected', score: 60, reviewer: 'คุณวิจิตร งามตา', eventName: 'SACIT Creative Awards' },
+  { id: 5, title: 'การศึกษาเปรียบเทียบอัลกอริทึม Machine Learning', author: 'ปีเตอร์ ปาร์คเกอร์', email: 'peter.p@example.com', type: 'ผลงานวิชาการ', submissionDate: '2025-05-20', status: 'reviewed', decision: 'conditional_accept', score: 78, reviewer: 'อ.ดร.วิชัย ประเสริฐ', eventName: 'SACIT Conference 2025', conditions: 'โปรดแก้ไขบทคัดย่อและเพิ่มการอ้างอิงที่เกี่ยวข้องภายใน 7 วัน' },
 ];
 
 const SUBMISSIONS_STORAGE_KEY = 'submissions_review_v1';
@@ -49,6 +51,8 @@ const SubmissionsReviewPage = () => {
   const [submissions, setSubmissions] = useState([]);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [isDecisionModalOpen, setIsDecisionModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [decisionData, setDecisionData] = useState({ decision: '', score: '', comments: '', conditions: '' });
 
   useEffect(() => {
@@ -93,10 +97,32 @@ const SubmissionsReviewPage = () => {
     setSelectedSubmission(null);
   };
 
-  const handleFeatureClick = (feature, submissionTitle = '') => {
+  const handleViewDetails = (submission) => {
+    setSelectedSubmission(submission);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleDownloadFile = (submission) => {
     toast({
-      title: `🚧 ฟีเจอร์ "${feature}" ${submissionTitle ? `สำหรับ "${submissionTitle}"` : ''} ยังไม่ได้พัฒนา`,
-      description: "แต่ไม่ต้องกังวล! ระบบจะใช้งานได้เร็วๆนี้!  🚀",
+      title: "🚀 เริ่มดาวน์โหลดไฟล์",
+      description: `กำลังดาวน์โหลดไฟล์สำหรับผลงาน "${submission.title}"`,
+    });
+  };
+
+  const handleContactSubmitter = (submission) => {
+    setSelectedSubmission(submission);
+    setIsContactModalOpen(true);
+  };
+
+  const handleContactSubmit = () => {
+    setIsContactModalOpen(false);
+    toast({ title: "ส่งข้อความสำเร็จ!", description: `ข้อความของคุณถูกส่งไปยัง ${selectedSubmission?.author} แล้ว` });
+  };
+
+  const handleFeatureClick = (feature) => {
+    toast({
+      title: `🚧 ฟีเจอร์ "${feature}" ยังไม่ได้พัฒนา`,
+      description: "แต่ไม่ต้องกังวล! ฟังชั้นจะใช้งานได้ในเร็วๆนี้  🚀",
     });
   };
 
@@ -262,13 +288,13 @@ const SubmissionsReviewPage = () => {
                           <DropdownMenuItem onClick={() => handleOpenDecisionModal(sub)}>
                             <Edit className="w-4 h-4 mr-2 text-blue-500"/>ตัดสินผลงาน
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleFeatureClick('ดูรายละเอียด', sub.title)}>
+                          <DropdownMenuItem onClick={() => handleViewDetails(sub)}>
                             <Eye className="w-4 h-4 mr-2 text-gray-500"/>ดูรายละเอียด
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleFeatureClick('ดาวน์โหลดไฟล์', sub.title)}>
+                          <DropdownMenuItem onClick={() => handleDownloadFile(sub)}>
                             <FileText className="w-4 h-4 mr-2 text-green-500"/>ดาวน์โหลดไฟล์
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleFeatureClick('ติดต่อผู้ส่ง', sub.title)}>
+                          <DropdownMenuItem onClick={() => handleContactSubmitter(sub)}>
                             <Users className="w-4 h-4 mr-2 text-purple-500"/>ติดต่อผู้ส่ง
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -297,7 +323,6 @@ const SubmissionsReviewPage = () => {
           </div>
         </motion.div>
 
-        {/* Decision Modal */}
         <AlertDialog open={isDecisionModalOpen} onOpenChange={setIsDecisionModalOpen}>
           <AlertDialogContent className="sm:max-w-md">
             <AlertDialogHeader>
@@ -363,6 +388,18 @@ const SubmissionsReviewPage = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <SubmissionDetailModal 
+          isOpen={isDetailModalOpen}
+          onOpenChange={setIsDetailModalOpen}
+          submission={selectedSubmission}
+        />
+        <ContactSubmitterModal
+          isOpen={isContactModalOpen}
+          onOpenChange={setIsContactModalOpen}
+          submission={selectedSubmission}
+          onSubmit={handleContactSubmit}
+        />
 
       </div>
     </>

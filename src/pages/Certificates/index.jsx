@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Search } from 'lucide-react';
@@ -133,15 +132,15 @@ const CertificatesPage = () => {
   };
 
   const handleFeatureClick = (feature, idOrName, certificateNameIfOpenForm = '') => {
-    let description = '🚧 ฟีเจอร์นี้ยังไม่ได้พัฒนา—แต่ไม่ต้องกังวล! ระบบจะใช้งานได้เร็วๆนี้!  🚀';
+    let description = '🚧 ฟีเจอร์นี้ยังไม่ได้พัฒนา—แต่ไม่ต้องกังวล! ฟังชั้นจะใช้งานได้ในเร็วๆนี้  🚀';
     if (feature === 'openForm') {
-        description = `🚧 ฟีเจอร์เปิดฟอร์มสำหรับงาน ID: ${idOrName} ("${certificateNameIfOpenForm}") ยังไม่ได้พัฒนา—แต่ไม่ต้องกังวล! ระบบจะใช้งานได้เร็วๆนี้! 🚀`;
+        description = `🚧 ฟีเจอร์เปิดฟอร์มสำหรับงาน ID: ${idOrName} ("${certificateNameIfOpenForm}") ยังไม่ได้พัฒนา—แต่ไม่ต้องกังวล! ฟังชั้นจะใช้งานได้ในเร็วๆนี้  🚀`;
     } else if (feature === 'view') {
-        description = `🚧 ฟีเจอร์ดูตัวอย่าง "${idOrName}" ยังไม่ได้พัฒนา—แต่ไม่ต้องกังวล! ระบบจะใช้งานได้เร็วๆนี้! 🚀`;
+        description = `🚧 ฟีเจอร์ดูตัวอย่าง "${idOrName}" ยังไม่ได้พัฒนา—แต่ไม่ต้องกังวล! ฟังชั้นจะใช้งานได้ในเร็วๆนี้  🚀`;
     } else if (feature === 'downloadQr') {
-        description = `🚧 ฟีเจอร์ดาวน์โหลด QR Code สำหรับ "${idOrName}" ยังไม่ได้พัฒนา—แต่ไม่ต้องกังวล! ระบบจะใช้งานได้เร็วๆนี้!  🚀`;
+        description = `🚧 ฟีเจอร์ดาวน์โหลด QR Code สำหรับ "${idOrName}" ยังไม่ได้พัฒนา—แต่ไม่ต้องกังวล! ฟังชั้นจะใช้งานได้ในเร็วๆนี้  🚀`;
     } else if (feature === 'pagination') {
-        description = '🚧 ฟีเจอร์แบ่งหน้ายังไม่ได้พัฒนา—แต่ไม่ต้องกังวล! ระบบจะใช้งานได้เร็วๆนี้!  🚀';
+        description = '🚧 ฟีเจอร์แบ่งหน้ายังไม่ได้พัฒนา—แต่ไม่ต้องกังวล! ฟังชั้นจะใช้งานได้ในเร็วๆนี้  🚀';
     }
     
     toast({ description });

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
@@ -388,4 +387,3 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
-

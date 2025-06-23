@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -21,7 +20,10 @@ import {
   UserPlus, 
   CalendarCheck, 
   ClipboardCheck,
-  LogIn
+  LogIn,
+  BookOpen,
+  CalendarDays,
+  Mic
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -34,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from '@/components/ui/use-toast';
+
 import logo from '@/assets/logo.png';
 
 
@@ -56,7 +59,7 @@ const Layout = ({ children }) => {
   const handleNotificationClick = (notification) => {
     toast({
       title: `การแจ้งเตือน: ${notification.title}`,
-      description: "🚧 ฟังก์ชันการจัดการการแจ้งเตือนยังไม่ได้พัฒนา แต่คุณสามารถขอให้เพิ่มได้! 🚀",
+      description: "🚧 ฟังก์ชันการจัดการการแจ้งเตือนยังไม่ได้พัฒนา ฟังชั้นจะใช้งานได้ในเร็วๆนี้ 🚀",
     });
   };
 
@@ -76,13 +79,14 @@ const Layout = ({ children }) => {
 
   const menuItems = [
     { icon: Home, label: 'หน้าหลัก', path: '/admin/dashboard', description: 'ภาพรวมและสถิติ' },
+    { icon: CalendarDays, label: 'Agenda', path: '/admin/agenda', description: 'จัดการกำหนดการ' },
+    { icon: Mic, label: 'ผู้บรรยาย', path: '/admin/speakers', description: 'จัดการข้อมูลผู้บรรยาย' },
     { icon: TrendingUp, label: 'Google Analytics', path: '/admin/google-analytics', description: 'สถิติการเข้าชมเว็บ' },
     { icon: Award, label: 'ใบประกาศนียบัตร', path: '/admin/certificates', description: 'จัดการใบประกาศ' },
     { icon: Film, label: 'สื่อมัลติมีเดีย', path: '/admin/multimedia', description: 'จัดการวิดีโอและภาพถ่าย' },
+    { icon: BookOpen, label: 'E-Book', path: '/admin/ebooks', description: 'จัดการผลงาน E-Book' },
     { icon: ClipboardCheck, label: 'ตรวจสอบผลงาน', path: '/admin/submissions-review', description: 'ประเมินและตัดสินผลงาน' },
-    { icon: Briefcase, label: 'กิจกรรม/โครงการ', path: '/admin/events', description: 'จัดการกิจกรรม' },
     { icon: Users, label: 'ผู้ใช้งาน', path: '/admin/users', description: 'จัดการผู้ใช้งานระบบ' },
-    { icon: BarChart3, label: 'รายงาน', path: '/admin/reports', description: 'สรุปและวิเคราะห์ข้อมูล' },
     { icon: FileText, label: 'เทมเพลต', path: '/admin/templates', description: 'จัดการเทมเพลตเอกสาร' },
     { icon: Settings, label: 'ตั้งค่า', path: '/admin/settings', description: 'ตั้งค่าระบบโดยรวม' }
   ];
@@ -157,12 +161,12 @@ const Layout = ({ children }) => {
             <div className="flex items-center justify-between">
               <div className={`flex items-center ${sidebarCollapsed && !isMobile ? 'justify-center' : 'space-x-3'}`}>
                 <div 
-  className="w-10 h-10 flex items-center justify-center flex-shrink-0 cursor-pointer"
-  onClick={() => navigate('/')}
-  title="กลับสู่หน้าหลัก"
->
-  <img src={logo} alt="SACIT Admin Logo" className="w-full h-full object-contain" />
-</div>
+                  className="w-10 h-10  rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer"
+                  onClick={() => navigate('/')}
+                  title="กลับสู่หน้าหลัก"
+                >
+                  <img src={logo} alt="SACIT Admin Logo" className="w-full h-full object-contain" />
+                  </div>
                 {(!sidebarCollapsed || isMobile) && (
                   <motion.div
                     initial={false}

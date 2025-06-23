@@ -1,4 +1,3 @@
-
 import React from 'react';
 import CertificatesPage from '@/pages/Certificates/index';
 
