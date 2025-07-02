@@ -12,6 +12,7 @@ import TemplatesPage from '@/pages/Templates/index';
 import EbooksPage from '@/pages/Ebooks/index';
 import SettingsPage from '@/pages/Settings/index';
 import LandingPage from '@/pages/LandingPage';
+import Register from '@/pages/Register';
 import AgendaPage from '@/pages/Agenda/index';
 import SpeakersPage from '@/pages/Speakers/index';
 import { Toaster } from '@/components/ui/toaster';
@@ -28,6 +29,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />

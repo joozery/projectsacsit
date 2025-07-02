@@ -1,9 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const Lightbox = ({ imageUrl, onClose, onNext, onPrev, hasPrev, hasNext }) => {
+const Lightbox = ({ imageUrl, onClose, onNext, onPrev, hasPrev, hasNext, currentIndex, totalImages }) => {
   if (!imageUrl) return null;
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      } else if (e.key === 'ArrowLeft' && hasPrev) {
+        onPrev();
+      } else if (e.key === 'ArrowRight' && hasNext) {
+        onNext();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, onNext, onPrev, hasPrev, hasNext]);
 
   return (
     <AnimatePresence>
@@ -22,12 +37,20 @@ const Lightbox = ({ imageUrl, onClose, onNext, onPrev, hasPrev, hasNext }) => {
           className="relative max-w-4xl max-h-[90vh]"
           onClick={(e) => e.stopPropagation()}
         >
-          <img-replace src={imageUrl} alt="Lightbox preview" className="rounded-lg shadow-2xl object-contain max-w-full max-h-full" />
+          <img src={imageUrl} alt="Lightbox preview" className="rounded-lg shadow-2xl object-contain max-w-full max-h-full" />
+          
+          {/* Image counter */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm border border-white/20">
+            Image {(currentIndex || 0) + 1} of {totalImages || 9}
+          </div>
         </motion.div>
 
         <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-white bg-black/30 rounded-full p-2 hover:bg-black/50 transition-colors z-[101]"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-3 hover:bg-black/70 transition-colors z-[101] border border-white/20"
           aria-label="Close"
         >
           <X size={24} />
@@ -35,8 +58,11 @@ const Lightbox = ({ imageUrl, onClose, onNext, onPrev, hasPrev, hasNext }) => {
 
         {hasPrev && (
           <button
-            onClick={onPrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/30 rounded-full p-2 hover:bg-black/50 transition-colors z-[101]"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrev();
+            }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/50 rounded-full p-3 hover:bg-black/70 transition-colors z-[101] border border-white/20"
             aria-label="Previous image"
           >
             <ChevronLeft size={32} />
@@ -45,8 +71,11 @@ const Lightbox = ({ imageUrl, onClose, onNext, onPrev, hasPrev, hasNext }) => {
 
         {hasNext && (
           <button
-            onClick={onNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/30 rounded-full p-2 hover:bg-black/50 transition-colors z-[101]"
+            onClick={(e) => {
+              e.stopPropagation();
+              onNext();
+            }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/50 rounded-full p-3 hover:bg-black/70 transition-colors z-[101] border border-white/20"
             aria-label="Next image"
           >
             <ChevronRight size={32} />
