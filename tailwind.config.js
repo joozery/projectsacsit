@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
 	darkMode: ['class'],
 	content: [
 		'./pages/**/*.{js,jsx}',
@@ -7,6 +7,7 @@ module.exports = {
 		'./app/**/*.{js,jsx}',
 		'./src/**/*.{js,jsx}',
 	],
+	prefix: "",
 	theme: {
 		container: {
 			center: true,
@@ -16,6 +17,14 @@ module.exports = {
 			},
 		},
 		extend: {
+			fontFamily: {
+				'custom': ['CustomFont-Regular', 'Noto Sans Thai', 'sans-serif'],
+				'custom-bold': ['CustomFont-Bold', 'Noto Sans Thai', 'sans-serif'],
+				'custom-light': ['CustomFont-Light', 'Noto Sans Thai', 'sans-serif'],
+				'custom-italic': ['CustomFont-Italic', 'Noto Sans Thai', 'sans-serif'],
+				'didot': ['AWConqueror Std Didot', 'Times New Roman', 'serif'],
+				'thai': ['Noto Sans Thai', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

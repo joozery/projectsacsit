@@ -23,7 +23,12 @@ import {
   LogIn,
   BookOpen,
   CalendarDays,
-  Mic
+  Mic,
+  UserCheck,
+  Palette,
+  Upload,
+  MessageSquare,
+  LogOut
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -38,6 +43,8 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 
 import logo from '@/assets/logo.png';
+import logoWhite from '@/assets/logow.svg';
+import symposiumText from '@/assets/symposiam.svg';
 
 
 const Layout = ({ children }) => {
@@ -81,6 +88,7 @@ const Layout = ({ children }) => {
     { icon: Home, label: 'หน้าหลัก', path: '/admin/dashboard', description: 'ภาพรวมและสถิติ' },
     { icon: CalendarDays, label: 'Agenda', path: '/admin/agenda', description: 'จัดการกำหนดการ' },
     { icon: Mic, label: 'ผู้บรรยาย', path: '/admin/speakers', description: 'จัดการข้อมูลผู้บรรยาย' },
+    { icon: UserCheck, label: 'รายชื่อผู้เข้าร่วม', path: '/admin/attendees', description: 'เช็ครายชื่อผู้เข้าร่วมงาน' },
     { icon: TrendingUp, label: 'Google Analytics', path: '/admin/google-analytics', description: 'สถิติการเข้าชมเว็บ' },
     { icon: Award, label: 'ใบประกาศนียบัตร', path: '/admin/certificates', description: 'จัดการใบประกาศ' },
     { icon: Film, label: 'สื่อมัลติมีเดีย', path: '/admin/multimedia', description: 'จัดการวิดีโอและภาพถ่าย' },
@@ -128,8 +136,13 @@ const Layout = ({ children }) => {
     return <>{children}</>; // Render children directly for non-admin pages
   }
 
+  const handleLogout = () => {
+    // In a real app, this would clear authentication tokens
+    navigate('/');
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       <AnimatePresence>
         {sidebarOpen && isMobile && (
           <motion.div
@@ -165,7 +178,7 @@ const Layout = ({ children }) => {
                   onClick={() => navigate('/')}
                   title="กลับสู่หน้าหลัก"
                 >
-                  <img src={logo} alt="SACIT Admin Logo" className="w-full h-full object-contain" />
+                  <img src={logoWhite} alt="SACIT" className="w-full h-full object-contain" />
                   </div>
                 {(!sidebarCollapsed || isMobile) && (
                   <motion.div
@@ -389,6 +402,26 @@ const Layout = ({ children }) => {
             {children}
           </motion.div>
         </main>
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/20">
+        <Link to="/" className="block mb-2">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-white/80 hover:bg-white/5 hover:text-white font-custom"
+          >
+            <Home className="mr-3 h-5 w-5" />
+            กลับหน้าหลัก
+          </Button>
+        </Link>
+        <Button 
+          variant="ghost" 
+          onClick={handleLogout}
+          className="w-full justify-start text-white/80 hover:bg-white/5 hover:text-white font-custom"
+        >
+          <LogOut className="mr-3 h-5 w-5" />
+          ออกจากระบบ
+        </Button>
       </div>
     </div>
   );

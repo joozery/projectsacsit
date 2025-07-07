@@ -1,17 +1,57 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { Search, Menu } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, Menu, X } from 'lucide-react';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
 import heroslideImage from '@/assets/heroslide/heroslide.jpg';
 
 const Register = () => {
+  const navigate = useNavigate();
+  const [selectedType, setSelectedType] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleRegistrationTypeSelect = (type) => {
+    setSelectedType(type);
+    // Navigate to terms and conditions page with the selected type
+    navigate('/register/terms', { state: { registrationType: type } });
+  };
+
   const handleFeatureClick = () => {
     console.log("Feature not implemented yet.");
   };
+
+  // Close mobile menu when clicking outside
+  const handleOutsideClick = (e) => {
+    if (mobileMenuOpen && !e.target.closest('.mobile-menu-container')) {
+      setMobileMenuOpen(false);
+    }
+  };
+
+  React.useEffect(() => {
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, [mobileMenuOpen]);
+
+  const registrationTypes = [
+    {
+      id: 'general',
+      title: 'ลงทะเบียนเข้าร่วมงานทั่วไป',
+      description: 'สำหรับผู้เข้าร่วมงานทั่วไป'
+    },
+    {
+      id: 'research',
+      title: 'นำเสนอผลงานวิจัย/บทความวิชาการ',
+      description: 'สำหรับการนำเสนอผลงานวิจัยและบทความวิชาการ'
+    },
+    {
+      id: 'creative',
+      title: 'นำเสนอผลงานสร้างสรรค์',
+      description: 'สำหรับการนำเสนอผลงานสร้างสรรค์และศิลปกรรม'
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#8B7DC3] via-[#B3FFD1] to-[#BFB4EE] relative overflow-hidden">
@@ -20,8 +60,9 @@ const Register = () => {
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#533193] rounded-full opacity-15 translate-x-40 translate-y-40"></div>
       
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#533193] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] h-[100px]">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#533193] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] h-[100px] mobile-menu-container">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1280px] flex items-center justify-between h-full">
+          {/* Logo */}
           <Link to="/" className="flex items-start py-4">
             <div className="flex flex-col">
               <div className="flex items-center justify-end w-full">
@@ -33,19 +74,39 @@ const Register = () => {
             </div>
           </Link>
           
+          {/* Center Navigation - Desktop Only */}
+          <div className="hidden md:flex items-center gap-8">
+            <Button 
+              variant="ghost" 
+              className="text-white hover:bg-white/10 transition-all duration-300 text-sm font-custom-bold"
+              onClick={handleFeatureClick}
+            >
+              About Us
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="text-white hover:bg-white/10 transition-all duration-300 text-sm font-custom-bold"
+              onClick={handleFeatureClick}
+            >
+              News/Update
+            </Button>
+          </div>
+          
+          {/* Right Side */}
           <div className="flex items-center gap-6">
-            {/* Desktop Navigation */}
+            {/* Desktop Auth Buttons */}
             <div className="hidden md:flex items-center gap-4">
+              <Link to="/login">
+                <Button 
+                  variant="outline" 
+                  className="bg-transparent border border-[#B3FFD1] text-white hover:bg-white/5 transition-all duration-300 rounded-[30px] w-[140px] py-2.5 text-sm font-custom-bold shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
+                >
+                  LOGIN
+                </Button>
+              </Link>
               <Button 
-                variant="outline" 
-                className="bg-transparent border border-[#B3FFD1] text-white hover:bg-white/5 transition-all duration-300 rounded-[30px] w-[140px] py-2.5 text-sm font-medium shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-                onClick={handleFeatureClick}
-              >
-                LOGIN
-              </Button>
-              <Button 
-                className="bg-gradient-to-r from-[#B3FFD1] to-[#BFB4EE] text-[#533193] hover:opacity-90 transition-all duration-300 rounded-[100px] w-[140px] py-2.5 text-sm font-medium shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-                onClick={handleFeatureClick}
+                className="bg-[#533193] border border-[#B3FFD1] text-white hover:bg-[#533193]/90 transition-all duration-300 rounded-[100px] w-[140px] py-2.5 text-sm font-custom-bold shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
+                disabled
               >
                 REGISTER
               </Button>
@@ -67,14 +128,64 @@ const Register = () => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center"
-                onClick={handleFeatureClick}
+                className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center md:hidden"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                <Menu className="w-8 h-8" />
+                {mobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
               </Button>
             </div>
           </div>
         </div>
+        
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="absolute top-full left-0 right-0 bg-[#533193] shadow-lg border-t border-white/10 md:hidden"
+          >
+            <div className="container mx-auto px-4 py-4 space-y-2">
+              <Button 
+                variant="ghost" 
+                className="w-full text-left text-white hover:bg-white/10 transition-all duration-300 justify-start font-custom"
+                onClick={() => {
+                  handleFeatureClick();
+                  setMobileMenuOpen(false);
+                }}
+              >
+                About Us
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full text-left text-white hover:bg-white/10 transition-all duration-300 justify-start font-custom"
+                onClick={() => {
+                  handleFeatureClick();
+                  setMobileMenuOpen(false);
+                }}
+              >
+                News/Update
+              </Button>
+              <div className="border-t border-white/20 pt-2 mt-2">
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button 
+                    variant="outline" 
+                    className="w-full bg-transparent border border-[#B3FFD1] text-white hover:bg-white/5 transition-all duration-300 rounded-[30px] py-2.5 text-sm font-custom-bold mb-2"
+                  >
+                    LOGIN
+                  </Button>
+                </Link>
+                <Button 
+                  className="w-full bg-[#533193] border border-[#B3FFD1] text-white hover:bg-[#533193]/90 transition-all duration-300 rounded-[100px] py-2.5 text-sm font-custom-bold"
+                  disabled
+                >
+                  REGISTER
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </header>
 
       {/* Main Content */}
@@ -113,35 +224,23 @@ const Register = () => {
             </div>
 
             <div className="space-y-4">
-              {/* Option 1 */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full bg-[#B3FFD1]/80 backdrop-blur-sm text-[#533193] py-4 px-6 rounded-full text-lg font-medium border border-[#533193]/20 hover:bg-[#B3FFD1] transition-all duration-300 shadow-lg"
-                onClick={handleFeatureClick}
-              >
-                ลงทะเบียนเข้าร่วมงานทั่วไป
-              </motion.button>
-
-              {/* Option 2 */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full bg-[#B3FFD1]/80 backdrop-blur-sm text-[#533193] py-4 px-6 rounded-full text-lg font-medium border border-[#533193]/20 hover:bg-[#B3FFD1] transition-all duration-300 shadow-lg"
-                onClick={handleFeatureClick}
-              >
-                นำเสนอผลงานวิจัย/บทความวิชาการ
-              </motion.button>
-
-              {/* Option 3 */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full bg-[#B3FFD1]/80 backdrop-blur-sm text-[#533193] py-4 px-6 rounded-full text-lg font-medium border border-[#533193]/20 hover:bg-[#B3FFD1] transition-all duration-300 shadow-lg"
-                onClick={handleFeatureClick}
-              >
-                นำเสนอผลงานสร้างสรรค์
-              </motion.button>
+              {registrationTypes.map((type, index) => (
+                <motion.button
+                  key={type.id}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full bg-[#B3FFD1]/80 backdrop-blur-sm text-[#533193] py-4 px-6 rounded-full text-lg font-medium border border-[#533193]/20 hover:bg-[#B3FFD1] transition-all duration-300 shadow-lg text-left"
+                  onClick={() => handleRegistrationTypeSelect(type.id)}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
+                >
+                  <div>
+                    <div className="font-semibold">{type.title}</div>
+                    <div className="text-sm text-[#533193]/70 mt-1">{type.description}</div>
+                  </div>
+                </motion.button>
+              ))}
             </div>
 
             {/* Back to Home */}

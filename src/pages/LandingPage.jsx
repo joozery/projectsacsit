@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronLeft, Diamond, Sparkles, Users, Image as ImageIcon, Newspaper as LucideNewspaper, BarChart2, Send, Search, Menu } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Diamond, Sparkles, Users, Image as ImageIcon, Newspaper as LucideNewspaper, BarChart2, Send, Search, Menu, X } from 'lucide-react';
 import Lightbox from '@/components/Lightbox';
 
 import logoWhite from '@/assets/logow.svg';
@@ -38,6 +38,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [lightboxImage, setLightboxImage] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const galleryImagesArray = [gallery01, gallery02, gallery03, gallery04, gallery05, gallery06, gallery07, gallery08, gallery09];
   
@@ -46,6 +47,18 @@ const LandingPage = () => {
     // For this example, it does nothing as Toaster is part of Admin layout.
     console.log("Feature not implemented yet.");
   };
+
+  // Close mobile menu when clicking outside
+  const handleOutsideClick = (e) => {
+    if (mobileMenuOpen && !e.target.closest('.mobile-menu-container')) {
+      setMobileMenuOpen(false);
+    }
+  };
+
+  React.useEffect(() => {
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, [mobileMenuOpen]);
 
   const openLightbox = (image, index) => {
     setLightboxImage(image);
@@ -124,8 +137,9 @@ const LandingPage = () => {
       </Helmet>
       <div className="bg-[#F5F3F7] text-[#333333] font-['Poppins']">
         {/* Header */}
-        <header className="fixed top-0 left-0 right-0 z-50 bg-[#533193] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] h-[100px]">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-[#533193] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] h-[100px] mobile-menu-container">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1280px] flex items-center justify-between h-full">
+            {/* Logo */}
             <Link to="/" className="flex items-start py-4">
               <div className="flex flex-col">
                 <div className="flex items-center justify-end w-full">
@@ -137,49 +151,120 @@ const LandingPage = () => {
               </div>
             </Link>
             
-                          <div className="flex items-center gap-6">
-                {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center gap-4">
+            {/* Center Navigation - Desktop Only */}
+            <div className="hidden md:flex items-center gap-8">
+              <Button 
+                variant="ghost" 
+                className="text-white hover:bg-white/10 transition-all duration-300 text-sm font-custom-bold"
+                onClick={handleFeatureClick}
+              >
+                About Us
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="text-white hover:bg-white/10 transition-all duration-300 text-sm font-custom-bold"
+                onClick={handleFeatureClick}
+              >
+                News/Update
+              </Button>
+            </div>
+            
+            {/* Right Side */}
+            <div className="flex items-center gap-6">
+              {/* Desktop Auth Buttons */}
+              <div className="hidden md:flex items-center gap-4">
+                <Link to="/login">
                   <Button 
                     variant="outline" 
-                    className="bg-transparent border border-[#B3FFD1] text-white hover:bg-white/5 transition-all duration-300 rounded-[30px] w-[140px] py-2.5 text-sm font-medium shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-                    onClick={handleFeatureClick}
+                    className="bg-transparent border border-[#B3FFD1] text-white hover:bg-white/5 transition-all duration-300 rounded-[30px] w-[140px] py-2.5 text-sm font-custom-bold shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
                   >
                     LOGIN
                   </Button>
-                  <Link to="/register">
+                </Link>
+                <Link to="/register">
+                  <Button 
+                    className="bg-gradient-to-r from-[#B3FFD1] to-[#BFB4EE] text-[#533193] hover:opacity-90 transition-all duration-300 rounded-[100px] w-[140px] py-2.5 text-sm font-custom-bold shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
+                  >
+                    REGISTER
+                  </Button>
+                </Link>
+              </div>
+              
+              {/* Divider */}
+              <div className="hidden md:block w-px h-6 bg-white/20"></div>
+              
+              {/* Icons */}
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center"
+                  onClick={handleFeatureClick}
+                >
+                  <Search className="w-8 h-8" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center md:hidden"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                  {mobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-full left-0 right-0 bg-[#533193] shadow-lg border-t border-white/10 md:hidden"
+            >
+              <div className="container mx-auto px-4 py-4 space-y-2">
+                <Button 
+                  variant="ghost" 
+                  className="w-full text-left text-white hover:bg-white/10 transition-all duration-300 justify-start font-custom"
+                  onClick={() => {
+                    handleFeatureClick();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  About Us
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="w-full text-left text-white hover:bg-white/10 transition-all duration-300 justify-start font-custom"
+                  onClick={() => {
+                    handleFeatureClick();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  News/Update
+                </Button>
+                <div className="border-t border-white/20 pt-2 mt-2">
+                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
                     <Button 
-                      className="bg-gradient-to-r from-[#B3FFD1] to-[#BFB4EE] text-[#533193] hover:opacity-90 transition-all duration-300 rounded-[100px] w-[140px] py-2.5 text-sm font-medium shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
+                      variant="outline" 
+                      className="w-full bg-transparent border border-[#B3FFD1] text-white hover:bg-white/5 transition-all duration-300 rounded-[30px] py-2.5 text-sm font-custom-bold mb-2"
+                    >
+                      LOGIN
+                    </Button>
+                  </Link>
+                  <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                    <Button 
+                      className="w-full bg-gradient-to-r from-[#B3FFD1] to-[#BFB4EE] text-[#533193] hover:opacity-90 transition-all duration-300 rounded-[100px] py-2.5 text-sm font-custom-bold"
                     >
                       REGISTER
                     </Button>
                   </Link>
                 </div>
-                
-                {/* Divider */}
-                <div className="hidden md:block w-px h-6 bg-white/20"></div>
-                
-                {/* Icons */}
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center"
-                    onClick={handleFeatureClick}
-                  >
-                    <Search className="w-8 h-8" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center"
-                    onClick={handleFeatureClick}
-                  >
-                    <Menu className="w-8 h-8" />
-                  </Button>
-                </div>
               </div>
-          </div>
+            </motion.div>
+          )}
         </header>
 
         {/* Hero Section */}
@@ -200,52 +285,52 @@ const LandingPage = () => {
                 <img src={kvSymposium} alt="Symposium 2025" className="w-[500px] h-auto" />
               </div>
               <div className="max-w-[600px]">
-                <h2 className="text-[24px] font-medium mb-6 text-black text-right">SACIT Symposium</h2>
-                <p className="text-base font-normal text-black leading-normal">
+                <h2 className="text-[24px] font-custom-bold mb-6 text-black text-right">SACIT Symposium</h2>
+                <p className="text-base font-custom text-black leading-normal">
                   The SACIT Symposium is an academic conference organized by the SUPPORT Arts and Crafts International Centre of Thailand (SACIT) to foster knowledge exchange in the field of Thai arts and crafts. It brings together scholars, artists, designers, entrepreneurs, and enthusiasts from both Thailand and abroad to share ideas and insights. The event aims to promote the sustainable development of Thai craftsmanship in contemporary society and often features exhibitions, discussions, and showcases of traditional techniques such as lacquerware.
                 </p>
               </div>
             </motion.div>
 
-                          <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-                className="relative"
-              >
-              {/* Image Container */}
-              <div className="relative w-full max-w-[600px]">
-                {/* Purple Frame */}
-                <div className="absolute inset-0 bg-[#533193] rounded-lg transform translate-x-4 translate-y-4"></div>
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+              className="relative"
+            >
+            {/* Image Container */}
+            <div className="relative w-full max-w-[600px]">
+              {/* Purple Frame */}
+              <div className="absolute inset-0 bg-[#533193] rounded-lg transform translate-x-4 translate-y-4"></div>
+              
+              {/* Image with Navigation */}
+              <div className="relative bg-white rounded-lg overflow-hidden">
+                <img src={heroslideImage} alt="SACIT Symposium Event" className="w-full h-[400px] object-cover"/>
                 
-                {/* Image with Navigation */}
-                <div className="relative bg-white rounded-lg overflow-hidden">
-                  <img src={heroslideImage} alt="SACIT Symposium Event" className="w-full h-[400px] object-cover"/>
-                  
-                  {/* Navigation Buttons */}
-                  <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4">
-                    <motion.button 
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg"
-                    >
-                      <ChevronLeft className="w-6 h-6 text-[#533193]" />
-                    </motion.button>
-                    <motion.button 
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg"
-                    >
-                      <ChevronRight className="w-6 h-6 text-[#533193]" />
-                    </motion.button>
-                  </div>
+                {/* Navigation Buttons */}
+                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4">
+                  <motion.button 
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg"
+                  >
+                    <ChevronLeft className="w-6 h-6 text-[#533193]" />
+                  </motion.button>
+                  <motion.button 
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg"
+                  >
+                    <ChevronRight className="w-6 h-6 text-[#533193]" />
+                  </motion.button>
                 </div>
               </div>
+            </div>
             </motion.div>
           </div>
           <div className="absolute -right-40 -top-20 w-96 h-96 bg-white/5 rounded-full filter blur-2xl opacity-50"></div>
           <div className="absolute -left-32 bottom-0 w-80 h-80 bg-[#A0E7D5]/10 rounded-full filter blur-2xl opacity-50"></div>
-                </motion.div>
+        </motion.div>
 
         {/* About Section */}
         <section className="py-16 sm:py-24 bg-white">
@@ -267,19 +352,19 @@ const LandingPage = () => {
             >
               {/* Top Section - English Text Only */}
               <div className="p-8 text-center bg-gradient-to-b from-[#8B7DC3] to-[#533193] rounded-t-[10px]" style={{ height: '150px' }}>
-                <p className="text-base leading-relaxed text-white max-w-4xl mx-auto">
+                <p className="text-base font-custom leading-relaxed text-white max-w-4xl mx-auto">
                   SACIT is planning to organize the 1st SACIT Symposium on Fine Arts and Crafts under the concept of
                 </p>
-                <p className="text-base font-semibold text-white max-w-4xl mx-auto mt-1">
+                <p className="text-base font-custom-bold text-white max-w-4xl mx-auto mt-1">
                   "Crafting Sustainability across ASEAN and Beyond"
                 </p>
-                <p className="text-sm leading-relaxed text-white/90 max-w-4xl mx-auto mt-2">
+                <p className="text-sm font-custom leading-relaxed text-white/90 max-w-4xl mx-auto mt-2">
                   The stage offers an exchange of academic knowledge and creative works of love craftsmanship and more.
                 </p>
-                <p className="text-sm leading-relaxed text-white/90 max-w-4xl mx-auto mt-1">
-                  As well as the extension and development of traditional materials such as <span className="font-semibold">"Lacquerware"</span> and replacement materials.
+                <p className="text-sm font-custom leading-relaxed text-white/90 max-w-4xl mx-auto mt-1">
+                  As well as the extension and development of traditional materials such as <span className="font-custom-bold">"Lacquerware"</span> and replacement materials.
                 </p>
-                <p className="text-sm leading-relaxed text-white/90 max-w-4xl mx-auto">
+                <p className="text-sm font-custom leading-relaxed text-white/90 max-w-4xl mx-auto">
                   To answer the problem of sustainable promotion of handicrafts in all dimensions.
                 </p>
               </div>
@@ -294,8 +379,8 @@ const LandingPage = () => {
                 }}
               >
                 <div className="absolute bottom-4 right-4 text-right">
-                  <p className="text-xs sm:text-sm text-white/80">เตรียมพบกับ SACIT Symposium 2025</p>
-                  <p className="text-lg sm:text-2xl font-bold text-white">ระหว่างวันที่ 8 - 9 สิงหาคม 2568</p>
+                  <p className="text-xs sm:text-sm font-custom text-white/80">เตรียมพบกับ SACIT Symposium 2025</p>
+                  <p className="text-lg sm:text-2xl font-custom-bold text-white">ระหว่างวันที่ 8 - 9 สิงหาคม 2568</p>
                 </div>
               </div>
             </motion.div>
@@ -310,7 +395,7 @@ const LandingPage = () => {
           
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.h2 
-              className="text-4xl font-bold text-center text-[#533193] mb-12"
+              className="text-4xl font-custom-bold text-center text-[#533193] mb-12"
               initial={{ opacity: 0, y: -20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -323,13 +408,13 @@ const LandingPage = () => {
               {/* Tab Headers */}
               <div className="flex">
                 <button 
-                  className="flex-1 py-4 px-6 font-medium text-lg bg-[#BFB4EE] text-[#533193] focus:outline-none transition-colors duration-300"
+                  className="flex-1 py-4 px-6 font-custom-bold text-lg bg-[#BFB4EE] text-[#533193] focus:outline-none transition-colors duration-300"
                   onClick={handleFeatureClick}
                 >
                   ◆ Symposium Day 1
                 </button>
                 <button 
-                  className="flex-1 py-4 px-6 font-medium text-lg bg-gray-200 text-gray-500 hover:text-[#533193] focus:outline-none transition-colors duration-300"
+                  className="flex-1 py-4 px-6 font-custom-bold text-lg bg-gray-200 text-gray-500 hover:text-[#533193] focus:outline-none transition-colors duration-300"
                   onClick={handleFeatureClick}
                 >
                   Symposium Day 2
@@ -338,7 +423,7 @@ const LandingPage = () => {
               
               {/* Date Header */}
               <div className="bg-[#533193] text-white py-3 px-6">
-                <h3 className="text-xl font-medium italic">Monday, August 8</h3>
+                <h3 className="text-xl font-custom-bold italic">Monday, August 8</h3>
               </div>
               
               {/* Agenda Content */}
@@ -346,8 +431,8 @@ const LandingPage = () => {
                 <div className="max-w-2xl mx-auto">
                   {/* Table Header */}
                   <div className="grid grid-cols-2 gap-8 mb-6 pb-4 border-b-2 border-[#533193]">
-                    <h4 className="text-lg font-semibold text-[#533193] text-center">time</h4>
-                    <h4 className="text-lg font-semibold text-[#533193] text-center">description</h4>
+                    <h4 className="text-lg font-custom-bold text-[#533193] text-center">time</h4>
+                    <h4 className="text-lg font-custom-bold text-[#533193] text-center">description</h4>
                   </div>
                   
                   {/* Agenda Items */}
@@ -361,8 +446,8 @@ const LandingPage = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: index * 0.1 }}
                       >
-                        <p className="text-[#533193] font-medium text-center text-lg">{item.time}</p>
-                        <p className="text-gray-700 text-center italic text-lg">{item.description}</p>
+                        <p className="text-[#533193] font-custom-bold text-center text-lg">{item.time}</p>
+                        <p className="text-gray-700 font-custom text-center italic text-lg">{item.description}</p>
                       </motion.div>
                     ))}
                   </div>
@@ -381,7 +466,7 @@ const LandingPage = () => {
           
           <div className="text-center mb-16">
             <motion.h2 
-              className="text-4xl font-bold text-center text-[#533193]"
+              className="text-4xl font-custom-bold text-center text-[#533193]"
               initial={{ opacity: 0, y: -20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -418,8 +503,8 @@ const LandingPage = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-lg font-bold mb-1">Name</h3>
-                  <p className="text-sm opacity-90">{speaker.title}</p>
+                  <h3 className="text-lg font-custom-bold mb-1">Name</h3>
+                  <p className="text-sm font-custom opacity-90">{speaker.title}</p>
                 </div>
               </motion.div>
             ))}
@@ -428,7 +513,7 @@ const LandingPage = () => {
           <div className="text-center">
             <Button 
               variant="outline" 
-              className="border-[#533193] text-[#533193] hover:bg-[#533193] hover:text-white transition-colors px-8 py-3 rounded-full text-lg font-medium"
+              className="border-[#533193] text-[#533193] hover:bg-[#533193] hover:text-white transition-colors px-8 py-3 rounded-full text-lg font-custom-bold"
               onClick={handleFeatureClick}
             >
               all speakers
@@ -445,10 +530,10 @@ const LandingPage = () => {
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             {/* Header */}
             <div className="flex justify-between items-center mb-12">
-              <h2 className="text-4xl font-bold text-[#533193]">Media and news</h2>
+              <h2 className="text-4xl font-custom-bold text-[#533193]">Media and news</h2>
               <Button 
                 variant="outline" 
-                className="border-[#533193] text-[#533193] hover:bg-[#533193] hover:text-white transition-colors px-6 py-2 rounded-full text-sm font-medium"
+                className="border-[#533193] text-[#533193] hover:bg-[#533193] hover:text-white transition-colors px-6 py-2 rounded-full text-sm font-custom-bold"
                 onClick={handleFeatureClick}
               >
                 all media and news
@@ -491,12 +576,12 @@ const LandingPage = () => {
                     {/* Tags */}
                     <div className="flex flex-wrap gap-2">
                       {item.category && (
-                        <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-3 py-1 rounded-full border border-white/30">
+                        <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-custom-bold px-3 py-1 rounded-full border border-white/30">
                           {item.category}
                         </span>
                       )}
                       {item.type && (
-                        <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-3 py-1 rounded-full border border-white/30">
+                        <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-custom-bold px-3 py-1 rounded-full border border-white/30">
                           {item.type}
                         </span>
                       )}
@@ -504,10 +589,10 @@ const LandingPage = () => {
                     
                     {/* Bottom Content */}
                     <div className="space-y-3">
-                      <h3 className="text-xl font-bold text-white leading-tight">{item.title}</h3>
-                      <p className="text-white/90 text-sm leading-relaxed">{item.description}</p>
+                      <h3 className="text-xl font-custom-bold text-white leading-tight">{item.title}</h3>
+                      <p className="text-white/90 font-custom text-sm leading-relaxed">{item.description}</p>
                       {item.author && (
-                        <p className="text-white/80 text-sm font-medium">{item.author}</p>
+                        <p className="text-white/80 font-custom text-sm font-medium">{item.author}</p>
                       )}
                       
                       {/* Arrow Button */}
@@ -528,13 +613,12 @@ const LandingPage = () => {
         <section className="py-16 sm:py-24 bg-white">
           <div className="text-center mb-12">
             <motion.h2 
-              className="text-center"
+              className="text-center font-custom-bold"
               style={{
                 background: 'linear-gradient(90deg, #533193 0%, #BFB4EE 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                fontFamily: '"AWConqueror Std Didot"',
                 fontSize: '40px',
                 fontStyle: 'normal',
                 fontWeight: 700,
@@ -612,7 +696,7 @@ const LandingPage = () => {
           <div className="text-center mt-12">
             <Button 
               variant="outline" 
-              className="border-[#533193] text-[#533193] hover:bg-[#533193] hover:text-white transition-colors px-8 py-3 rounded-full text-lg font-medium"
+              className="border-[#533193] text-[#533193] hover:bg-[#533193] hover:text-white transition-colors px-8 py-3 rounded-full text-lg font-custom-bold"
               onClick={handleFeatureClick}
             >
               all photos and video

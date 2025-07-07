@@ -1,0 +1,75 @@
+/* Custom Fonts */
+
+/* ตัวอย่างการประกาศฟ้อนต์ - แก้ไขตามชื่อฟ้อนต์ที่คุณมี */
+
+@font-face {
+  font-family: 'CustomFont-Regular';
+  src: url('./CustomFont-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CustomFont-Bold';
+  src: url('./CustomFont-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CustomFont-Light';
+  src: url('./CustomFont-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* หากมีฟ้อนต์แบบ Italic */
+@font-face {
+  font-family: 'CustomFont-Italic';
+  src: url('./CustomFont-Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* AWConqueror Std Didot Font */
+@font-face {
+  font-family: 'AWConqueror Std Didot';
+  src: url('./AWConqueror Std Didot Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* CSS Variables สำหรับใช้งานง่าย */
+:root {
+  --font-custom-regular: 'CustomFont-Regular', 'Noto Sans Thai', sans-serif;
+  --font-custom-bold: 'CustomFont-Bold', 'Noto Sans Thai', sans-serif;
+  --font-custom-light: 'CustomFont-Light', 'Noto Sans Thai', sans-serif;
+  --font-custom-italic: 'CustomFont-Italic', 'Noto Sans Thai', sans-serif;
+  --font-didot: 'AWConqueror Std Didot', 'Times New Roman', serif;
+}
+
+/* Utility Classes */
+.font-custom {
+  font-family: var(--font-custom-regular);
+}
+
+.font-custom-bold {
+  font-family: var(--font-custom-bold);
+}
+
+.font-custom-light {
+  font-family: var(--font-custom-light);
+}
+
+.font-custom-italic {
+  font-family: var(--font-custom-italic);
+}
+
+.font-didot {
+  font-family: var(--font-didot);
+} 
