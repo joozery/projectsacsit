@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, Check } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { CheckCircle, ArrowLeft, Home } from 'lucide-react';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
@@ -10,121 +10,37 @@ import symposiumText from '@/assets/symposiam.svg';
 const RegisterSuccess = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const registrationType = location.state?.registrationType || 'general';
-  const formData = location.state?.formData || {};
+  const { formData, registrationType, registrationId } = location.state || {};
 
   const handleBackToHome = () => {
     navigate('/');
   };
 
+  const handleContinue = () => {
+    if (registrationType === 'research') {
+      navigate('/register/research', { state: { formData, registrationType, registrationId } });
+    } else if (registrationType === 'creative') {
+      navigate('/register/creative', { state: { formData, registrationType, registrationId } });
+    } else {
+      navigate('/');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#533193] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] h-[100px]">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1280px] flex items-center justify-between h-full">
-          <Link to="/" className="flex items-start py-4">
-            <div className="flex flex-col">
-              <div className="flex items-center justify-end w-full">
-                <img src={logoWhite} alt="SACIT" className="h-6 w-auto" />
-              </div>
-              <div className="flex items-center justify-start w-full">
-                <img src={symposiumText} alt="Symposium" className="h-7 w-auto" />
-              </div>
-            </div>
-          </Link>
-          
-          <div className="flex items-center gap-6">
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-4">
-              <Button 
-                variant="outline" 
-                className="bg-transparent border border-[#B3FFD1] text-white hover:bg-white/5 transition-all duration-300 rounded-[30px] w-[140px] py-2.5 text-sm font-medium shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-              >
-                LOGIN
-              </Button>
-              <Button 
-                className="bg-gradient-to-r from-[#B3FFD1] to-[#BFB4EE] text-[#533193] hover:opacity-90 transition-all duration-300 rounded-[100px] w-[140px] py-2.5 text-sm font-medium shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-              >
-                REGISTER
-              </Button>
-            </div>
-            
-            {/* Divider */}
-            <div className="hidden md:block w-px h-6 bg-white/20"></div>
-            
-            {/* Icons */}
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center"
-              >
-                <Search className="w-8 h-8" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center"
-              >
-                <Menu className="w-8 h-8" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
-      <div className="pt-[120px] pb-16 min-h-screen flex items-center justify-center">
-        <div className="container mx-auto px-4 max-w-2xl text-center">
+      <div className="pt-[120px] pb-16 min-h-screen">
+        <div className="container mx-auto px-4 max-w-2xl">
           
-          {/* Step Indicator */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex items-center justify-center mb-12"
-          >
-            <div className="flex items-center space-x-4">
-              {/* Step 1 - Completed */}
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 bg-[#533193] text-white rounded-full flex items-center justify-center text-sm font-medium">
-                  1
-                </div>
-                <span className="text-xs text-[#533193] mt-1">Firstly</span>
-              </div>
-              
-              {/* Connector */}
-              <div className="w-12 h-px bg-[#533193]"></div>
-              
-              {/* Step 2 - Completed */}
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 bg-[#533193] text-white rounded-full flex items-center justify-center text-sm font-medium">
-                  2
-                </div>
-                <span className="text-xs text-[#533193] mt-1">Finally</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Success Title */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mb-8"
-          >
-            <h1 className="text-3xl font-bold text-gray-800 mb-8">ลงทะเบียนสำเร็จ</h1>
-          </motion.div>
-
           {/* Success Icon */}
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.3, type: "spring", stiffness: 200 }}
-            className="mb-8"
+            transition={{ duration: 0.6 }}
+            className="flex justify-center mb-8"
           >
-            <div className="w-24 h-24 bg-[#533193] rounded-full flex items-center justify-center mx-auto shadow-lg">
-              <Check className="w-12 h-12 text-white" strokeWidth={3} />
+            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-16 h-16 text-green-600" />
             </div>
           </motion.div>
 
@@ -132,31 +48,103 @@ const RegisterSuccess = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="mb-8 space-y-2"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-center mb-8"
           >
-            <p className="text-gray-700 text-lg">
-              ขอบคุณที่ลงทะเบียนเข้าร่วมงาน
+            <h1 className="text-3xl font-bold text-gray-800 mb-4">
+              ลงทะเบียนสำเร็จ!
+            </h1>
+            <p className="text-lg text-gray-600 mb-2">
+              ขอบคุณสำหรับการลงทะเบียนเข้าร่วม SACIT Symposium 2025
             </p>
-            <p className="text-gray-700 text-lg">
-              ระหว่างวันที่ <span className="font-semibold">8 - 9 สิงหาคม 2568</span> ในงาน{' '}
-              <span className="font-semibold italic">SACIT Symposium 2025</span>
+            <p className="text-sm text-gray-500">
+              Registration ID: {registrationId || 'N/A'}
             </p>
           </motion.div>
 
-          {/* Back to Home Button */}
+          {/* User Info */}
+          {formData && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="bg-gray-50 rounded-lg p-6 mb-8"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">ข้อมูลการลงทะเบียน</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">ชื่อ:</span>
+                  <span className="font-medium">{formData.firstName} {formData.lastName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">อีเมล:</span>
+                  <span className="font-medium">{formData.email}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">บริษัท/องค์กร:</span>
+                  <span className="font-medium">{formData.company}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">ประเภทการลงทะเบียน:</span>
+                  <span className="font-medium capitalize">
+                    {registrationType === 'general' ? 'ทั่วไป' : 
+                     registrationType === 'research' ? 'วิจัย' : 
+                     registrationType === 'creative' ? 'สร้างสรรค์' : 'ทั่วไป'}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Next Steps */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            className="flex justify-center"
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8"
+          >
+            <h3 className="text-lg font-semibold text-blue-800 mb-3">ขั้นตอนต่อไป</h3>
+            <div className="space-y-2 text-sm text-blue-700">
+              {registrationType === 'general' ? (
+                <>
+                  <p>• คุณจะได้รับอีเมลยืนยันการลงทะเบียนภายใน 24 ชั่วโมง</p>
+                  <p>• กรุณาตรวจสอบอีเมลและยืนยันการลงทะเบียน</p>
+                  <p>• ข้อมูลเพิ่มเติมเกี่ยวกับงานจะถูกส่งไปยังอีเมลของคุณ</p>
+                </>
+              ) : (
+                <>
+                  <p>• กรุณาเตรียมเอกสารสำหรับการส่งผลงาน</p>
+                  <p>• ระบบจะนำคุณไปยังหน้าส่งผลงานต่อไป</p>
+                  <p>• กำหนดส่งผลงาน: 31 มกราคม 2025</p>
+                </>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Action Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <Button
               onClick={handleBackToHome}
-              className="bg-[#533193] text-white hover:bg-[#533193]/90 px-8 py-3 rounded-full text-lg font-medium transition-all duration-300"
+              variant="outline"
+              className="border-[#533193] text-[#533193] hover:bg-[#533193] hover:text-white px-8 py-3 rounded-full transition-all duration-300"
             >
+              <ArrowLeft className="w-5 h-5 mr-2" />
               กลับหน้าหลัก
             </Button>
+            
+            {registrationType !== 'general' && (
+              <Button
+                onClick={handleContinue}
+                className="bg-[#533193] text-white hover:bg-[#533193]/90 px-8 py-3 rounded-full transition-all duration-300"
+              >
+                ส่งผลงานต่อไป
+              </Button>
+            )}
           </motion.div>
         </div>
       </div>

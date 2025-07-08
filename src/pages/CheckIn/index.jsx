@@ -352,26 +352,8 @@ const CheckInPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#8B7DC3] via-[#B3FFD1] to-[#BFB4EE]">
-      {/* Header */}
-      <header className="bg-[#533193] shadow-lg">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col items-center">
-            <div className="flex flex-col items-center mb-2">
-              <div className="flex items-center justify-end w-full">
-                <img src={logoWhite} alt="SACIT" className="h-6 w-auto" />
-              </div>
-              <div className="flex items-center justify-start w-full">
-                <img src={symposiumText} alt="Symposium" className="h-7 w-auto" />
-              </div>
-            </div>
-            <h1 className="text-xl font-bold text-white">ส่งคำขอเช็คอิน</h1>
-            <p className="text-white/80 text-sm">SACIT Symposium {year}</p>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 max-w-md">
+      <div className="pt-[120px] pb-16 min-h-screen">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

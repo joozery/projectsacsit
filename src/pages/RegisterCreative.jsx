@@ -157,60 +157,6 @@ const RegisterCreative = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#533193] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] h-[100px]">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1280px] flex items-center justify-between h-full">
-          <Link to="/" className="flex items-start py-4">
-            <div className="flex flex-col">
-              <div className="flex items-center justify-end w-full">
-                <img src={logoWhite} alt="SACIT" className="h-6 w-auto" />
-              </div>
-              <div className="flex items-center justify-start w-full">
-                <img src={symposiumText} alt="Symposium" className="h-7 w-auto" />
-              </div>
-            </div>
-          </Link>
-          
-          <div className="flex items-center gap-6">
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-4">
-              <Button 
-                variant="outline" 
-                className="bg-transparent border border-[#B3FFD1] text-white hover:bg-white/5 transition-all duration-300 rounded-[30px] w-[140px] py-2.5 text-sm font-medium shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-              >
-                LOGIN
-              </Button>
-              <Button 
-                className="bg-gradient-to-r from-[#B3FFD1] to-[#BFB4EE] text-[#533193] hover:opacity-90 transition-all duration-300 rounded-[100px] w-[140px] py-2.5 text-sm font-medium shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-              >
-                REGISTER
-              </Button>
-            </div>
-            
-            {/* Divider */}
-            <div className="hidden md:block w-px h-6 bg-white/20"></div>
-            
-            {/* Icons */}
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center"
-              >
-                <Search className="w-8 h-8" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center"
-              >
-                <Menu className="w-8 h-8" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <div className="pt-[120px] pb-16 min-h-screen">
         <div className="container mx-auto px-4 max-w-4xl">

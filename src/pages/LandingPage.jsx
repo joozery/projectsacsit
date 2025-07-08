@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, Diamond, Sparkles, Users, Image as ImageIcon, Newspaper as LucideNewspaper, BarChart2, Send, Search, Menu, X } from 'lucide-react';
 import Lightbox from '@/components/Lightbox';
+import authService from '@/services/authService';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
@@ -32,13 +33,12 @@ import gallery07 from '@/assets/gallery/07.jpg';
 import gallery08 from '@/assets/gallery/08.jpg';
 import gallery09 from '@/assets/gallery/09.jpg';
 
-
-
 const LandingPage = () => {
-  const navigate = useNavigate();
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [lightboxImage, setLightboxImage] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   
   const galleryImagesArray = [gallery01, gallery02, gallery03, gallery04, gallery05, gallery06, gallery07, gallery08, gallery09];
   
@@ -128,6 +128,7 @@ const LandingPage = () => {
     { alt: 'Cultural performance at symposium', description: 'Traditional dance performance' },
   ];
 
+  const isLoggedIn = authService.isAuthenticated();
 
   return (
     <>
@@ -136,137 +137,6 @@ const LandingPage = () => {
         <meta name="description" content="เข้าร่วม SACIT Symposium 2025 - งานประชุมวิชาการด้านศิลปหัตถกรรมครั้งที่ 1 เพื่อการพัฒนาที่ยั่งยืนในอาเซียนและนอกอาเซียน" />
       </Helmet>
       <div className="bg-[#F5F3F7] text-[#333333] font-['Poppins']">
-        {/* Header */}
-        <header className="fixed top-0 left-0 right-0 z-50 bg-[#533193] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] h-[100px] mobile-menu-container">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1280px] flex items-center justify-between h-full">
-            {/* Logo */}
-            <Link to="/" className="flex items-start py-4">
-              <div className="flex flex-col">
-                <div className="flex items-center justify-end w-full">
-                  <img src={logoWhite} alt="SACIT" className="h-6 w-auto" />
-                </div>
-                <div className="flex items-center justify-start w-full">
-                  <img src={symposiumText} alt="Symposium" className="h-7 w-auto" />
-                </div>
-              </div>
-            </Link>
-            
-            {/* Center Navigation - Desktop Only */}
-            <div className="hidden md:flex items-center gap-8">
-              <Button 
-                variant="ghost" 
-                className="text-white hover:bg-white/10 transition-all duration-300 text-sm font-custom-bold"
-                onClick={handleFeatureClick}
-              >
-                About Us
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="text-white hover:bg-white/10 transition-all duration-300 text-sm font-custom-bold"
-                onClick={handleFeatureClick}
-              >
-                News/Update
-              </Button>
-            </div>
-            
-            {/* Right Side */}
-            <div className="flex items-center gap-6">
-              {/* Desktop Auth Buttons */}
-              <div className="hidden md:flex items-center gap-4">
-                <Link to="/login">
-                  <Button 
-                    variant="outline" 
-                    className="bg-transparent border border-[#B3FFD1] text-white hover:bg-white/5 transition-all duration-300 rounded-[30px] w-[140px] py-2.5 text-sm font-custom-bold shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-                  >
-                    LOGIN
-                  </Button>
-                </Link>
-                <Link to="/register">
-                  <Button 
-                    className="bg-gradient-to-r from-[#B3FFD1] to-[#BFB4EE] text-[#533193] hover:opacity-90 transition-all duration-300 rounded-[100px] w-[140px] py-2.5 text-sm font-custom-bold shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-                  >
-                    REGISTER
-                  </Button>
-                </Link>
-              </div>
-              
-              {/* Divider */}
-              <div className="hidden md:block w-px h-6 bg-white/20"></div>
-              
-              {/* Icons */}
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center"
-                  onClick={handleFeatureClick}
-                >
-                  <Search className="w-8 h-8" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center md:hidden"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                >
-                  {mobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="absolute top-full left-0 right-0 bg-[#533193] shadow-lg border-t border-white/10 md:hidden"
-            >
-              <div className="container mx-auto px-4 py-4 space-y-2">
-                <Button 
-                  variant="ghost" 
-                  className="w-full text-left text-white hover:bg-white/10 transition-all duration-300 justify-start font-custom"
-                  onClick={() => {
-                    handleFeatureClick();
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  About Us
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  className="w-full text-left text-white hover:bg-white/10 transition-all duration-300 justify-start font-custom"
-                  onClick={() => {
-                    handleFeatureClick();
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  News/Update
-                </Button>
-                <div className="border-t border-white/20 pt-2 mt-2">
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <Button 
-                      variant="outline" 
-                      className="w-full bg-transparent border border-[#B3FFD1] text-white hover:bg-white/5 transition-all duration-300 rounded-[30px] py-2.5 text-sm font-custom-bold mb-2"
-                    >
-                      LOGIN
-                    </Button>
-                  </Link>
-                  <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                    <Button 
-                      className="w-full bg-gradient-to-r from-[#B3FFD1] to-[#BFB4EE] text-[#533193] hover:opacity-90 transition-all duration-300 rounded-[100px] py-2.5 text-sm font-custom-bold"
-                    >
-                      REGISTER
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </header>
-
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0 }}

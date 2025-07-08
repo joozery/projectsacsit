@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import authService from '@/services/authService';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
@@ -18,6 +19,8 @@ const Login = () => {
     password: ''
   });
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -25,14 +28,25 @@ const Login = () => {
       ...prev,
       [name]: value
     }));
+    if (error) setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempt:', formData);
-    // For demo purposes, redirect to admin
-    navigate('/admin');
+    setIsLoading(true);
+    setError('');
+    try {
+      const result = await authService.login(formData);
+      if (result.success) {
+        navigate('/account');
+      } else {
+        setError(result.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+      }
+    } catch (err) {
+      setError('เกิดข้อผิดพลาด กรุณาลองใหม่');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
@@ -100,6 +114,17 @@ const Login = () => {
                   Login
                 </h1>
 
+                {/* Error Message */}
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-red-50 border border-red-200 rounded-lg p-3 mb-2 text-center"
+                  >
+                    <span className="text-red-600 text-sm">{error}</span>
+                  </motion.div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Email Field */}
                   <div className="space-y-2">
@@ -161,9 +186,10 @@ const Login = () => {
                   >
                     <Button
                       type="submit"
-                      className="w-full bg-gradient-to-r from-[#533193] to-[#8B7DC3] hover:from-[#533193]/90 hover:to-[#8B7DC3]/90 text-white py-3 rounded-xl font-custom-bold text-lg shadow-lg"
+                      disabled={isLoading}
+                      className="w-full bg-gradient-to-r from-[#533193] to-[#8B7DC3] hover:from-[#533193]/90 hover:to-[#8B7DC3]/90 text-white py-3 rounded-xl font-custom-bold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Login
+                      {isLoading ? 'กำลังเข้าสู่ระบบ...' : 'Login'}
                     </Button>
                   </motion.div>
                 </form>

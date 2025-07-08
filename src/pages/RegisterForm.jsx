@@ -3,10 +3,12 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu } from 'lucide-react';
+import { Search, Menu, Loader2 } from 'lucide-react';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
+import authService from '@/services/authService';
+import registrationService from '@/services/registrationService';
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -28,6 +30,8 @@ const RegisterForm = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -41,6 +45,11 @@ const RegisterForm = () => {
         ...prev,
         [field]: ''
       }));
+    }
+    
+    // Clear submit error when user makes changes
+    if (submitError) {
+      setSubmitError('');
     }
   };
 
@@ -63,84 +72,108 @@ const RegisterForm = () => {
       newErrors.confirmPassword = 'รหัสผ่านไม่ตรงกัน';
     }
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      newErrors.email = 'รูปแบบอีเมลไม่ถูกต้อง';
+    }
+
+    // Password validation (minimum 6 characters)
+    if (formData.password && formData.password.length < 6) {
+      newErrors.password = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
-    if (validateForm()) {
-      console.log('Form data:', formData);
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setSubmitError('');
+
+    try {
+      // 1. สร้างบัญชีผู้ใช้
+      const userData = {
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.telephone,
+        organization: formData.company,
+        role: 'user'
+      };
+
+      const authResult = await authService.register(userData);
       
-      // Navigate based on registration type
-      if (registrationType === 'research') {
-        // Go to research submission page
-        navigate('/register/research', { state: { formData, registrationType } });
-      } else if (registrationType === 'creative') {
-        // Go to creative work submission page (to be created)
-        navigate('/register/creative', { state: { formData, registrationType } });
-      } else {
-        // General registration - go directly to success
-        navigate('/register/success', { state: { formData, registrationType } });
+      if (!authResult.success) {
+        setSubmitError(authResult.message);
+        setIsLoading(false);
+        return;
       }
+
+      // 2. สร้างการลงทะเบียน
+      const registrationData = {
+        registration_type: registrationType,
+        title_prefix: formData.title === 'other' ? formData.titleOther : formData.title,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.telephone,
+        organization: formData.company,
+        education_level: formData.educationLevel === 'other' ? formData.educationOther : formData.educationLevel,
+        registration_year: 2025,
+        terms_accepted: 'true' // เพิ่ม field นี้เพื่อผ่าน validation
+      };
+
+      const registrationResult = await registrationService.createRegistration(registrationData);
+      
+      if (!registrationResult.success) {
+        setSubmitError(registrationResult.message);
+        setIsLoading(false);
+        return;
+      }
+
+      // 3. Navigate based on registration type
+      if (registrationType === 'research') {
+        navigate('/register/research', { 
+          state: { 
+            formData, 
+            registrationType,
+            registrationId: registrationResult.data?.id 
+          } 
+        });
+      } else if (registrationType === 'creative') {
+        navigate('/register/creative', { 
+          state: { 
+            formData, 
+            registrationType,
+            registrationId: registrationResult.data?.id 
+          } 
+        });
+      } else {
+        navigate('/register/success', { 
+          state: { 
+            formData, 
+            registrationType,
+            registrationId: registrationResult.data?.id 
+          } 
+        });
+      }
+
+    } catch (error) {
+      console.error('Registration error:', error);
+      setSubmitError('เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#533193] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] h-[100px]">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1280px] flex items-center justify-between h-full">
-          <Link to="/" className="flex items-start py-4">
-            <div className="flex flex-col">
-              <div className="flex items-center justify-end w-full">
-                <img src={logoWhite} alt="SACIT" className="h-6 w-auto" />
-              </div>
-              <div className="flex items-center justify-start w-full">
-                <img src={symposiumText} alt="Symposium" className="h-7 w-auto" />
-              </div>
-            </div>
-          </Link>
-          
-          <div className="flex items-center gap-6">
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-4">
-              <Button 
-                variant="outline" 
-                className="bg-transparent border border-[#B3FFD1] text-white hover:bg-white/5 transition-all duration-300 rounded-[30px] w-[140px] py-2.5 text-sm font-medium shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-              >
-                LOGIN
-              </Button>
-              <Button 
-                className="bg-gradient-to-r from-[#B3FFD1] to-[#BFB4EE] text-[#533193] hover:opacity-90 transition-all duration-300 rounded-[100px] w-[140px] py-2.5 text-sm font-medium shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
-              >
-                REGISTER
-              </Button>
-            </div>
-            
-            {/* Divider */}
-            <div className="hidden md:block w-px h-6 bg-white/20"></div>
-            
-            {/* Icons */}
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center"
-              >
-                <Search className="w-8 h-8" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-white hover:bg-white/10 transition-all duration-300 rounded-full w-14 h-14 flex items-center justify-center"
-              >
-                <Menu className="w-8 h-8" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <div className="pt-[120px] pb-16 min-h-screen">
         <div className="container mx-auto px-4 max-w-2xl">
@@ -359,13 +392,32 @@ const RegisterForm = () => {
               )}
             </div>
 
+            {/* Error Message */}
+            {submitError && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-50 border border-red-200 rounded-lg p-4"
+              >
+                <p className="text-red-600 text-sm">{submitError}</p>
+              </motion.div>
+            )}
+
             {/* Next Button */}
             <div className="flex justify-center pt-8">
               <Button
-                onClick={handleNext}
-                className="bg-[#533193] text-white hover:bg-[#533193]/90 px-12 py-3 rounded-full text-lg font-medium transition-all duration-300"
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="bg-[#533193] text-white hover:bg-[#533193]/90 px-12 py-3 rounded-full text-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                NEXT
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    กำลังดำเนินการ...
+                  </>
+                ) : (
+                  'NEXT'
+                )}
               </Button>
             </div>
           </motion.div>
