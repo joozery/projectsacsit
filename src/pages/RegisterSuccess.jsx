@@ -10,7 +10,13 @@ import symposiumText from '@/assets/symposiam.svg';
 const RegisterSuccess = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { formData, registrationType, registrationId } = location.state || {};
+  const { formData, registrationType, registrationId, researchData } = location.state || {};
+  
+  // Extract registration data
+  const registrationData = location.state?.registrationData;
+  const registrationNumber = registrationData?.registration?.registration_number || 
+                            registrationData?.registration_number ||
+                            location.state?.registration_number;
 
   const handleBackToHome = () => {
     navigate('/');
@@ -54,11 +60,26 @@ const RegisterSuccess = () => {
             <h1 className="text-3xl font-bold text-gray-800 mb-4">
               ลงทะเบียนสำเร็จ!
             </h1>
-            <p className="text-lg text-gray-600 mb-2">
+            <p className="text-lg text-gray-600 mb-4">
               ขอบคุณสำหรับการลงทะเบียนเข้าร่วม SACIT Symposium 2025
             </p>
+            
+            {/* Registration Number Display */}
+            {registrationNumber && (
+              <div className="bg-[#533193] text-white px-6 py-3 rounded-lg inline-block mb-4">
+                <p className="text-sm opacity-90">หมายเลขการลงทะเบียน</p>
+                <p className="text-xl font-bold">{registrationNumber}</p>
+              </div>
+            )}
+            
+            {!registrationNumber && registrationId && (
+              <p className="text-sm text-gray-500 mb-4">
+                Registration ID: #{registrationId}
+              </p>
+            )}
+            
             <p className="text-sm text-gray-500">
-              Registration ID: {registrationId || 'N/A'}
+              กรุณาเก็บหมายเลขนี้ไว้สำหรับการอ้างอิง
             </p>
           </motion.div>
 

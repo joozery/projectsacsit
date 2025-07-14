@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, Upload } from 'lucide-react';
+import { Search, Menu, Upload, Loader2 } from 'lucide-react';
+import registrationService from '@/services/registrationService';
+import authService from '@/services/authService';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
@@ -25,6 +27,8 @@ const RegisterResearch = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleInputChange = (field, value) => {
     setResearchData(prev => ({
@@ -44,6 +48,25 @@ const RegisterResearch = () => {
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Validate file type
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors(prev => ({
+          ...prev,
+          researchFile: 'กรุณาอัปโหลดไฟล์ PDF หรือ Word เท่านั้น'
+        }));
+        return;
+      }
+
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setErrors(prev => ({
+          ...prev,
+          researchFile: 'ขนาดไฟล์ต้องไม่เกิน 10MB'
+        }));
+        return;
+      }
+
       setResearchData(prev => ({
         ...prev,
         researchFile: file
@@ -74,19 +97,222 @@ const RegisterResearch = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      // Submit form data
-      console.log('Research data:', researchData);
-      console.log('Form data:', formData);
-      navigate('/register/success', { 
-        state: { 
-          formData, 
-          researchData, 
-          registrationType 
-        } 
-      });
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      return;
     }
+
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      // Get registration ID from previous step
+      let registrationId = location.state?.registrationId;
+      
+      console.log('Location state:', location.state);
+      console.log('Registration ID from location state:', registrationId);
+      console.log('Form data from location state:', formData);
+      
+      // Check if user is logged in
+      const isLoggedIn = authService.isAuthenticated();
+      const currentUser = authService.getCurrentUser();
+      
+      console.log('User logged in:', isLoggedIn);
+      console.log('Current user:', currentUser);
+      
+      // If user is logged in but no registrationId, try to find their existing registration
+      if (isLoggedIn && !registrationId && currentUser?.email) {
+        console.log('User is logged in but no registration ID, trying to find registration...');
+        
+        try {
+          // Try to get user registrations first
+          const userRegistrations = await registrationService.getUserRegistrations();
+          console.log('User registrations result:', userRegistrations);
+          
+          if (userRegistrations.success && userRegistrations.data && userRegistrations.data.length > 0) {
+            // Find the most recent registration for this year and type
+            const currentYearRegistration = userRegistrations.data.find(reg => 
+              reg.registration_year === 2025 && reg.registration_type === registrationType
+            );
+            
+            if (currentYearRegistration) {
+              registrationId = currentYearRegistration.id;
+              console.log('Found existing registration ID:', registrationId);
+            }
+          }
+        } catch (getUserError) {
+          console.log('getUserRegistrations failed:', getUserError);
+          
+          // Fallback: try search by email (now supports pending status)
+          try {
+            const searchResult = await registrationService.searchRegistrationByEmail(currentUser.email);
+            console.log('Search result:', searchResult);
+            
+            if (searchResult.success && searchResult.data?.registration) {
+              registrationId = searchResult.data.registration.id;
+              console.log('Found existing registration ID from search:', registrationId);
+            }
+          } catch (searchError) {
+            console.log('Search by email also failed:', searchError);
+          }
+        }
+      }
+      
+      // If we have registrationId, update existing registration
+      if (registrationId) {
+        console.log('Using registration ID:', registrationId);
+        
+        // Prepare research data for update
+        const researchUpdateData = {
+          research_data: {
+            project_title: researchData.projectTitle,
+            category: researchData.category === 'other' ? researchData.categoryOther : researchData.category,
+            abstract: researchData.abstract,
+            keywords: researchData.keywords.split(',').map(keyword => keyword.trim()),
+          }
+        };
+
+        console.log('Updating registration with research data:', researchUpdateData);
+
+        // Update existing registration with research data
+        const updateResult = await registrationService.updateRegistration(registrationId, researchUpdateData);
+        
+        console.log('Update result:', updateResult);
+        
+        if (!updateResult.success) {
+          let errorMessage = updateResult.message || 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล';
+          
+          if (updateResult.errors) {
+            console.log('Update errors:', updateResult.errors);
+            let errorDetails = formatErrors(updateResult.errors);
+            if (errorDetails) {
+              errorMessage += '\n\nรายละเอียด:\n' + errorDetails;
+            }
+          }
+          
+          throw new Error(errorMessage);
+        }
+
+        // Upload research file if update was successful
+        if (researchData.researchFile) {
+          const fileUploadResult = await registrationService.uploadResearchFile(
+            researchData.researchFile, 
+            registrationId
+          );
+
+          console.log('File upload result:', fileUploadResult);
+
+          if (!fileUploadResult.success) {
+            console.warn('File upload failed but registration update succeeded.');
+            setSubmitError('อัปเดตข้อมูลสำเร็จแล้ว แต่การอัปโหลดไฟล์ล้มเหลว กรุณาติดต่อเจ้าหน้าที่');
+            
+            setTimeout(() => {
+              navigate('/register/success', { 
+                state: { 
+                  formData, 
+                  researchData, 
+                  registrationType,
+                  registrationId,
+                  fileUploadFailed: true
+                } 
+              });
+            }, 3000);
+            return;
+          }
+        }
+
+        // Navigate to success page
+        navigate('/register/success', { 
+          state: { 
+            formData, 
+            researchData, 
+            registrationType,
+            registrationId
+          } 
+        });
+        return;
+      }
+      
+      // If no registrationId found, show helpful error message
+      if (isLoggedIn) {
+        throw new Error('ไม่พบข้อมูลการลงทะเบียนของท่าน\n\nเป็นไปได้ว่า:\n1. ท่านยังไม่ได้ลงทะเบียน\n2. ท่านลงทะเบียนแล้วแต่เป็นประเภทอื่น\n\nกรุณาเริ่มต้นการลงทะเบียนใหม่จากขั้นตอนแรก');
+      } else {
+        throw new Error('กรุณาเริ่มต้นการลงทะเบียนจากขั้นตอนแรก\n\nคลิก "ลงทะเบียน" จากหน้าหลักและกรอกข้อมูลส่วนตัวให้ครบถ้วนก่อน จากนั้นจะสามารถกรอกข้อมูลงานวิจัยได้');
+      }
+
+    } catch (error) {
+      console.error('Registration submission error:', error);
+      
+      // Format error message for display
+      let displayError = error.message || 'เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง';
+      
+      // If it's a network error or specific API error
+      if (error.response) {
+        console.error('API Error Response:', error.response);
+        const apiError = error.response.data;
+        
+        if (apiError?.message) {
+          displayError = apiError.message;
+        } else if (apiError?.error) {
+          displayError = apiError.error;
+        } else {
+          displayError = `เกิดข้อผิดพลาด (${error.response.status}): ${error.response.statusText}`;
+        }
+        
+        // Add validation errors if available
+        if (apiError?.errors) {
+          console.log('API validation errors:', apiError.errors);
+          let errorDetails = formatErrors(apiError.errors);
+          if (errorDetails) {
+            displayError += '\n\nรายละเอียด:\n' + errorDetails;
+          }
+        }
+      }
+      
+      setSubmitError(displayError);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Helper function to format errors
+  const formatErrors = (errors) => {
+    let errorDetails = '';
+    
+    if (Array.isArray(errors)) {
+      errorDetails = errors
+        .map((error, index) => {
+          if (typeof error === 'string') {
+            return `${index + 1}. ${error}`;
+          } else if (typeof error === 'object' && error !== null) {
+            if (error.message) {
+              return `${index + 1}. ${error.message}`;
+            } else if (error.field && error.msg) {
+              return `${index + 1}. ${error.field}: ${error.msg}`;
+            } else if (error.path && error.msg) {
+              return `${index + 1}. ${error.path}: ${error.msg}`;
+            } else {
+              return `${index + 1}. ${JSON.stringify(error)}`;
+            }
+          }
+          return `${index + 1}. ${String(error)}`;
+        })
+        .join('\n');
+    } else if (typeof errors === 'object') {
+      errorDetails = Object.entries(errors)
+        .map(([field, messages]) => {
+          if (Array.isArray(messages)) {
+            return `${field}: ${messages.join(', ')}`;
+          } else if (typeof messages === 'string') {
+            return `${field}: ${messages}`;
+          } else {
+            return `${field}: ${JSON.stringify(messages)}`;
+          }
+        })
+        .join('\n');
+    }
+    
+    return errorDetails;
   };
 
   const categories = [
@@ -169,6 +395,28 @@ const RegisterResearch = () => {
             <p className="text-lg text-gray-600">ข้อมูลของผลงานวิจัย หรือ บทความวิชาการ / Researcher or Academic Work Information</p>
           </motion.div>
 
+          {/* Error Message */}
+          {submitError && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6"
+            >
+              <div className="text-red-600 text-sm whitespace-pre-line">{submitError}</div>
+              {(submitError.includes('กรุณาเริ่มต้นการลงทะเบียนจากขั้นตอนแรก') || 
+                submitError.includes('ไม่พบข้อมูลการลงทะเบียนของท่าน')) && (
+                <div className="mt-4 flex justify-center">
+                  <Button
+                    onClick={() => navigate('/register')}
+                    className="bg-[#533193] text-white hover:bg-[#533193]/90 px-6 py-2 rounded-lg text-sm transition-colors"
+                  >
+                    กลับไปลงทะเบียน
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {/* Form */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -186,6 +434,7 @@ const RegisterResearch = () => {
                 value={researchData.projectTitle}
                 onChange={(e) => handleInputChange('projectTitle', e.target.value)}
                 className={`w-full ${errors.projectTitle ? 'border-red-500' : 'border-gray-300'}`}
+                disabled={isSubmitting}
               />
               {errors.projectTitle && <p className="text-red-500 text-xs mt-1">{errors.projectTitle}</p>}
             </div>
@@ -205,6 +454,7 @@ const RegisterResearch = () => {
                       checked={researchData.category === category.value}
                       onChange={(e) => handleInputChange('category', e.target.value)}
                       className="mr-3 mt-1 text-[#533193] focus:ring-[#533193] flex-shrink-0"
+                      disabled={isSubmitting}
                     />
                     <div className="text-sm text-gray-700">
                       <div>{category.label} /</div>
@@ -224,6 +474,7 @@ const RegisterResearch = () => {
                     value={researchData.categoryOther}
                     onChange={(e) => handleInputChange('categoryOther', e.target.value)}
                     className={`w-full max-w-md ${errors.categoryOther ? 'border-red-500' : 'border-gray-300'}`}
+                    disabled={isSubmitting}
                   />
                   {errors.categoryOther && <p className="text-red-500 text-xs mt-1">{errors.categoryOther}</p>}
                 </div>
@@ -240,6 +491,7 @@ const RegisterResearch = () => {
                 onChange={(e) => handleInputChange('abstract', e.target.value)}
                 className={`w-full h-32 ${errors.abstract ? 'border-red-500' : 'border-gray-300'}`}
                 maxLength={500}
+                disabled={isSubmitting}
               />
               <div className="text-right text-xs text-gray-500 mt-1">
                 {researchData.abstract.length}/500
@@ -258,6 +510,7 @@ const RegisterResearch = () => {
                 onChange={(e) => handleInputChange('keywords', e.target.value)}
                 className={`w-full ${errors.keywords ? 'border-red-500' : 'border-gray-300'}`}
                 placeholder="คำสำคัญ1, คำสำคัญ2, คำสำคัญ3"
+                disabled={isSubmitting}
               />
               {errors.keywords && <p className="text-red-500 text-xs mt-1">{errors.keywords}</p>}
             </div>
@@ -277,8 +530,9 @@ const RegisterResearch = () => {
                   accept=".pdf,.doc,.docx"
                   onChange={handleFileUpload}
                   className="hidden"
+                  disabled={isSubmitting}
                 />
-                <label htmlFor="research-file" className="cursor-pointer">
+                <label htmlFor="research-file" className={`cursor-pointer ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                   <div className="bg-[#533193] text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 hover:bg-[#533193]/90 transition-colors">
                     <Upload className="w-4 h-4" />
                     upload
@@ -310,9 +564,17 @@ const RegisterResearch = () => {
             <div className="flex justify-center pt-8">
               <Button
                 onClick={handleSubmit}
-                className="bg-[#533193] text-white hover:bg-[#533193]/90 px-12 py-3 rounded-full text-lg font-medium transition-all duration-300"
+                disabled={isSubmitting}
+                className="bg-[#533193] text-white hover:bg-[#533193]/90 px-12 py-3 rounded-full text-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                SUBMIT
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    กำลังส่งข้อมูล...
+                  </>
+                ) : (
+                  'SUBMIT'
+                )}
               </Button>
             </div>
           </motion.div>

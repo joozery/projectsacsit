@@ -170,16 +170,16 @@ const Layout = ({ children }) => {
         className={`fixed left-0 top-0 h-full bg-white z-50 ${isMobile ? 'w-80' : sidebarWidth} shadow-xl border-r border-gray-200`}
       >
         <div className="flex flex-col h-full text-gray-700">
-          <div className={`${sidebarCollapsed && !isMobile ? 'p-4' : 'p-6'} border-b border-gray-200`}>
+          <div className={`${sidebarCollapsed && !isMobile ? 'p-4' : 'p-6'} border-b border-gray-200 flex-shrink-0`}>
             <div className="flex items-center justify-between">
               <div className={`flex items-center ${sidebarCollapsed && !isMobile ? 'justify-center' : 'space-x-3'}`}>
                 <div 
-                  className="w-10 h-10  rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer"
+                  className="w-10 h-10 bg-[#533193] rounded-lg flex items-center justify-center flex-shrink-0 cursor-pointer hover:bg-[#6B46C1] transition-colors duration-200"
                   onClick={() => navigate('/')}
                   title="กลับสู่หน้าหลัก"
                 >
-                  <img src={logoWhite} alt="SACIT" className="w-full h-full object-contain" />
-                  </div>
+                  <img src={logoWhite} alt="SACIT" className="w-6 h-6 object-contain filter brightness-0 invert" />
+                </div>
                 {(!sidebarCollapsed || isMobile) && (
                   <motion.div
                     initial={false}
@@ -222,67 +222,69 @@ const Layout = ({ children }) => {
             </div>
           </div>
 
-          <nav className={`flex-1 ${sidebarCollapsed && !isMobile ? 'p-2' : 'p-4'} space-y-1.5 overflow-y-auto`}>
-            {menuItems.map((item, index) => {
-              const isActive = location.pathname === item.path || (item.path !== '/admin/dashboard' && location.pathname.startsWith(item.path));
-              return (
-                <motion.div
-                  key={item.path}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Link
-                    to={item.path}
-                    className={`flex items-center ${
-                      sidebarCollapsed && !isMobile 
-                        ? 'justify-center p-3' 
-                        : 'space-x-3 p-3'
-                    } rounded-lg transition-all duration-200 group relative ${
-                      isActive 
-                        ? 'bg-violet-500 text-white shadow-md' 
-                        : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'
-                    }`}
-                    onClick={() => isMobile && setSidebarOpen(false)}
-                    title={sidebarCollapsed && !isMobile ? item.label : ''}
+          <nav className={`flex-1 ${sidebarCollapsed && !isMobile ? 'p-2' : 'p-4'} space-y-1.5 overflow-hidden hover:overflow-y-auto scrollbar-hide`} style={{ minHeight: 0 }}>
+            <div className="space-y-1.5">
+              {menuItems.map((item, index) => {
+                const isActive = location.pathname === item.path || (item.path !== '/admin/dashboard' && location.pathname.startsWith(item.path));
+                return (
+                  <motion.div
+                    key={item.path}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
                   >
-                    <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'}`} />
-                    
-                    {(!sidebarCollapsed || isMobile) && (
-                      <motion.div
-                        className="flex-1 min-w-0"
-                        initial={false}
-                        animate={{ 
-                          opacity: sidebarCollapsed && !isMobile ? 0 : 1,
-                          width: sidebarCollapsed && !isMobile ? 0 : 'auto'
-                        }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className={`font-medium truncate ${isActive ? 'text-white' : 'text-gray-700 group-hover:text-gray-900'}`}>
-                          {item.label}
-                        </div>
-                        {item.description && !sidebarCollapsed && (
-                           <div className={`text-xs truncate ${isActive ? 'text-violet-100' : 'text-gray-500 group-hover:text-gray-600'}`}>
-                            {item.description}
+                    <Link
+                      to={item.path}
+                      className={`flex items-center ${
+                        sidebarCollapsed && !isMobile 
+                          ? 'justify-center p-3' 
+                          : 'space-x-3 p-3'
+                      } rounded-lg transition-all duration-200 group relative ${
+                        isActive 
+                          ? 'bg-violet-500 text-white shadow-md' 
+                          : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'
+                      }`}
+                      onClick={() => isMobile && setSidebarOpen(false)}
+                      title={sidebarCollapsed && !isMobile ? item.label : ''}
+                    >
+                      <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'}`} />
+                      
+                      {(!sidebarCollapsed || isMobile) && (
+                        <motion.div
+                          className="flex-1 min-w-0"
+                          initial={false}
+                          animate={{ 
+                            opacity: sidebarCollapsed && !isMobile ? 0 : 1,
+                            width: sidebarCollapsed && !isMobile ? 0 : 'auto'
+                          }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <div className={`font-medium truncate ${isActive ? 'text-white' : 'text-gray-700 group-hover:text-gray-900'}`}>
+                            {item.label}
                           </div>
-                        )}
-                      </motion.div>
-                    )}
+                          {item.description && !sidebarCollapsed && (
+                             <div className={`text-xs truncate ${isActive ? 'text-violet-100' : 'text-gray-500 group-hover:text-gray-600'}`}>
+                              {item.description}
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
 
-                    {sidebarCollapsed && !isMobile && (
-                      <div className="absolute left-full ml-3 px-3 py-2 bg-gray-800 text-white text-sm rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                        <div className="font-medium">{item.label}</div>
-                        {item.description && <div className="text-xs text-gray-300">{item.description}</div>}
-                        <div className="absolute top-1/2 -left-1.5 transform -translate-y-1/2 w-3 h-3 bg-gray-800 rotate-45"></div>
-                      </div>
-                    )}
-                  </Link>
-                </motion.div>
-              );
-            })}
+                      {sidebarCollapsed && !isMobile && (
+                        <div className="absolute left-full ml-3 px-3 py-2 bg-gray-800 text-white text-sm rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                          <div className="font-medium">{item.label}</div>
+                          {item.description && <div className="text-xs text-gray-300">{item.description}</div>}
+                          <div className="absolute top-1/2 -left-1.5 transform -translate-y-1/2 w-3 h-3 bg-gray-800 rotate-45"></div>
+                        </div>
+                      )}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
           </nav>
 
-          <div className={`${sidebarCollapsed && !isMobile ? 'p-2' : 'p-4'} border-t border-gray-200`}>
+          <div className={`${sidebarCollapsed && !isMobile ? 'p-2' : 'p-4'} border-t border-gray-200 flex-shrink-0`}>
             <div className={`flex items-center ${
               sidebarCollapsed && !isMobile 
                 ? 'justify-center p-2' 
@@ -402,26 +404,6 @@ const Layout = ({ children }) => {
             {children}
           </motion.div>
         </main>
-      </div>
-
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/20">
-        <Link to="/" className="block mb-2">
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start text-white/80 hover:bg-white/5 hover:text-white font-custom"
-          >
-            <Home className="mr-3 h-5 w-5" />
-            กลับหน้าหลัก
-          </Button>
-        </Link>
-        <Button 
-          variant="ghost" 
-          onClick={handleLogout}
-          className="w-full justify-start text-white/80 hover:bg-white/5 hover:text-white font-custom"
-        >
-          <LogOut className="mr-3 h-5 w-5" />
-          ออกจากระบบ
-        </Button>
       </div>
     </div>
   );

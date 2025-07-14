@@ -351,150 +351,58 @@ const CheckInPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#8B7DC3] via-[#B3FFD1] to-[#BFB4EE]">
-      {/* Main Content */}
-      <div className="pt-[120px] pb-16 min-h-screen">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-white rounded-2xl shadow-xl p-6"
-        >
-          <div className="text-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">ค้นหาชื่อของคุณ</h2>
-            <p className="text-gray-600 text-sm">กรอกชื่อ, อีเมล, เบอร์โทร หรือชื่อองค์กร</p>
+    <div className="min-h-screen bg-gradient-to-br from-[#8B7DC3] via-[#B3FFD1] to-[#BFB4EE] flex flex-col">
+      {/* Header */}
+      <header className="bg-[#533193] pb-6 pt-6 flex flex-col items-center justify-center text-center">
+        <span className="text-white text-base mb-1">✦ SACIT</span>
+        <span className="text-white font-serif text-4xl md:text-5xl font-bold leading-tight">Symposium</span>
+        <span className="text-white text-2xl md:text-3xl font-bold mt-1">ส่งคำขอเช็คอิน</span>
+        <span className="text-white text-base mt-1">SACIT Symposium 2025</span>
+      </header>
+      <main className="flex-1 flex flex-col items-center justify-center px-2 py-6">
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl px-6 py-8 flex flex-col items-center mx-auto">
+          <div className="w-full text-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">ค้นหาชื่อของคุณ</h2>
+            <p className="text-gray-600 text-base">กรอกชื่อ, อีเมล, เบอร์โทร หรือชื่อองค์กร</p>
           </div>
-
           {/* Search Input */}
-          <div className="relative mb-6">
+          <div className="relative w-full mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
               type="text"
               placeholder="ค้นหาชื่อ, อีเมล, หรือองค์กร..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 py-3 text-lg rounded-xl border-2 border-gray-200 focus:border-[#533193]"
+              className="pl-10 py-3 text-base rounded-xl border-2 border-gray-200 focus:border-[#533193] focus:ring-0 bg-gray-50"
             />
           </div>
-
-          {/* Loading */}
-          {isLoading && (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#533193] mx-auto"></div>
-              <p className="text-gray-600 mt-2">กำลังค้นหา...</p>
-            </div>
-          )}
-
-          {/* Search Results */}
-          {searchResults.length > 0 && !isLoading && (
-            <div className="space-y-3">
-              <p className="text-sm text-gray-600 mb-3">พบ {searchResults.length} รายการ</p>
-              {searchResults.map((attendee) => (
-                <motion.div
-                  key={attendee.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 mb-1">{attendee.name}</h3>
-                      <div className="space-y-1 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4" />
-                          <span>{attendee.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Building className="w-4 h-4" />
-                          <span>{attendee.organization}</span>
-                        </div>
-                        {attendee.projectTitle && (
-                          <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded mt-2">
-                            {attendee.projectTitle}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="ml-4">
-                      <div className="text-center">
-                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-1">
-                          {getStatusIcon(attendee)}
-                        </div>
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusColor(attendee)}`}>
-                          {getStatusText(attendee)}
-                        </span>
-                        {attendee.checkInRequested && !attendee.checkedIn && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            {new Date(attendee.checkInRequestTime).toLocaleTimeString('th-TH', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        )}
-                        {attendee.checkedIn && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            {new Date(attendee.checkInTime).toLocaleTimeString('th-TH', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        )}
-                      </div>
-                      
-                      {!attendee.checkInRequested && !attendee.checkedIn && (
-                        <Button
-                          onClick={() => handleCheckInRequest(attendee)}
-                          className="bg-[#533193] hover:bg-[#533193]/90 text-white px-4 py-2 rounded-xl mt-2 text-sm"
-                          disabled={isLoading}
-                        >
-                          <Send className="w-4 h-4 mr-1" />
-                          ส่งคำขอ
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-
-          {/* No Results */}
-          {searchTerm.length >= 2 && searchResults.length === 0 && !isLoading && (
-            <div className="text-center py-8">
-              <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">ไม่พบข้อมูลที่ตรงกับการค้นหา</p>
-              <p className="text-sm text-gray-500 mt-1">กรุณาตรวจสอบการสะกดหรือลองใช้คำค้นหาอื่น</p>
-            </div>
-          )}
-
-          {/* Instructions */}
-          {searchTerm.length === 0 && (
-            <div className="text-center py-8">
-              <QrCode className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-600 mb-2">ยินดีต้อนรับสู่ SACIT Symposium {year}</p>
-              <p className="text-sm text-gray-500">กรุณากรอกชื่อหรือข้อมูลของคุณเพื่อส่งคำขอเช็คอิน</p>
-              <div className="bg-blue-50 rounded-lg p-4 mt-4 text-left">
-                <h3 className="font-semibold text-blue-900 mb-2">ขั้นตอนการเช็คอิน:</h3>
-                <ol className="text-sm text-blue-800 space-y-1">
-                  <li>1. ค้นหาชื่อของคุณในระบบ</li>
-                  <li>2. กดปุ่ม "ส่งคำขอ" เพื่อส่งคำขอเช็คอิน</li>
-                  <li>3. รอเจ้าหน้าที่ตรวจสอบและยืนยัน</li>
-                  <li>4. เข้าร่วมงานได้ทันทีเมื่อได้รับการยืนยัน</li>
-                </ol>
-              </div>
-            </div>
-          )}
-        </motion.div>
-
+          {/* QR Code */}
+          <div className="flex flex-col items-center mb-6">
+            <QrCode className="w-16 h-16 text-gray-300 mb-2" />
+          </div>
+          {/* Welcome Text */}
+          <div className="text-center mb-4">
+            <div className="font-semibold text-gray-700">ยินดีต้อนรับสู่ SACIT Symposium 2025</div>
+            <div className="text-gray-500 text-sm">กรุณากรอกชื่อหรือข้อมูลของคุณเพื่อส่งคำขอเช็คอิน</div>
+          </div>
+          {/* Steps Box */}
+          <div className="w-full bg-blue-50 rounded-xl p-4 text-left mt-2 mb-2">
+            <div className="font-bold text-blue-900 mb-2">ขั้นตอนการเช็คอิน:</div>
+            <ol className="text-sm text-blue-800 list-decimal list-inside space-y-1">
+              <li>ค้นหาชื่อของคุณในระบบ</li>
+              <li>กดปุ่ม "ส่งคำขอ" เพื่อส่งคำขอเช็คอิน</li>
+              <li>รอเจ้าหน้าที่ตรวจสอบและยืนยัน</li>
+              <li>เข้าร่วมงานได้ทันทีเมื่อได้รับการยืนยัน</li>
+            </ol>
+          </div>
+        </div>
         {/* Footer */}
-        <div className="text-center mt-6">
-          <p className="text-white/80 text-sm">
+        <div className="text-center mt-6 w-full">
+          <p className="text-green-400 text-sm">
             หากมีปัญหาในการส่งคำขอ กรุณาติดต่อเจ้าหน้าที่
           </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

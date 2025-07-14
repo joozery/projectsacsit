@@ -82,6 +82,11 @@ class AuthService {
     return !!(token && user);
   }
 
+  // ดึง token จาก localStorage
+  getToken() {
+    return localStorage.getItem('token');
+  }
+
   // ดึงข้อมูลโปรไฟล์ผู้ใช้
   async getProfile() {
     try {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '@fontsource/poppins';
 import '@fontsource/poppins/400.css';
 import { Helmet } from 'react-helmet';
@@ -9,6 +9,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, Diamond, Sparkles, Users, Image as ImageIcon, Newspaper as LucideNewspaper, BarChart2, Send, Search, Menu, X } from 'lucide-react';
 import Lightbox from '@/components/Lightbox';
 import authService from '@/services/authService';
+import ReactPlayer from 'react-player';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
@@ -32,6 +33,7 @@ import gallery06 from '@/assets/gallery/06.jpg';
 import gallery07 from '@/assets/gallery/07.jpg';
 import gallery08 from '@/assets/gallery/08.jpg';
 import gallery09 from '@/assets/gallery/09.jpg';
+import bghero from '@/assets/bghero.mp4';
 
 const LandingPage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -47,6 +49,49 @@ const LandingPage = () => {
     // For this example, it does nothing as Toaster is part of Admin layout.
     console.log("Feature not implemented yet.");
   };
+
+  // Hide scrollbar when component mounts
+  useEffect(() => {
+    // Add CSS to hide scrollbar
+    const style = document.createElement('style');
+    style.textContent = `
+      html, body {
+        overflow-x: hidden !important;
+      }
+      
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+      }
+      
+      html {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      
+      body {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      
+      /* Hide scrollbar for all containers */
+      *::-webkit-scrollbar {
+        display: none !important;
+      }
+      
+      * {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Cleanup when component unmounts
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   // Close mobile menu when clicking outside
   const handleOutsideClick = (e) => {
@@ -136,203 +181,288 @@ const LandingPage = () => {
         <title>SACIT Symposium - สถาบันส่งเสริมศิลปหัตถกรรมไทย</title>
         <meta name="description" content="เข้าร่วม SACIT Symposium 2025 - งานประชุมวิชาการด้านศิลปหัตถกรรมครั้งที่ 1 เพื่อการพัฒนาที่ยั่งยืนในอาเซียนและนอกอาเซียน" />
       </Helmet>
-      <div className="bg-[#F5F3F7] text-[#333333] font-['Poppins']">
+      
+      <div className="bg-white text-[#333333] font-['Poppins'] relative overflow-x-clip min-h-screen flex flex-col">
+        {/* Shared Decorative Circles for Agenda & Speaker */}
         {/* Hero Section */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          className="relative h-[827px] flex items-center justify-center pt-[100px] bg-[linear-gradient(263deg,#533192_0%,#8973C0_0.01%,#BFB4EE_31.73%,#B9D9DF_62.02%,#B3FFD1_100%)] overflow-hidden"
-        >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="flex flex-col justify-center text-left"
+        <div style={{ position: 'relative', width: '100vw', height: '80vh', overflow: 'hidden' }}>
+          <video
+            src={bghero}
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '80vh',
+              objectFit: 'cover',
+              zIndex: 1
+            }}
+          />
+          {/* Overlay */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '80vh',
+            background: 'rgba(0,0,0,0.4)',
+            zIndex: 2
+          }} />
+          {/* Centered Content */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '80vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 3,
+            color: '#fff'
+          }}>
+            <h1
+              style={{
+                fontFamily: 'AWConqueror Std Didot',
+                fontWeight: 700,
+                fontStyle: 'bold',
+                fontSize: '64px',
+                lineHeight: '100%',
+                letterSpacing: 0,
+                textAlign: 'center',
+                verticalAlign: 'middle',
+                marginBottom: '1rem',
+                color: '#fff'
+              }}
             >
-              <div className="mb-12">
-                <img src={kvSymposium} alt="Symposium 2025" className="w-[500px] h-auto" />
+              Welcome To Sacsit Symposium
+            </h1>
               </div>
-              <div className="max-w-[600px]">
-                <h2 className="text-[24px] font-custom-bold mb-6 text-black text-right">SACIT Symposium</h2>
-                <p className="text-base font-custom text-black leading-normal">
-                  The SACIT Symposium is an academic conference organized by the SUPPORT Arts and Crafts International Centre of Thailand (SACIT) to foster knowledge exchange in the field of Thai arts and crafts. It brings together scholars, artists, designers, entrepreneurs, and enthusiasts from both Thailand and abroad to share ideas and insights. The event aims to promote the sustainable development of Thai craftsmanship in contemporary society and often features exhibitions, discussions, and showcases of traditional techniques such as lacquerware.
-                </p>
               </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-              className="relative"
-            >
-            {/* Image Container */}
-            <div className="relative w-full max-w-[600px]">
-              {/* Purple Frame */}
-              <div className="absolute inset-0 bg-[#533193] rounded-lg transform translate-x-4 translate-y-4"></div>
-              
-              {/* Image with Navigation */}
-              <div className="relative bg-white rounded-lg overflow-hidden">
-                <img src={heroslideImage} alt="SACIT Symposium Event" className="w-full h-[400px] object-cover"/>
-                
-                {/* Navigation Buttons */}
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4">
-                  <motion.button 
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg"
-                  >
-                    <ChevronLeft className="w-6 h-6 text-[#533193]" />
-                  </motion.button>
-                  <motion.button 
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg"
-                  >
-                    <ChevronRight className="w-6 h-6 text-[#533193]" />
-                  </motion.button>
-                </div>
-              </div>
-            </div>
-            </motion.div>
-          </div>
-          <div className="absolute -right-40 -top-20 w-96 h-96 bg-white/5 rounded-full filter blur-2xl opacity-50"></div>
-          <div className="absolute -left-32 bottom-0 w-80 h-80 bg-[#A0E7D5]/10 rounded-full filter blur-2xl opacity-50"></div>
-        </motion.div>
 
         {/* About Section */}
-        <section className="py-16 sm:py-24 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div 
-              className="text-white mx-auto relative"
-              style={{
-                borderRadius: '10px',
-                boxShadow: '0px 0px 6px 0px rgba(0, 0, 0, 0.25)',
-                width: '100%',
-                maxWidth: '1174px',
-                height: '400px',
-                flexShrink: 0
-              }}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-            >
-              {/* Top Section - English Text Only */}
-              <div className="p-8 text-center bg-gradient-to-b from-[#8B7DC3] to-[#533193] rounded-t-[10px]" style={{ height: '150px' }}>
-                <p className="text-base font-custom leading-relaxed text-white max-w-4xl mx-auto">
-                  SACIT is planning to organize the 1st SACIT Symposium on Fine Arts and Crafts under the concept of
-                </p>
-                <p className="text-base font-custom-bold text-white max-w-4xl mx-auto mt-1">
-                  "Crafting Sustainability across ASEAN and Beyond"
-                </p>
-                <p className="text-sm font-custom leading-relaxed text-white/90 max-w-4xl mx-auto mt-2">
-                  The stage offers an exchange of academic knowledge and creative works of love craftsmanship and more.
-                </p>
-                <p className="text-sm font-custom leading-relaxed text-white/90 max-w-4xl mx-auto mt-1">
-                  As well as the extension and development of traditional materials such as <span className="font-custom-bold">"Lacquerware"</span> and replacement materials.
-                </p>
-                <p className="text-sm font-custom leading-relaxed text-white/90 max-w-4xl mx-auto">
-                  To answer the problem of sustainable promotion of handicrafts in all dimensions.
-                </p>
-              </div>
-              
-              {/* Bottom Section - Image with Date */}
-              <div 
-                className="rounded-b-[10px] relative overflow-hidden" 
-                style={{
-                  width: '100%',
-                  height: '250px',
-                  background: `linear-gradient(90deg, rgba(0, 0, 0, 0.00) 0%, #BFB4EE 100%), linear-gradient(0deg, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.30) 100%), url(${heroslideImage}) lightgray 50% / cover no-repeat`
-                }}
+        <section className="py-16 sm:py-24 bg-transparent relative overflow-hidden" style={{marginTop: 0, paddingTop: '2rem'}}>
+          {/* Background Shapes */}
+          <div className="absolute top-0 left-0 w-32 h-32 bg-[#8B7DC3] rounded-[20%] opacity-60 -translate-x-8 -translate-y-8"></div>
+          <div className="absolute top-8 left-40 w-24 h-24 bg-[#B3FFD1] rounded-[20%] opacity-80 -rotate-12"></div>
+          <div className="absolute top-16 right-16 w-28 h-28 bg-[#8B7DC3] rounded-[20%] opacity-60 rotate-12"></div>
+          <div className="absolute bottom-8 left-16 w-32 h-32 bg-[#B3FFD1] rounded-[20%] opacity-80 rotate-6"></div>
+          <div className="absolute bottom-0 right-0 w-40 h-40 bg-[#8B7DC3] rounded-[20%] opacity-60 translate-x-8 translate-y-8"></div>
+          <div className="absolute top-20 right-40 w-16 h-16 bg-[#B3FFD1] rounded-[20%] opacity-80 -rotate-12"></div>
+          <div className="absolute top-10 left-1/2 w-6 h-6 bg-white rounded-[20%] opacity-80 -translate-x-1/2"></div>
+          <div className="absolute bottom-10 right-1/2 w-6 h-6 bg-white rounded-[20%] opacity-80 translate-x-1/2"></div>
+
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center max-w-4xl mx-auto" style={{color: '#222'}}>
+              <motion.h2
+                className="text-lg sm:text-xl font-semibold mb-2"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+              >The 1st National Academic Symposium on Arts and Crafts</motion.h2>
+              <motion.h1
+                className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.15 }}
+                viewport={{ once: true }}
+              >SACIT Symposium 2025</motion.h1>
+              <motion.h3
+                className="text-lg sm:text-xl font-medium mb-4"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                viewport={{ once: true }}
+              >“Crafting Sustainability across ASEAN and Beyond”</motion.h3>
+              <motion.div
+                className="text-base sm:text-lg mb-2 font-bold"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.45 }}
+                viewport={{ once: true }}
+              >Date: 7 – 8 August 2025</motion.div>
+              <motion.div
+                className="text-base sm:text-lg mb-8"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                viewport={{ once: true }}
+              >Venue: The Sustainable Arts and Crafts Institute of Thailand (Public Organization),<br/>Bang Sai District, Phra Nakhon Si Ayutthaya Province</motion.div>
+              <motion.div
+                className="flex flex-col sm:flex-row justify-center gap-8 mt-6"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.75 }}
+                viewport={{ once: true }}
               >
-                <div className="absolute bottom-4 right-4 text-right">
-                  <p className="text-xs sm:text-sm font-custom text-white/80">เตรียมพบกับ SACIT Symposium 2025</p>
-                  <p className="text-lg sm:text-2xl font-custom-bold text-white">ระหว่างวันที่ 8 - 9 สิงหาคม 2568</p>
-                </div>
-              </div>
-            </motion.div>
+                <button style={{
+                  background: 'linear-gradient(90deg, #B3FFD1 0%, #BFB4EE 100%)',
+                  boxShadow: '0px 4px 4px 0px rgba(0,0,0,0.25)',
+                  borderRadius: '40px',
+                  padding: '18px 48px',
+                  fontWeight: 400,
+                  fontSize: '24px',
+                  color: '#222',
+                  fontFamily: 'AWConqueror Std Didot',
+                  marginBottom: '0.5rem',
+                  border: 'none',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}>SACIT Symposium_EN</button>
+                <button style={{
+                  background: 'linear-gradient(90deg, #B3FFD1 0%, #BFB4EE 100%)',
+                  boxShadow: '0px 4px 4px 0px rgba(0,0,0,0.25)',
+                  borderRadius: '40px',
+                  padding: '18px 48px',
+                  fontWeight: 400,
+                  fontSize: '24px',
+                  color: '#222',
+                  fontFamily: 'AWConqueror Std Didot',
+                  marginBottom: '0.5rem',
+                  border: 'none',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}>SACIT Symposium_TH</button>
+              </motion.div>
+            </div>
           </div>
         </section>
 
-        {/* Agenda Section */}
-        <section className="py-16 sm:py-24 bg-gradient-to-br from-[#8B7DC3] via-[#B3FFD1] to-[#BFB4EE] relative overflow-hidden">
-          {/* Background decorative elements */}
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#533193] rounded-full opacity-10 -translate-x-48 translate-y-48"></div>
-          <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#B3FFD1] rounded-full opacity-20 translate-x-40 translate-y-40"></div>
-          
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <motion.h2 
-              className="text-4xl font-custom-bold text-center text-[#533193] mb-12"
-              initial={{ opacity: 0, y: -20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              Agenda of SACIT Symposium 2025
-            </motion.h2>
-            
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden max-w-4xl mx-auto">
-              {/* Tab Headers */}
-              <div className="flex">
-                <button 
-                  className="flex-1 py-4 px-6 font-custom-bold text-lg bg-[#BFB4EE] text-[#533193] focus:outline-none transition-colors duration-300"
-                  onClick={handleFeatureClick}
-                >
-                  ◆ Symposium Day 1
-                </button>
-                <button 
-                  className="flex-1 py-4 px-6 font-custom-bold text-lg bg-gray-200 text-gray-500 hover:text-[#533193] focus:outline-none transition-colors duration-300"
-                  onClick={handleFeatureClick}
-                >
-                  Symposium Day 2
-                </button>
+        {/* Symposium Banner Section */}
+        <section style={{
+                width: '100%',
+          minHeight: '180px',
+          background: 'linear-gradient(180deg, #240F47 0%, #533192 100%)',
+          color: '#fff',
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '2.5rem 0 2.5rem 0',
+          marginBottom: '2.5rem',
+        }}>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-start relative z-10">
+            <div>
+              <h2 style={{ fontSize: '2rem', fontWeight: 400, marginBottom: '0.5rem', lineHeight: 1.1 }}>Sustainability</h2>
+              <h2 style={{ fontSize: '2rem', fontWeight: 400, marginBottom: '1.2rem', lineHeight: 1.1 }}>Across ASEAN and Beyond</h2>
+              <div style={{ color: '#7FFFB3', fontSize: '1.2rem', fontWeight: 500, marginBottom: '1.2rem' }}>7-8 August 2025</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem', color: '#fff' }}>
+                <span style={{ fontSize: '1.3rem', color: '#FFD166' }}>📍</span>
+                <span>The Sustainable Arts and Crafts Institute of Thailand (SACIT)<br/>Bang Sai District, Phra Nakhon Si Ayutthaya Province, Thailand</span>
               </div>
-              
-              {/* Date Header */}
-              <div className="bg-[#533193] text-white py-3 px-6">
-                <h3 className="text-xl font-custom-bold italic">Monday, August 8</h3>
-              </div>
-              
-              {/* Agenda Content */}
-              <div className="p-8">
-                <div className="max-w-2xl mx-auto">
-                  {/* Table Header */}
-                  <div className="grid grid-cols-2 gap-8 mb-6 pb-4 border-b-2 border-[#533193]">
-                    <h4 className="text-lg font-custom-bold text-[#533193] text-center">time</h4>
-                    <h4 className="text-lg font-custom-bold text-[#533193] text-center">description</h4>
-                  </div>
-                  
-                  {/* Agenda Items */}
-                  <div className="space-y-6">
-                    {agenda.day1.map((item, index) => (
-                      <motion.div 
-                        key={index} 
-                        className="grid grid-cols-2 gap-8 items-center"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                      >
-                        <p className="text-[#533193] font-custom-bold text-center text-lg">{item.time}</p>
-                        <p className="text-gray-700 font-custom text-center italic text-lg">{item.description}</p>
-                      </motion.div>
-                    ))}
-                  </div>
                 </div>
+            <div className="hidden md:block" style={{ position: 'absolute', top: 32, right: 48, textAlign: 'right' }}>
+              <div style={{ fontFamily: 'AWConqueror Std Didot', fontWeight: 700, fontSize: '2rem', lineHeight: 1, letterSpacing: 0 }}>
+                <span style={{ fontSize: '1.2rem', fontWeight: 400, verticalAlign: 'middle', marginRight: 4 }}>* SACIT</span><br/>
+                Symposium<br/>2025
+              </div>
+            </div>
+          </div>
+          {/* Curve Decoration */}
+          <svg width="400" height="120" viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: 'absolute', right: 0, bottom: 0, zIndex: 1 }}>
+            <path d="M0 120 Q 300 0 400 120" stroke="#BFB4EE" strokeWidth="3" fill="none" />
+          </svg>
+        </section>
+
+        {/* Agenda Section */}
+        <section className="py-16 sm:py-24 bg-white relative overflow-hidden" style={{marginBottom: 0, paddingBottom: '2rem'}}>
+          {/* Background decorative elements */}
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#B3FFD1] rounded-full opacity-20 -translate-x-48 translate-y-48 z-0"></div>
+          <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#BFB4EE] rounded-full opacity-20 translate-x-40 translate-y-40 z-0"></div>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div style={{
+              border: '4px solid #BFB4EE',
+              borderRadius: '24px',
+              background: '#fff',
+              maxWidth: '900px',
+              margin: '0 auto',
+              padding: '2.5rem 1.5rem',
+              boxShadow: '0 2px 16px 0 rgba(83,49,147,0.08)'
+            }}>
+              <h2 style={{
+                fontFamily: 'AWConqueror Std Didot',
+                fontWeight: 700,
+                fontSize: '2.5rem',
+                background: 'linear-gradient(90deg, #8B7DC3 0%, #BFB4EE 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textAlign: 'center',
+                marginBottom: '0.5rem',
+              }}>
+              Agenda of SACIT Symposium 2025
+              </h2>
+              <div style={{
+                fontFamily: 'AWConqueror Std Didot',
+                color: '#8B7DC3',
+                fontSize: '1.2rem',
+                textAlign: 'center',
+                marginBottom: '1.5rem',
+              }}>
+                SACIT Symposium 2025: Crafting Sustainability across ASEAN and Beyond
+              </div>
+              <div style={{
+                background: 'linear-gradient(90deg, #8B7DC3 0%, #BFB4EE 100%)',
+                color: '#fff',
+                fontFamily: 'AWConqueror Std Didot',
+                fontWeight: 500,
+                fontSize: '1.4rem',
+                textAlign: 'center',
+                borderRadius: '4px',
+                margin: '0 auto 1.5rem auto',
+                maxWidth: '600px',
+                padding: '0.5rem 0',
+                letterSpacing: '0.5px',
+              }}>
+                August 7 – 8, 2025
+              </div>
+              <div style={{
+                fontFamily: 'serif',
+                color: '#222',
+                fontSize: '1.15rem',
+                textAlign: 'center',
+                marginBottom: '2.5rem',
+                lineHeight: 1.4,
+              }}>
+                At the Sustainable Arts and Crafts Institute of Thailand (SACIT)<br/>
+                Bang Sai District, Phra Nakhon Si Ayutthaya Province, Thailand
+                  </div>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <button style={{
+                  fontFamily: 'AWConqueror Std Didot',
+                  fontWeight: 700,
+                  fontSize: '1.3rem',
+                  color: '#533193',
+                  background: 'linear-gradient(90deg, #B3FFD1 0%, #BFB4EE 100%)',
+                  border: 'none',
+                  borderRadius: '40px',
+                  boxShadow: '0px 4px 12px 0px rgba(83,49,147,0.10)',
+                  padding: '12px 56px',
+                  cursor: 'pointer',
+                  letterSpacing: '2px',
+                  transition: 'all 0.2s',
+                  marginTop: 0,
+                  marginBottom: 0,
+                  textShadow: '0 1px 2px #fff8',
+                }}>SEE</button>
               </div>
             </div>
           </div>
         </section>
 
         {/* Speakers Section */}
-        <section className="py-16 sm:py-24 bg-white relative overflow-hidden">
+        <section className="py-16 sm:py-24 bg-white relative overflow-hidden" style={{marginTop: 0, paddingTop: '2rem'}}>
           {/* Background decorative elements */}
-          <div className="absolute top-0 left-0 w-64 h-64 bg-[#8B7DC3] rounded-full opacity-20 -translate-x-32 -translate-y-32"></div>
-          <div className="absolute top-20 right-0 w-48 h-48 bg-[#B3FFD1] rounded-full opacity-30 translate-x-24 -translate-y-12 transform rotate-45"></div>
-          <div className="absolute bottom-0 left-20 w-32 h-32 bg-[#BFB4EE] rounded-full opacity-25"></div>
+          <div className="absolute top-0 left-0 w-64 h-64 bg-[#8B7DC3] rounded-full opacity-20 -translate-x-32 -translate-y-32 z-0"></div>
+          <div className="absolute top-20 right-0 w-48 h-48 bg-[#B3FFD1] rounded-full opacity-30 translate-x-24 -translate-y-12 transform rotate-45 z-0"></div>
+          <div className="absolute bottom-0 left-20 w-32 h-32 bg-[#BFB4EE] rounded-full opacity-25 z-0"></div>
           
           <div className="text-center mb-16">
             <motion.h2 
@@ -573,78 +703,6 @@ const LandingPage = () => {
             </Button>
           </div>
         </section>
-
-        {/* Footer */}
-        <footer className="bg-gradient-to-br from-[#8B7DC3] via-[#B3FFD1] to-[#BFB4EE] pt-16 pb-8 text-[#533193] relative overflow-hidden">
-          {/* Background decorative elements */}
-          <div className="absolute top-0 left-0 w-96 h-96 bg-[#533193] rounded-full opacity-10 -translate-x-48 -translate-y-48"></div>
-          <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#533193] rounded-full opacity-15 translate-x-40 translate-y-40"></div>
-          
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-              <div>
-                <Link to="/" className="flex items-center space-x-2 mb-4">
-                  <div className="flex flex-col">
-                    <div className="flex items-center justify-end w-full">
-                      <img 
-                        src={logoWhite} 
-                        alt="SACIT" 
-                        className="h-6 w-auto"
-                        style={{ filter: 'brightness(0) saturate(100%) invert(27%) sepia(15%) saturate(4390%) hue-rotate(248deg) brightness(91%) contrast(93%)' }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-start w-full">
-                      <img 
-                        src={symposiumText} 
-                        alt="Symposium" 
-                        className="h-7 w-auto"
-                        style={{ filter: 'brightness(0) saturate(100%) invert(27%) sepia(15%) saturate(4390%) hue-rotate(248deg) brightness(91%) contrast(93%)' }}
-                      />
-                    </div>
-                  </div>
-                </Link>
-                <p className="text-sm text-[#533193]/80 leading-relaxed">สถาบันส่งเสริมศิลปหัตถกรรมไทย (องค์การมหาชน)<br/>THE SUSTAINABLE ARTS AND CRAFTS INSTITUTE OF THAILAND (PUBLIC ORGANIZATION)</p>
-              </div>
-              
-              <div>
-                <h4 className="text-lg font-semibold mb-4">ลงทะเบียน</h4>
-                <ul className="space-y-2 text-sm">
-                  <li><Link to="#" className="hover:text-[#533193] transition-colors">SACIT Symposium</Link></li>
-                  <li><Link to="#" className="hover:text-[#533193] transition-colors">Agenda of SACIT Symposium 2025</Link></li>
-                  <li><Link to="#" className="hover:text-[#533193] transition-colors">ผู้บรรยาย</Link></li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="text-lg font-semibold mb-4">ข้อมูลเพิ่มเติม</h4>
-                <ul className="space-y-2 text-sm">
-                  <li><Link to="#" className="hover:text-[#533193] transition-colors">สื่อและข่าวสาร</Link></li>
-                  <li><Link to="#" className="hover:text-[#533193] transition-colors">บรรยากาศภายในงาน</Link></li>
-                  <li><Link to="/admin" className="hover:text-[#533193] transition-colors">สำหรับเจ้าหน้าที่</Link></li>
-                  <li><Link to="/admin" className="hover:text-[#533193] transition-colors">เข้าสู่ระบบจัดการ</Link></li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="text-lg font-semibold mb-4">Join us to know the news</h4>
-                <form className="flex space-x-2" onSubmit={(e) => e.preventDefault()}>
-                  <Input type="email" placeholder="Enter your email" className="bg-white border-gray-300 focus:border-[#A0E7D5] focus:ring-[#A0E7D5] rounded-md" />
-                  <Button type="submit" className="bg-[#533193] text-white hover:bg-[#533193]/80 rounded-md px-4">
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </form>
-              </div>
-            </div>
-            <div className="border-t border-[#533193]/20 pt-8 flex flex-col sm:flex-row justify-between items-center text-sm text-[#533193]/80">
-              <p>&copy; 2025 SACIT Symposium. All rights reserved</p>
-              <div className="flex space-x-4 mt-4 sm:mt-0">
-                <Link to="#" className="hover:text-[#533193]">Terms of Services</Link>
-                <Link to="#" className="hover:text-[#533193]">Privacy Policy</Link>
-                <Link to="#" className="hover:text-[#533193]">Cookies</Link>
-              </div>
-            </div>
-          </div>
-        </footer>
 
       </div>
       

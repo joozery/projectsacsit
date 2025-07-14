@@ -25,6 +25,8 @@ import AttendeesPage from '@/pages/Attendees/index';
 import CheckInPage from '@/pages/CheckIn/index';
 import Account from '@/pages/Account';
 import { Toaster } from '@/components/ui/toaster';
+import About from '@/pages/About';
+import Footer from '@/components/Footer';
 
 const AdminLayout = () => (
   <Layout>
@@ -45,6 +47,11 @@ const AppWithNavbar = () => {
       return null;
     }
     
+    // Login page - no navbar
+    if (path === '/login') {
+      return null;
+    }
+    
     // CheckIn page - simple navbar only
     if (path === '/checkin') {
       return { variant: 'simple' };
@@ -55,17 +62,7 @@ const AppWithNavbar = () => {
       return { showNavigation: false };
     }
     
-    // Register pages - navbar without auth buttons (since they're on register flow)
-    if (path.startsWith('/register')) {
-      return { showAuthButtons: false };
-    }
-    
-    // Login page - navbar without auth buttons
-    if (path === '/login') {
-      return { showAuthButtons: false };
-    }
-    
-    // Landing page and other pages - full navbar
+    // Landing page, Register pages, and other pages - full navbar (same as landing page)
     return {};
   };
   
@@ -86,6 +83,7 @@ const AppWithNavbar = () => {
       
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<About />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register/terms" element={<RegisterTerms />} />
         <Route path="/register/form" element={<RegisterForm />} />
@@ -120,6 +118,7 @@ function App() {
     <>
       <Router>
         <AppWithNavbar />
+        <Footer />
         <Toaster />
       </Router>
     </>

@@ -146,6 +146,23 @@ class RegistrationService {
       };
     }
   }
+
+  // ค้นหาการลงทะเบียนจากอีเมล
+  async searchRegistrationByEmail(email) {
+    try {
+      const response = await api.get(`/registrations/search/${encodeURIComponent(email)}`);
+      return {
+        success: true,
+        data: response.data.data || response.data
+      };
+    } catch (error) {
+      console.error('Search registration by email error:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'ไม่พบข้อมูลการลงทะเบียน'
+      };
+    }
+  }
 }
 
 // Export single instance

@@ -11,6 +11,30 @@
   display: none;  /* Safari and Chrome */
 }
 
+/* Enhanced scrollbar hiding for sidebar */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar-track {
+  display: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar-corner {
+  display: none;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
 
@@ -45,6 +69,24 @@ body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: 'Sarabun', 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+html, body {
+  background: #fff !important;
+  height: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-gradient {
@@ -290,4 +332,24 @@ body {
   border-width: 5px;
   border-style: solid;
   border-color: #1f2937 transparent transparent transparent;
+}
+
+/* Prevent dropdown layout issues */
+[data-radix-popper-content-wrapper] {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+[data-radix-dropdown-menu-content] {
+  position: fixed !important;
+  z-index: 9999 !important;
+  max-width: 224px !important;
+  width: 224px !important;
+}
+
+/* Ensure navbar container doesn't cause layout shifts */
+.navbar-container {
+  position: relative;
+  width: 100%;
+  contain: layout;
 }
