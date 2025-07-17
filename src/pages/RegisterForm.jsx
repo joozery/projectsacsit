@@ -15,6 +15,12 @@ const RegisterForm = () => {
   const location = useLocation();
   const registrationType = location.state?.registrationType || 'general';
   
+  // Debug: Log the location state
+  console.log('Location State:', location.state);
+  console.log('Registration Type:', registrationType);
+  console.log('Privacy Consent:', location.state?.privacyConsent);
+  console.log('Registration Date:', location.state?.registrationDate);
+
   const [formData, setFormData] = useState({
     title: '',
     titleOther: '',
@@ -26,7 +32,11 @@ const RegisterForm = () => {
     password: '',
     confirmPassword: '',
     educationLevel: '',
-    educationOther: ''
+    educationOther: '',
+    age: '',
+    occupation: '',
+    occupationOther: '',
+    objectives: []
   });
 
   const [errors, setErrors] = useState({});
@@ -53,6 +63,28 @@ const RegisterForm = () => {
     }
   };
 
+  const handleObjectiveChange = (objective) => {
+    setFormData(prev => ({
+      ...prev,
+      objectives: prev.objectives.includes(objective)
+        ? prev.objectives.filter(obj => obj !== objective)
+        : [...prev.objectives, objective]
+    }));
+    
+    // Clear error when user makes selection
+    if (errors.objectives) {
+      setErrors(prev => ({
+        ...prev,
+        objectives: ''
+      }));
+    }
+    
+    // Clear submit error when user makes changes
+    if (submitError) {
+      setSubmitError('');
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -68,21 +100,16 @@ const RegisterForm = () => {
     if (!formData.educationLevel) newErrors.educationLevel = 'กรุณาเลือกระดับการศึกษา';
     if (formData.educationLevel === 'other' && !formData.educationOther) newErrors.educationOther = 'กรุณาระบุระดับการศึกษา';
     
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'รหัสผ่านไม่ตรงกัน';
-    }
-
+    if (!formData.age) newErrors.age = 'กรุณาเลือกอายุ';
+    if (!formData.occupation) newErrors.occupation = 'กรุณาเลือกอาชีพ';
+    if (formData.occupation === 'other' && !formData.occupationOther) newErrors.occupationOther = 'กรุณาระบุอาชีพ';
+    if (!formData.objectives || formData.objectives.length === 0) newErrors.objectives = 'กรุณาเลือกเป้าหมายอย่างน้อย 1 ข้อ';
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'รหัสผ่านไม่ตรงกัน';
+    
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
-      newErrors.email = 'รูปแบบอีเมลไม่ถูกต้อง';
-    }
-
-    // Password validation (minimum 6 characters)
-    if (formData.password && formData.password.length < 6) {
-      newErrors.password = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
-    }
-
+    if (formData.email && !emailRegex.test(formData.email)) newErrors.email = 'รูปแบบอีเมลไม่ถูกต้อง';
+    if (formData.password && formData.password.length < 6) newErrors.password = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -92,80 +119,41 @@ const RegisterForm = () => {
       return;
     }
 
+    // Check if we have the required data from RegisterTerms
+    if (!location.state?.privacyConsent || !location.state?.registrationDate) {
+      setSubmitError('กรุณากลับไปยังหน้าเงื่อนไขและเลือกการยินยอมและวันที่ลงทะเบียน');
+      return;
+    }
+
     setIsLoading(true);
     setSubmitError('');
 
     try {
-      // 1. สร้างบัญชีผู้ใช้
-      const userData = {
-        email: formData.email,
-        password: formData.password,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone: formData.telephone,
-        organization: formData.company,
-        role: 'user'
-      };
-
-      const authResult = await authService.register(userData);
-      
-      if (!authResult.success) {
-        setSubmitError(authResult.message);
-        setIsLoading(false);
-        return;
-      }
-
-      // 2. สร้างการลงทะเบียน
-      const registrationData = {
-        registration_type: registrationType,
+      const res = await registrationService.createRegistration({
+        user_id: null, // ถ้ายังไม่ได้ login
+        registration_type: location.state.registrationType,
         title_prefix: formData.title === 'other' ? formData.titleOther : formData.title,
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
+        password: formData.password, // ✅ เพิ่มบรรทัดนี้
         phone: formData.telephone,
         organization: formData.company,
         education_level: formData.educationLevel === 'other' ? formData.educationOther : formData.educationLevel,
-        registration_year: 2025,
-        terms_accepted: 'true' // เพิ่ม field นี้เพื่อผ่าน validation
-      };
+        registration_year: 225,
+        terms_accepted: true,
+        age: formData.age,
+        occupation: formData.occupation === 'other' ? formData.occupationOther : formData.occupation,
+        objectives: formData.objectives,
+        privacy_consent: location.state.privacyConsent,
+        registration_date: location.state.registrationDate
+      });
 
-      const registrationResult = await registrationService.createRegistration(registrationData);
-      
-      if (!registrationResult.success) {
-        setSubmitError(registrationResult.message);
-        setIsLoading(false);
-        return;
+      if (res.data.success) {
+        navigate('/register/success');
       }
-
-      // 3. Navigate based on registration type
-      if (registrationType === 'research') {
-        navigate('/register/research', { 
-          state: { 
-            formData, 
-            registrationType,
-            registrationId: registrationResult.data?.id 
-          } 
-        });
-      } else if (registrationType === 'creative') {
-        navigate('/register/creative', { 
-          state: { 
-            formData, 
-            registrationType,
-            registrationId: registrationResult.data?.id 
-          } 
-        });
-      } else {
-        navigate('/register/success', { 
-          state: { 
-            formData, 
-            registrationType,
-            registrationId: registrationResult.data?.id 
-          } 
-        });
-      }
-
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch (err) {
+      console.error(err);
       setSubmitError('เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง');
     } finally {
       setIsLoading(false);
@@ -326,28 +314,28 @@ const RegisterForm = () => {
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
 
-            {/* Password */}
-            <div>
-              <Input
-                type="password"
-                placeholder="รหัสผ่าน / Password*"
-                value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
-                className={`w-full ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
-              />
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <Input
-                type="password"
-                placeholder="ยืนยันรหัสผ่าน / Confirm Password*"
-                value={formData.confirmPassword}
-                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                className={`w-full ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`}
-              />
-              {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
+            {/* Password Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Input
+                  type="password"
+                  placeholder="รหัสผ่าน / Password*"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  className={`w-full ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
+                />
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+              </div>
+              <div>
+                <Input
+                  type="password"
+                  placeholder="ยืนยันรหัสผ่าน / Confirm Password*"
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  className={`w-full ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`}
+                />
+                {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
+              </div>
             </div>
 
             {/* Education Level */}
@@ -390,6 +378,127 @@ const RegisterForm = () => {
                   {errors.educationOther && <p className="text-red-500 text-xs mt-1">{errors.educationOther}</p>}
                 </div>
               )}
+            </div>
+
+            {/* Age */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                อายุ (Age)<span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { value: 'under20', label: 'ต่ำกว่า 20 ปี (Under 20 years old)' },
+                  { value: '21-30', label: 'ระหว่าง 21 - 30 ปี (Between 21 and 30 years old)' },
+                  { value: '31-40', label: 'ระหว่าง 31 - 40 ปี (Between 31 and 40 years old)' },
+                  { value: '41-50', label: 'ระหว่าง 41 - 50 ปี (Between 41 and 50 years old)' },
+                  { value: '51-60', label: 'ระหว่าง 51 - 60 ปี (Between 51 and 60 years old)' },
+                  { value: 'over60', label: 'มากกว่า 60 ปี (Over 60 years old)' }
+                ].map((option) => (
+                  <label key={option.value} className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="age"
+                      value={option.value}
+                      checked={formData.age === option.value}
+                      onChange={(e) => handleInputChange('age', e.target.value)}
+                      className="mr-2 text-[#533193] focus:ring-[#533193]"
+                    />
+                    <span className="text-sm text-gray-700">{option.label}</span>
+                  </label>
+                ))}
+              </div>
+              {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
+            </div>
+
+            {/* Occupation */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                อาชีพ Occupation<span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { value: 'craftsman', label: 'ผู้สร้างสรรค์งานศิลปหัตถกรรม (Craftsman or Artisan)' },
+                  { value: 'civil_servant', label: 'ข้าราชการ / เจ้าหน้าที่ของรัฐ (Civil Servant or Government Official)' },
+                  { value: 'business_owner', label: 'ธุรกิจส่วนตัว (Business Owner)' },
+                  { value: 'academic', label: 'นักวิชาการ (Academic)' },
+                  { value: 'student', label: 'นักเรียน / นักศึกษา (Student)' },
+                  { value: 'general_public', label: 'บุคคลทั่วไป (General Public)' },
+                  { value: 'other', label: 'อื่น ๆ (Others)' }
+                ].map((option) => (
+                  <label key={option.value} className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="occupation"
+                      value={option.value}
+                      checked={formData.occupation === option.value}
+                      onChange={(e) => handleInputChange('occupation', e.target.value)}
+                      className="mr-2 text-[#533193] focus:ring-[#533193]"
+                    />
+                    <span className="text-sm text-gray-700">{option.label}</span>
+                  </label>
+                ))}
+              </div>
+              {errors.occupation && <p className="text-red-500 text-xs mt-1">{errors.occupation}</p>}
+              
+              {/* Other Occupation Input */}
+              {formData.occupation === 'other' && (
+                <div className="mt-3">
+                  <Input
+                    type="text"
+                    placeholder="ระบุอาชีพ / Specify Occupation"
+                    value={formData.occupationOther}
+                    onChange={(e) => handleInputChange('occupationOther', e.target.value)}
+                    className={`w-full max-w-md ${errors.occupationOther ? 'border-red-500' : 'border-gray-300'}`}
+                  />
+                  {errors.occupationOther && <p className="text-red-500 text-xs mt-1">{errors.occupationOther}</p>}
+                </div>
+              )}
+            </div>
+
+            {/* Objectives */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                เป้าหมายในการเข้าร่วมโครงการ (Objectives for joining the project)<span className="text-red-500">*</span>
+              </label>
+              <div className="space-y-3">
+                {[
+                  { 
+                    value: 'inspiration', 
+                    label: 'เพื่อสร้างแรงบันดาลในการศึกษาองค์ความรู้งานศิลปหัตถกรรมไทย',
+                    description: 'To foster inspiration in the study and appreciation of traditional Thai arts and crafts.'
+                  },
+                  { 
+                    value: 'development', 
+                    label: 'เพื่อศึกษาต่อยอดงานเครื่องรักในการพัฒนาผลิตภัณฑ์หัตถกรรมประกอบอาชีพ',
+                    description: 'To explore the potential for further development of lacquerware craftsmanship in product innovation and professional practice.'
+                  },
+                  { 
+                    value: 'knowledge', 
+                    label: 'ติดตามองค์ความรู้จากวิทยากรโดยตรง',
+                    description: 'To acquire in-depth knowledge directly from SACIT and subject matter experts.'
+                  },
+                  { 
+                    value: 'networking', 
+                    label: 'เพื่อพบปะผู้ชื่นชอบศึกษาองค์ความรู้งานศิลปหัตถกรรมรูปแบบเดียวกัน',
+                    description: 'To engage with like-minded individuals who share a scholarly interest in traditional arts and crafts.'
+                  }
+                ].map((option) => (
+                  <label key={option.value} className="flex items-start cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <input
+                      type="checkbox"
+                      value={option.value}
+                      checked={formData.objectives.includes(option.value)}
+                      onChange={() => handleObjectiveChange(option.value)}
+                      className="mr-3 mt-1 text-[#533193] focus:ring-[#533193]"
+                    />
+                    <div>
+                      <div className="text-sm font-medium text-gray-700">{option.label}</div>
+                      <div className="text-xs text-gray-500 mt-1">{option.description}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              {errors.objectives && <p className="text-red-500 text-xs mt-1">{errors.objectives}</p>}
             </div>
 
             {/* Error Message */}

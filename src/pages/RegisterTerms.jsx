@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Menu, ArrowLeft, Check } from 'lucide-react';
+import api from '@/api/api'; // ✅ import API ที่เราสร้างไว้
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
@@ -11,6 +12,8 @@ const RegisterTerms = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [agreed, setAgreed] = useState(false);
+  const [privacyConsent, setPrivacyConsent] = useState('');
+  const [registrationDate, setRegistrationDate] = useState('');
   
   const registrationType = location.state?.registrationType || 'general';
   
@@ -21,9 +24,15 @@ const RegisterTerms = () => {
   };
 
   const handleAcceptTerms = () => {
-    if (agreed) {
-      // Navigate to registration form with the selected type
-      navigate('/register/form', { state: { registrationType } });
+    if (agreed && privacyConsent && registrationDate) {
+      // Navigate to registration form with the selected type and data
+      navigate('/register/form', { 
+        state: { 
+          registrationType,
+          privacyConsent,
+          registrationDate
+        } 
+      });
     }
   };
 
@@ -45,7 +54,7 @@ const RegisterTerms = () => {
             className="text-center mb-12"
           >
             <h1 className="text-3xl font-bold text-gray-800 mb-4">
-              เงื่อนไข และข้อตกลงการลงทะเบียน
+              การลงทะเบียนเข้าร่วมงาน [Attend Registration]
             </h1>
           </motion.div>
 
@@ -58,26 +67,94 @@ const RegisterTerms = () => {
           >
             <div className="space-y-6 text-sm text-gray-700 leading-relaxed">
               <p>
-                งานประชุมวิชาการศิลปหัตถกรรมครั้งที่ 1 พ.ศ. 2562 ส่งผลงานภายในวันที่ 1 มิถุนายน 2565 
-                สถาบันส่งเสริมศิลปหัตถกรรมไทย (องค์การมหาชน) ให้การสนับสนุนผลงานดังกล่าว สถาบันส่งเสริมศิลปหัตถกรรมไทย 
-                (องค์การมหาชน) จะประกาศรายชื่อผู้ได้รับการคัดเลือกผลงานดังกล่าว และต้องได้รับการรับรองผลงานดังกล่าว
-                เพื่อนำเสนอผลงานดังกล่าวในงานประชุมวิชาการดังกล่าว เพื่อให้ผลงานดังกล่าวได้รับการยอมรับ สถาบันส่งเสริม
-                ศิลปหัตถกรรมไทย (องค์การมหาชน) จะประกาศรายชื่อผู้ได้รับการคัดเลือกผลงานดังกล่าว และต้องได้รับการรับรอง
-                ผลงานดังกล่าวเพื่อนำเสนอผลงานดังกล่าวในงานประชุมวิชาการดังกล่าว ไม่ใช่ผลงานดังกล่าว ต้องได้รับ
+                ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) สถาบันส่งเสริมศิลปหัตถกรรมไทย (องค์การมหาชน) 
+                ให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของท่าน โดยข้อมูลส่วนบุคคลที่ท่านลงทะเบียนไว้จะถูกใช้เพื่อวัตถุประสงค์ดังนี้:
               </p>
 
               <ol className="list-decimal list-inside space-y-3 ml-4">
-                <li>ผู้ส่งผลงานต้องเป็นผู้มีคุณวุฒิระดับปริญญาตรีขึ้นไปประจำปีงบประมาณ 2563</li>
-                <li>ผู้ส่งผลงานต้องสมัครใจเข้าร่วมการประกวดผลงานดังกล่าวด้วยตนเอง</li>
-                <li>ผู้ส่งผลงานและผลงานจะต้องผ่านกระบวนการคัดเลือกจากคณะกรรมการ</li>
-                <li>ผลงานดังกล่าวต้องเป็นผลงานใหม่ที่ไม่เคยได้รับรางวัลมาก่อน</li>
-                <li>ผู้ส่งผลงานต้องรับผิดชอบในผลงานของตนเองและไม่ละเมิดลิขสิทธิ์ของผู้อื่น</li>
+                <li>จัดทำรายชื่อ/เอกสารประกอบการประชุม</li>
+                <li>ประมวลผลและจัดทำรายงานสถิติผู้เข้าร่วม</li>
+                <li>จัดทำและเผยแพร่วิดีโอที่เกี่ยวข้องกับการจัดประชุม</li>
+                <li>ติดต่อประสานงานและแจ้งข้อมูลข่าวสาร</li>
+                <li>เผยแพร่ประชาสัมพันธ์ข้อมูล รูปถ่าย และวิดีโอต่างๆ ในวันจัดประชุม</li>
               </ol>
 
               <p>
-                ก่อน สถาบันส่งเสริมศิลปหัตถกรรมไทย (องค์การมหาชน) จะส่งผลงานของผู้เข้าร่วมการประกวดผลงานดังกล่าว 
-                และเงื่อนไขการส่งผลงานดังกล่าว เท่านั้น
+                ข้อมูลของท่านจะถูกเก็บเป็นความลับและเปิดเผยเท่าที่จำเป็นสำหรับการจัดการประชุมเท่านั้น
               </p>
+            </div>
+
+            {/* Privacy Policy Consent */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                <span className="text-red-500">*</span> การยินยอม
+              </label>
+              <div className="space-y-3">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="privacyConsent"
+                    value="agree"
+                    checked={privacyConsent === 'agree'}
+                    onChange={(e) => setPrivacyConsent(e.target.value)}
+                    className="mr-2 text-[#533193] focus:ring-[#533193]"
+                  />
+                  <span className="text-sm text-gray-700">ยินยอม (Agree)</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="privacyConsent"
+                    value="disagree"
+                    checked={privacyConsent === 'disagree'}
+                    onChange={(e) => setPrivacyConsent(e.target.value)}
+                    className="mr-2 text-[#533193] focus:ring-[#533193]"
+                  />
+                  <span className="text-sm text-gray-700">ไม่ยินยอม (Disagree)</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Registration Date Selection */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Date of Registeration<span className="text-red-500">*</span>
+              </label>
+              <div className="space-y-3">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="registrationDate"
+                    value="august7"
+                    checked={registrationDate === 'august7'}
+                    onChange={(e) => setRegistrationDate(e.target.value)}
+                    className="mr-2 text-[#533193] focus:ring-[#533193]"
+                  />
+                  <span className="text-sm text-gray-700">วันที่ 7 สิงหาคม 2568 (August 7, 2025)</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="registrationDate"
+                    value="august8"
+                    checked={registrationDate === 'august8'}
+                    onChange={(e) => setRegistrationDate(e.target.value)}
+                    className="mr-2 text-[#533193] focus:ring-[#533193]"
+                  />
+                  <span className="text-sm text-gray-700">วันที่ 8 สิงหาคม 2568 (August 8, 2025)</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="registrationDate"
+                    value="august7-8"
+                    checked={registrationDate === 'august7-8'}
+                    onChange={(e) => setRegistrationDate(e.target.value)}
+                    className="mr-2 text-[#533193] focus:ring-[#533193]"
+                  />
+                  <span className="text-sm text-gray-700">วันที่ 7-8 สิงหาคม 2568 (August 7-8, 2025)</span>
+                </label>
+              </div>
             </div>
 
             {/* Agreement Checkbox */}
@@ -92,10 +169,7 @@ const RegisterTerms = () => {
                   {agreed && <Check className="w-3 h-3" />}
                 </button>
                 <label className="text-sm text-gray-700 cursor-pointer leading-relaxed" onClick={() => setAgreed(!agreed)}>
-                  ยอมรับเงื่อนไขและข้อตกลงการลงทะเบียนในการเข้าร่วม{' '}
-                  <span className="text-blue-600 underline cursor-pointer hover:text-blue-800">
-                    นโยบายความเป็นส่วนตัว
-                  </span>
+                  ยอมรับเงื่อนไขและข้อตกลงการลงทะเบียนในการเข้าร่วม
                 </label>
               </div>
             </div>
@@ -104,14 +178,14 @@ const RegisterTerms = () => {
             <div className="flex justify-center gap-4 mt-8">
               <Button
                 onClick={handleAcceptTerms}
-                disabled={!agreed}
+                disabled={!agreed || !privacyConsent || !registrationDate}
                 className={`px-8 py-2 rounded-full transition-all duration-300 ${
-                  agreed 
-                    ? 'bg-gray-600 text-white hover:bg-gray-700' 
+                  agreed && privacyConsent && registrationDate
+                    ? 'bg-[#533193] text-white hover:bg-[#533193]' 
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                ตกลง
+                ถัดไป
               </Button>
             </div>
 
@@ -121,7 +195,7 @@ const RegisterTerms = () => {
                 onClick={handleBackToSelection}
                 className="text-blue-600 hover:text-blue-800 transition-colors font-medium underline"
               >
-                กลับไปยังหน้าหลัก
+                กลับไปยังหน้าแรก
               </button>
             </div>
           </motion.div>
