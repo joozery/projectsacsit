@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Menu, ArrowLeft, Check } from 'lucide-react';
-import api from '@/api/api'; // ✅ import API ที่เราสร้างไว้
+
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
