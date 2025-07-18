@@ -19,7 +19,7 @@ const RegisterSuccess = () => {
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">ลงทะเบียนสำเร็จ</h1>
             <p className="text-gray-700 mb-4">
-              ขอบคุณที่ลงทะเบียนเข้าร่วมงาน<br />แล้วพบกันวันที่ 8-9 สิงหาคม 2568 ในงาน <b>SACIT Symposium 2025</b>
+              ขอบคุณที่ลงทะเบียนเข้าร่วมงาน<br />แล้วพบกันวันที่ 7-8 สิงหาคม 2568 ในงาน <b>SACIT Symposium 2025</b>
             </p>
             <button
               onClick={() => navigate('/')}
