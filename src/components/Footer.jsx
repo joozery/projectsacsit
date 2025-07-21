@@ -4,65 +4,79 @@ import symposiumText from '@/assets/symposiam.svg';
 
 const Footer = () => (
   <footer
-    className="w-full pt-12 pb-4 text-[#533193]"
+    className="w-full pt-12 pb-6 text-white font-['DBMomentX','Prompt','sans-serif']"
     style={{
-      background: 'linear-gradient(120deg, #BFB4EE 0%, #B3FFD1 100%)',
+      background: 'linear-gradient(180deg, #533192 0%, #31195C 100%)',
       position: 'relative',
       overflow: 'hidden',
     }}
   >
     <div className="container mx-auto px-4">
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 pb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8">
         {/* Logo & Description */}
-        <div className="flex-1 min-w-[220px]">
-          <div className="flex items-center gap-3 mb-2">
-            <img src={logoWhite} alt="SACIT" className="h-7 w-auto" />
-            <img src={symposiumText} alt="Symposium" className="h-8 w-auto" />
+        <div className="col-span-1">
+          <div className="flex items-center gap-3 mb-4">
+            <img src={logoWhite} alt="SACIT" className="h-12 w-auto" />
           </div>
-          <div className="font-semibold mb-1">สถาบันส่งเสริมศิลปหัตถกรรมไทย (องค์การมหาชน)</div>
-          <div className="text-xs leading-snug opacity-80">
-            THE SUSTAINABLE ARTS AND CRAFTS<br />
-            INSTITUTE OF THAILAND (PUBLIC ORGANIZATION)
+          <div className="text-sm font-medium mb-2">สถาบันส่งเสริมศิลปหัตถกรรมไทย</div>
+          <div className="text-sm opacity-80 mb-4">(องค์การมหาชน)</div>
+        </div>
+
+        {/* About us */}
+        <div className="col-span-1">
+          <div className="font-bold mb-4 text-white">About us</div>
+          <ul className="space-y-2 text-sm">
+            <li><a href="#" className="hover:underline opacity-90">SACIT Symposium 2025</a></li>
+          </ul>
+          
+          <div className="mt-6">
+            <div className="font-bold mb-3 text-white">เนื้อหากิจกรรม</div>
+            <ul className="space-y-1 text-xs opacity-90">
+              <li>Main Exhibition: Lacquer Legacy</li>
+              <li>Creative Works Exhibition (Collaborative Partners)</li>
+              <li>Live Exhibition (Demonstrative Area)</li>
+            </ul>
           </div>
         </div>
+
+        {/* ข้อมูลเพิ่มเติม */}
+        <div className="col-span-1">
+          <div className="font-bold mb-4 text-white">ข้อมูลเพิ่มเติม</div>
+          <ul className="space-y-2 text-sm opacity-90">
+            <li><a href="#" className="hover:underline">ข่าวสาร</a></li>
+            <li><a href="#" className="hover:underline">นิทรรศการ</a></li>
+            <li><a href="#" className="hover:underline">หลองเสริมสร้าง</a></li>
+            <li><a href="#" className="hover:underline">Proceeding</a></li>
+            <li><a href="#" className="hover:underline">กำหนดการ</a></li>
+            <li><a href="#" className="hover:underline">วิทยากร</a></li>
+          </ul>
+        </div>
+
         {/* Register */}
-        <div className="flex-1 min-w-[180px]">
-          <div className="font-bold mb-2">ลงทะเบียน</div>
-          <ul className="space-y-1 text-sm">
-            <li><a href="#" className="hover:underline">SACIT Symposium</a></li>
-            <li><a href="#" className="hover:underline">Agenda of SACIT Symposium 2025</a></li>
-            <li><a href="#" className="hover:underline">ผู้บรรยาย</a></li>
-          </ul>
-        </div>
-        {/* More Info */}
-        <div className="flex-1 min-w-[180px]">
-          <div className="font-bold mb-2">ข้อมูลเพิ่มเติม</div>
-          <ul className="space-y-1 text-sm">
-            <li><a href="#" className="hover:underline">สื่อและข่าวสาร</a></li>
+        <div className="col-span-1">
+          <div className="font-bold mb-4 text-white">Register</div>
+          <ul className="space-y-2 text-sm opacity-90">
             <li><a href="#" className="hover:underline">บรรยากาศภายในงาน</a></li>
-            <li><a href="#" className="hover:underline">สำหรับเจ้าหน้าที่</a></li>
-            <li><a href="#" className="hover:underline">เข้าสู่ระบบจัดการ</a></li>
+            <li><a href="#" className="hover:underline">ภาพถ่ายในงาน</a></li>
+            <li><a href="#" className="hover:underline">วิดีโอภายในงาน</a></li>
           </ul>
-        </div>
-        {/* Newsletter */}
-        <div className="flex-1 min-w-[220px]">
-          <div className="font-bold mb-2 text-center md:text-left">Join us to know the news</div>
-          <form className="flex gap-2 justify-center md:justify-start">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="rounded-md px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#533193] w-full max-w-[180px]"
-            />
-            <button type="submit" className="bg-[#533193] hover:bg-[#6B46C1] text-white px-4 py-2 rounded-md">
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M2 12l19-7-7 19-2-8-8-2z" fill="currentColor"/></svg>
-            </button>
-          </form>
+
+          <div className="mt-6">
+            <div className="font-bold mb-3 text-white">ค้นหา</div>
+            <div className="text-sm opacity-90">ค้นหา</div>
+          </div>
         </div>
       </div>
-      <hr className="border-t border-[#533193]/20 my-4" />
-      <div className="flex flex-col md:flex-row items-center justify-between gap-2 text-xs opacity-80">
-        <div>© {new Date().getFullYear()} SACIT Symposium. All rights reserved</div>
-        <div className="flex gap-4">
+
+      {/* Divider */}
+      <hr className="border-t border-white/20 my-6" />
+
+      {/* Bottom Section */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <div className="opacity-90">
+          SACIT Symposium. All rights reserved
+        </div>
+        <div className="flex gap-6 opacity-90">
           <a href="#" className="hover:underline">Terms of Services</a>
           <a href="#" className="hover:underline">Privacy Policy</a>
           <a href="#" className="hover:underline">Cookies</a>

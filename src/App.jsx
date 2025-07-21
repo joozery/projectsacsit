@@ -26,6 +26,7 @@ import CheckInPage from '@/pages/CheckIn/index';
 import Account from '@/pages/Account';
 import { Toaster } from '@/components/ui/toaster';
 import About from '@/pages/About';
+import CookiePolicy from '@/pages/CookiePolicy';
 import Footer from '@/components/Footer';
 
 const AdminLayout = () => (
@@ -43,7 +44,7 @@ const AppWithNavbar = () => {
     const path = location.pathname;
     
     // Admin pages - no navbar (Layout handles its own navbar)
-    if (path.startsWith('/admin')) {
+    if (path.toLowerCase().startsWith('/admin')) {
       return null;
     }
     
@@ -84,6 +85,7 @@ const AppWithNavbar = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<About />} />
+        <Route path="/cookie-policy" element={<CookiePolicy />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register/terms" element={<RegisterTerms />} />
         <Route path="/register/form" element={<RegisterForm />} />
@@ -113,12 +115,24 @@ const AppWithNavbar = () => {
   );
 };
 
+// Component to conditionally render footer
+const ConditionalFooter = () => {
+  const location = useLocation();
+  
+  // Don't show footer on admin pages
+  if (location.pathname.toLowerCase().startsWith('/admin')) {
+    return null;
+  }
+  
+  return <Footer />;
+};
+
 function App() {
   return (
     <>
       <Router>
         <AppWithNavbar />
-        <Footer />
+        <ConditionalFooter />
         <Toaster />
       </Router>
     </>

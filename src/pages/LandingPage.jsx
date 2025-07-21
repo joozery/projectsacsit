@@ -10,6 +10,7 @@ import { ChevronRight, ChevronLeft, Diamond, Sparkles, Users, Image as ImageIcon
 import Lightbox from '@/components/Lightbox';
 import authService from '@/services/authService';
 import ReactPlayer from 'react-player';
+import CookieConsent from '@/components/CookieConsent';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
@@ -719,6 +720,9 @@ const LandingPage = () => {
           totalImages={galleryImagesArray.length}
         />
       )}
+      
+      {/* Cookie Consent Popup */}
+      <CookieConsent />
     </>
   );
 };

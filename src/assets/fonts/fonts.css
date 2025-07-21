@@ -38,6 +38,22 @@
 /* AWConqueror Std Didot Font */
 @font-face {
   font-family: 'AWConqueror Std Didot';
+  src: url('./AWConqueror Std Didot.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AWConqueror Std Didot';
+  src: url('./AWConqueror Std Didot Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AWConqueror Std Didot';
   src: url('./AWConqueror Std Didot Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;

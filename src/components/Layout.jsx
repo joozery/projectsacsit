@@ -55,7 +55,7 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const isAdminPage = location.pathname.startsWith('/admin');
+  const isAdminPage = location.pathname.toLowerCase().startsWith('/admin');
 
   const notifications = [
     { id: 1, icon: Mail, title: "New certificate request", time: "5 mins ago", description: "John Doe requested a certificate for 'Tech Conference 2025'."},

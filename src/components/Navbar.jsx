@@ -78,10 +78,24 @@ const Navbar = ({
         {/* Center Navigation - Desktop Only */}
         {showNavigation && (
           <div className="hidden md:flex items-center gap-8 flex-shrink-0">
-            <Link to="/about">
-              <span className="text-white font-medium">About Us</span>
+            <Link to="/about" className="relative group">
+              <span className="text-white font-medium transition-all duration-300 group-hover:text-purple-200">About Us</span>
+              {/* Hover dots */}
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-1">
+                <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
             </Link>
-            <span className="text-white font-medium ml-8">News/Update</span>
+            <span className="text-white font-medium ml-8 relative group cursor-pointer transition-all duration-300 hover:text-purple-200">
+              News/Update
+              {/* Hover dots */}
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-1">
+                <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+            </span>
           </div>
         )}
         
@@ -105,7 +119,7 @@ const Navbar = ({
                     </div>
                     <div className="text-white hidden sm:block">
                       <div className="flex items-center gap-1">
-                        <span className="font-medium text-sm max-w-[120px] truncate">{user?.first_name} {user?.last_name}</span>
+                        <span className="font-medium text-sm max-w-[120px] truncate" style={{ fontFamily: 'Prompt, sans-serif' }}>{user?.first_name} {user?.last_name}</span>
                         <ChevronDown className="w-3 h-3 text-white/70 flex-shrink-0" />
                       </div>
                     </div>
@@ -113,78 +127,96 @@ const Navbar = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
-                  className="w-56 z-[9999] bg-white border border-gray-200 shadow-2xl rounded-xl overflow-hidden animate-in fade-in-0 zoom-in-95 !max-w-[224px] !w-[224px]" 
-                  sideOffset={12}
+                  className="w-64 z-[9999] bg-white border border-purple-200 shadow-2xl rounded-2xl overflow-hidden animate-in fade-in-0 zoom-in-95 backdrop-blur-sm" 
+                  sideOffset={16}
                   alignOffset={-8}
                   avoidCollisions={true}
                   collisionPadding={20}
                   side="bottom"
                   sticky="always"
+                  style={{ fontFamily: 'Prompt, sans-serif' }}
                 >
+                  {/* User Info Header */}
+                  <div className="px-4 py-3 bg-gradient-to-r from-purple-50 to-purple-100 border-b border-purple-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-200 overflow-hidden border-2 border-purple-300">
+                        <img 
+                          src={user?.avatar || 'https://i.pravatar.cc/100?u=' + user?.email} 
+                          alt="avatar" 
+                          className="w-full h-full object-cover" 
+                        />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800 text-sm">{user?.first_name} {user?.last_name}</p>
+                        <p className="text-xs text-gray-600">{user?.email}</p>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Menu Items */}
                   <div className="py-2">
                     <DropdownMenuItem 
                       onClick={() => navigate('/account')} 
-                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-purple-50 transition-all duration-200 mx-2 rounded-lg"
+                      className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-purple-50 transition-all duration-300 mx-2 rounded-xl group"
                     >
-                      <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center flex-shrink-0 group-hover:from-purple-200 group-hover:to-purple-300 transition-all duration-300">
                         <User className="w-4 h-4 text-purple-600" />
                       </div>
-                      <span className="font-medium text-gray-700 text-sm">โปรไฟล์</span>
+                      <span className="font-medium text-gray-700 text-sm group-hover:text-purple-700">โปรไฟล์</span>
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem 
                       onClick={() => navigate('/certificates')} 
-                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-amber-50 transition-all duration-200 mx-2 rounded-lg"
+                      className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-amber-50 transition-all duration-300 mx-2 rounded-xl group"
                     >
-                      <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center flex-shrink-0 group-hover:from-amber-200 group-hover:to-amber-300 transition-all duration-300">
                         <Award className="w-4 h-4 text-amber-600" />
                       </div>
-                      <span className="font-medium text-gray-700 text-sm">ใบประกาศนียบัตร</span>
+                      <span className="font-medium text-gray-700 text-sm group-hover:text-amber-700">ใบประกาศนียบัตร</span>
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem 
                       onClick={() => navigate('/submissions')} 
-                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-50 transition-all duration-200 mx-2 rounded-lg"
+                      className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-blue-50 transition-all duration-300 mx-2 rounded-xl group"
                     >
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center flex-shrink-0 group-hover:from-blue-200 group-hover:to-blue-300 transition-all duration-300">
                         <FileText className="w-4 h-4 text-blue-600" />
                       </div>
-                      <span className="font-medium text-gray-700 text-sm">การส่งผลงาน</span>
+                      <span className="font-medium text-gray-700 text-sm group-hover:text-blue-700">การส่งผลงาน</span>
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem 
-                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-green-50 transition-all duration-200 mx-2 rounded-lg"
+                      className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-green-50 transition-all duration-300 mx-2 rounded-xl group"
                     >
-                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center flex-shrink-0 group-hover:from-green-200 group-hover:to-green-300 transition-all duration-300">
                         <Settings className="w-4 h-4 text-green-600" />
                       </div>
-                      <span className="font-medium text-gray-700 text-sm">การตั้งค่า</span>
+                      <span className="font-medium text-gray-700 text-sm group-hover:text-green-700">การตั้งค่า</span>
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem 
-                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-indigo-50 transition-all duration-200 mx-2 rounded-lg"
+                      className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-indigo-50 transition-all duration-300 mx-2 rounded-xl group"
                     >
-                      <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center flex-shrink-0 group-hover:from-indigo-200 group-hover:to-indigo-300 transition-all duration-300">
                         <HelpCircle className="w-4 h-4 text-indigo-600" />
                       </div>
-                      <span className="font-medium text-gray-700 text-sm">ช่วยเหลือ</span>
+                      <span className="font-medium text-gray-700 text-sm group-hover:text-indigo-700">ช่วยเหลือ</span>
                     </DropdownMenuItem>
                   </div>
                   
                   {/* Divider */}
-                  <div className="h-px bg-gray-200 mx-4 my-2"></div>
+                  <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-4 my-3"></div>
                   
                   {/* Logout */}
                   <div className="py-2">
                     <DropdownMenuItem 
                       onClick={handleLogout} 
-                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-red-50 transition-all duration-200 mx-2 rounded-lg text-red-600 hover:text-red-700"
+                      className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-red-50 transition-all duration-300 mx-2 rounded-xl text-red-600 hover:text-red-700 group"
                     >
-                      <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center flex-shrink-0 group-hover:from-red-200 group-hover:to-red-300 transition-all duration-300">
                         <LogOut className="w-4 h-4 text-red-600" />
                       </div>
-                      <span className="font-medium text-sm">ออกจากระบบ</span>
+                      <span className="font-medium text-sm group-hover:text-red-700">ออกจากระบบ</span>
                     </DropdownMenuItem>
                   </div>
                 </DropdownMenuContent>
