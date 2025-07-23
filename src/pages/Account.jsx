@@ -38,9 +38,20 @@ const Account = () => {
     phone: '',
     organization: '',
     educationLevel: '',
-    prefix: ''
+    prefix: '',
+    profileImage: ''
   });
   const [profileLoading, setProfileLoading] = useState(false);
+  
+  // Profile image state
+  const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  
+  // Edit profile state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editProfileData, setEditProfileData] = useState({});
+  const [updateLoading, setUpdateLoading] = useState(false);
   
   // Certificate data state
   const [certificateData, setCertificateData] = useState(null);
@@ -50,9 +61,7 @@ const Account = () => {
   const [resultsData, setResultsData] = useState([]);
   const [resultsLoading, setResultsLoading] = useState(false);
   
-  // Submission history state
-  const [submissionHistory, setSubmissionHistory] = useState([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
+
 
   // Add cache to prevent excessive API calls
   const [dataCache, setDataCache] = useState({
@@ -71,29 +80,34 @@ const Account = () => {
     return cache && lastFetch && (Date.now() - lastFetch) < CACHE_DURATION;
   };
 
-  // Mock data for development when rate limited
-  const mockProfileData = {
-    firstName: 'Teeracha',
-    lastName: 'Kavinkame', 
-    email: 'teeracha@gmail.com',
-    phone: '099-999-9999',
-    organization: 'มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี',
-    educationLevel: 'ปริญญาตรี / Bachelor Degrees',
-    prefix: 'นาย',
-    department: 'คณะวิทยาศาสตร์'
-  };
 
-  const mockHistoryData = [
-    { id: 1, date: '1/07/68', description: 'ส่งใบเสนอผลงานวิจัย', status: 'approved' },
-    { id: 2, date: '6/07/68', description: 'เข้าร่วมงาน', status: 'pending' }
-  ];
+
+
 
   useEffect(() => {
     if (!user) {
       navigate('/login');
     } else {
+      // แสดงข้อมูลจาก localStorage ทันทีก่อน
+      if (user) {
+        console.log('📋 Setting data from localStorage:', user);
+        setProfileData({
+          firstName: user.first_name || user.firstName || '',
+          lastName: user.last_name || user.lastName || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          organization: user.organization || '',
+          educationLevel: user.role || '',
+          prefix: '',
+          profileImage: user.profile_image || user.profileImage || ''
+        });
+      }
+      
       // Load initial data based on active menu
       loadPageData();
+      
+      // Log current user data for debugging
+      console.log('🔍 Current user from localStorage:', user);
     }
   }, [user, navigate, activeMenu]);
 
@@ -108,7 +122,6 @@ const Account = () => {
     switch (activeMenu) {
       case 'โปรไฟล์':
         await fetchProfileData();
-        await fetchSubmissionHistory();
         break;
       case 'ใบประกาศนียบัตร':
         await fetchCertificateData();
@@ -128,46 +141,68 @@ const Account = () => {
   const fetchProfileData = async () => {
     setProfileLoading(true);
     setError('');
+    
     try {
-      console.log('🔍 Fetching profile data...');
+      // ใช้ข้อมูลจาก localStorage ก่อนในขณะที่รอ API
+      if (user) {
+        console.log('📋 Using localStorage data temporarily:', user);
+        setProfileData({
+          firstName: user.first_name || user.firstName || '',
+          lastName: user.last_name || user.lastName || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          organization: user.organization || '',
+          educationLevel: user.role || '',
+          prefix: '',
+          profileImage: user.profile_image || ''
+        });
+      }
+
+      console.log('🔍 Fetching profile data from API...');
       
-      const response = await api.get('/users/profile');
+      // ลองเรียก API หลายทาง
+      let response;
+      try {
+        response = await api.get('/users/profile');
+      } catch (error) {
+        console.log('❌ /users/profile failed, trying /auth/profile...');
+        response = await api.get('/auth/profile');
+      }
+      
       console.log('✅ Profile data received:', response.data);
       
       if (response.data.success) {
-        setProfileData(response.data.data);
+        // Map API response to frontend state
+        const apiData = response.data.data || response.data;
+        setProfileData({
+          firstName: apiData.first_name || apiData.firstName || '',
+          lastName: apiData.last_name || apiData.lastName || '',
+          email: apiData.email || '',
+          phone: apiData.phone || '',
+          organization: apiData.organization || '',
+          educationLevel: apiData.role || apiData.educationLevel || '',
+          prefix: apiData.prefix || '',
+          profileImage: apiData.profile_image || apiData.profileImage || ''
+        });
       } else {
-        setError(`API Error: ${response.data.message || 'Unknown error'}`);
+        console.log('⚠️ API returned success:false, keeping localStorage data');
       }
     } catch (error) {
       console.error('❌ Error fetching profile:', error);
       if (error.response?.status === 429) {
-        setError('⚠️ Too many requests - please try again later');
+        setError('⚠️ Too many requests - กำลังใช้ข้อมูลที่มีอยู่');
+      } else if (error.response?.status === 401) {
+        setError('⚠️ Session หมดอายุ - กรุณาล็อกอินใหม่');
       } else {
-        setError(`API Error: ${error.response?.data?.message || error.message}`);
+        console.log('📋 API failed, using localStorage data only');
+        // ถ้า API ล้มเหลว ให้ใช้ข้อมูลจาก localStorage
       }
     } finally {
       setProfileLoading(false);
     }
   };
 
-  const fetchSubmissionHistory = async () => {
-    setHistoryLoading(true);
-    try {
-      console.log('🔍 Fetching submission history...');
-      
-      const response = await api.get('/users/submissions/history');
-      console.log('✅ History data received:', response.data);
-      
-      if (response.data.success) {
-        setSubmissionHistory(response.data.data);
-      }
-    } catch (error) {
-      console.error('❌ Error fetching submission history:', error);
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
+
 
   const fetchCertificateData = async () => {
     setCertificateLoading(true);
@@ -229,6 +264,148 @@ const Account = () => {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Clear previous messages
+      setError('');
+      setSuccess('');
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('ขนาดไฟล์ต้องไม่เกิน 5MB');
+        return;
+      }
+      
+      setProfileImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadProfileImage = async () => {
+    if (!profileImage) return;
+    
+    setImageUploading(true);
+    setError('');
+    
+    try {
+      const formData = new FormData();
+      formData.append('profileImage', profileImage);
+      
+      console.log('📤 Uploading profile image...');
+      const response = await api.post('/users/profile/image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      if (response.data.success) {
+        console.log('✅ Profile image uploaded successfully');
+        setProfileData(prev => ({
+          ...prev,
+          profileImage: response.data.data.profileImage
+        }));
+        setProfileImage(null);
+        setImagePreview(null);
+        setSuccess('อัปโหลดรูปภาพสำเร็จ');
+      }
+    } catch (error) {
+      console.error('❌ Error uploading image:', error);
+      setError(`อัปโหลดรูปภาพไม่สำเร็จ: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
+  const handleStartEdit = () => {
+    setIsEditing(true);
+    setEditProfileData({
+      firstName: profileData.firstName || user?.first_name || '',
+      lastName: profileData.lastName || user?.last_name || '',
+      phone: profileData.phone || user?.phone || '',
+      organization: profileData.organization || user?.organization || ''
+    });
+    setError('');
+    setSuccess('');
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditProfileData({});
+    setError('');
+    setSuccess('');
+  };
+
+  const handleEditChange = (field, value) => {
+    setEditProfileData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSaveProfile = async () => {
+    setUpdateLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      console.log('📤 Updating profile data:', editProfileData);
+      
+      const response = await api.put('/users/profile', {
+        first_name: editProfileData.firstName,
+        last_name: editProfileData.lastName,
+        phone: editProfileData.phone,
+        organization: editProfileData.organization
+      });
+
+      if (response.data.success) {
+        console.log('✅ Profile updated successfully');
+        
+        // Update local state
+        setProfileData(prev => ({
+          ...prev,
+          firstName: editProfileData.firstName,
+          lastName: editProfileData.lastName,
+          phone: editProfileData.phone,
+          organization: editProfileData.organization
+        }));
+
+        // Update localStorage user data if needed
+        const currentUser = authService.getCurrentUser();
+        if (currentUser) {
+          const updatedUser = {
+            ...currentUser,
+            first_name: editProfileData.firstName,
+            last_name: editProfileData.lastName,
+            phone: editProfileData.phone,
+            organization: editProfileData.organization
+          };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+
+        setIsEditing(false);
+        setSuccess('อัปเดตข้อมูลสำเร็จ');
+      }
+    } catch (error) {
+      console.error('❌ Error updating profile:', error);
+      setError(`อัปเดตข้อมูลไม่สำเร็จ: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     authService.logout();
     navigate('/login');
@@ -265,7 +442,7 @@ const Account = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f7fa]">
+    <div className="min-h-screen bg-[#f7f7fa] pb-20">
       {/* My account header with gradient */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
@@ -291,7 +468,7 @@ const Account = () => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="max-w-5xl mx-auto px-4 -mt-8 relative z-10"
+        className="max-w-5xl mx-auto px-4 -mt-8 relative z-10 mb-16"
       >
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
@@ -636,24 +813,78 @@ const Account = () => {
                       transition={{ duration: 0.4, delay: 0.2 }}
                       className="flex items-center gap-4 mb-8 bg-white rounded-lg p-4 border border-gray-200"
                     >
-                      <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
-                        <img 
-                          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
-                          alt="Profile" 
-                          className="w-full h-full object-cover"
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
+                          <img 
+                            src={
+                              imagePreview || 
+                              profileData.profileImage || 
+                              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            } 
+                            alt="Profile" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          title="เปลี่ยนรูปโปรไฟล์"
                         />
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#533193] rounded-full flex items-center justify-center cursor-pointer">
+                          <Edit className="w-3 h-3 text-white" />
+                        </div>
                       </div>
+                      
                       <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-gray-800">Teeracha Kavinkame</h3>
-                        <p className="text-gray-600">teeracha@gmail.com</p>
+                        <h3 className="text-xl font-semibold text-gray-800">
+                          {profileData.firstName || profileData.lastName 
+                            ? `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim()
+                            : user?.first_name || user?.last_name
+                              ? `${user.first_name || user.firstName || ''} ${user.last_name || user.lastName || ''}`.trim()
+                              : user?.name || 'ไม่พบข้อมูลชื่อ'
+                          }
+                        </h3>
+                        <p className="text-gray-600">
+                          {profileData.email || user?.email || 'ไม่พบข้อมูลอีเมล'}
+                        </p>
                       </div>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </motion.button>
+                      
+                      {/* Upload/Cancel buttons for new image */}
+                      {profileImage && !isEditing && (
+                        <div className="flex gap-2">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={uploadProfileImage}
+                            disabled={imageUploading}
+                            className="px-3 py-2 bg-[#BFB4EE] text-[#533193] rounded-lg hover:bg-[#B3A7E8] transition-colors text-sm disabled:opacity-50"
+                          >
+                            {imageUploading ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-[#533193] border-t-transparent rounded-full animate-spin"></div>
+                                อัปโหลด
+                              </div>
+                            ) : (
+                              'บันทึก'
+                            )}
+                          </motion.button>
+                          
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                              setProfileImage(null);
+                              setImagePreview(null);
+                            }}
+                            disabled={imageUploading}
+                            className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm disabled:opacity-50"
+                          >
+                            ยกเลิก
+                          </motion.button>
+                        </div>
+                      )}
                     </motion.div>
 
                     {/* Personal Information */}
@@ -665,13 +896,45 @@ const Account = () => {
                     >
                       <div className="flex justify-between items-center mb-6">
                         <h4 className="text-lg font-semibold text-gray-800">ข้อมูลส่วนตัว</h4>
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </motion.button>
+                        
+                        {!isEditing ? (
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={handleStartEdit}
+                            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                          >
+                            <Edit className="w-4 h-4" />
+                            แก้ไข
+                          </motion.button>
+                        ) : (
+                          <div className="flex gap-2">
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={handleSaveProfile}
+                              disabled={updateLoading}
+                              className="flex items-center gap-2 px-4 py-2 bg-[#BFB4EE] text-[#533193] rounded-lg hover:bg-[#B3A7E8] transition-colors text-sm disabled:opacity-50"
+                            >
+                              {updateLoading ? (
+                                <div className="w-4 h-4 border-2 border-[#533193] border-t-transparent rounded-full animate-spin"></div>
+                              ) : (
+                                <Check className="w-4 h-4" />
+                              )}
+                              บันทึก
+                            </motion.button>
+                            
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={handleCancelEdit}
+                              disabled={updateLoading}
+                              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm disabled:opacity-50"
+                            >
+                              ยกเลิก
+                            </motion.button>
+                          </div>
+                        )}
                       </div>
                       
                       {profileLoading ? (
@@ -688,105 +951,103 @@ const Account = () => {
                             </div>
                           )}
                           
-                          <div className="grid grid-cols-2 gap-8">
-                            <div>
-                              <label className="text-sm text-gray-500 block mb-1">คำนำหน้า / Prefix</label>
-                              <p className="text-gray-800 font-medium">{profileData.prefix || 'นาย'}</p>
+                          {success && (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                              <p className="text-green-600 text-sm">{success}</p>
                             </div>
-                            <div>
-                              <label className="text-sm text-gray-500 block mb-1">นามสกุล / Last Name</label>
-                              <p className="text-gray-800 font-medium">{profileData.lastName || 'กวินกานต์ / Kavinkame'}</p>
-                            </div>
-                          </div>
+                          )}
                           
                           <div className="grid grid-cols-2 gap-8">
                             <div>
                               <label className="text-sm text-gray-500 block mb-1">ชื่อ / First Name</label>
-                              <p className="text-gray-800 font-medium">{profileData.firstName || 'รีรา / Teeracha'}</p>
+                              {!isEditing ? (
+                                <p className="text-gray-800 font-medium">
+                                  {profileData.firstName || user?.first_name || user?.firstName || 'ไม่พบข้อมูล'}
+                                </p>
+                              ) : (
+                                <Input
+                                  type="text"
+                                  value={editProfileData.firstName || ''}
+                                  onChange={(e) => handleEditChange('firstName', e.target.value)}
+                                  className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-200 focus:border-transparent transition-all"
+                                  placeholder="กรอกชื่อ"
+                                />
+                              )}
                             </div>
                             <div>
-                              <label className="text-sm text-gray-500 block mb-1">เบอร์โทรศัพท์</label>
-                              <p className="text-gray-800 font-medium">{profileData.phone || '099-999-9999'}</p>
+                              <label className="text-sm text-gray-500 block mb-1">นามสกุล / Last Name</label>
+                              {!isEditing ? (
+                                <p className="text-gray-800 font-medium">
+                                  {profileData.lastName || user?.last_name || user?.lastName || 'ไม่พบข้อมูล'}
+                                </p>
+                              ) : (
+                                <Input
+                                  type="text"
+                                  value={editProfileData.lastName || ''}
+                                  onChange={(e) => handleEditChange('lastName', e.target.value)}
+                                  className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-200 focus:border-transparent transition-all"
+                                  placeholder="กรอกนามสกุล"
+                                />
+                              )}
                             </div>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-8">
                             <div>
-                              <label className="text-sm text-gray-500 block mb-1">ชื่อหน่วยงาน/องค์กร</label>
-                              <p className="text-gray-800 font-medium">{profileData.organization || 'มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี'}</p>
+                              <label className="text-sm text-gray-500 block mb-1">เบอร์โทรศัพท์ / Phone</label>
+                              {!isEditing ? (
+                                <p className="text-gray-800 font-medium">
+                                  {profileData.phone || user?.phone || 'ไม่พบข้อมูล'}
+                                </p>
+                              ) : (
+                                <Input
+                                  type="tel"
+                                  value={editProfileData.phone || ''}
+                                  onChange={(e) => handleEditChange('phone', e.target.value)}
+                                  className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-200 focus:border-transparent transition-all"
+                                  placeholder="กรอกเบอร์โทรศัพท์"
+                                />
+                              )}
                             </div>
-                            <div>
-                              <label className="text-sm text-gray-500 block mb-1">หน่วยงาน</label>
-                              <p className="text-gray-800 font-medium">{profileData.department || 'คณะวิทยาศาสตร์'}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-8">
                             <div>
                               <label className="text-sm text-gray-500 block mb-1">อีเมล / Email</label>
-                              <p className="text-gray-800 font-medium">{profileData.email || user?.email || 'teeracha@gmail.com'}</p>
+                              <p className="text-gray-800 font-medium text-gray-500">
+                                {profileData.email || user?.email || 'ไม่พบข้อมูล'}
+                                {!isEditing && <span className="text-xs block text-gray-400">(ไม่สามารถแก้ไขได้)</span>}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-8">
+                            <div>
+                              <label className="text-sm text-gray-500 block mb-1">หน่วยงาน/องค์กร / Organization</label>
+                              {!isEditing ? (
+                                <p className="text-gray-800 font-medium">
+                                  {profileData.organization || user?.organization || 'ไม่พบข้อมูล'}
+                                </p>
+                              ) : (
+                                <Input
+                                  type="text"
+                                  value={editProfileData.organization || ''}
+                                  onChange={(e) => handleEditChange('organization', e.target.value)}
+                                  className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-200 focus:border-transparent transition-all"
+                                  placeholder="กรอกชื่อหน่วยงาน/องค์กร"
+                                />
+                              )}
                             </div>
                             <div>
-                              <label className="text-sm text-gray-500 block mb-1">ระดับการศึกษา / Education Level</label>
-                              <p className="text-gray-800 font-medium">{profileData.educationLevel || 'ปริญญาตรี / Bachelor Degrees'}</p>
+                              <label className="text-sm text-gray-500 block mb-1">บทบาท / Role</label>
+                              <p className="text-gray-800 font-medium text-gray-500">
+                                {profileData.educationLevel || user?.role || 'ไม่พบข้อมูล'}
+                                {!isEditing && <span className="text-xs block text-gray-400">(ไม่สามารถแก้ไขได้)</span>}
+                              </p>
                             </div>
                           </div>
                         </div>
                       )}
                     </motion.div>
 
-                    {/* Research History */}
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.4 }}
-                      className="bg-white rounded-lg p-6 border border-gray-200"
-                    >
-                      <h4 className="text-lg font-semibold text-gray-800 mb-4">ประวัติการส่ง</h4>
-                      
-                      {historyLoading ? (
-                        <div className="text-center py-8">
-                          <div className="w-8 h-8 border-2 border-[#533193] border-t-transparent rounded-full animate-spin mx-auto"></div>
-                          <p className="text-gray-500 mt-2">กำลังโหลดประวัติ...</p>
-                        </div>
-                      ) : (
-                        <div className="overflow-x-auto">
-                          <table className="w-full">
-                            <thead>
-                              <tr className="border-b border-gray-200">
-                                <th className="text-left py-3 text-sm text-gray-500 font-medium">ลำดับ</th>
-                                <th className="text-left py-3 text-sm text-gray-500 font-medium">วัน เดือน ปี</th>
-                                <th className="text-left py-3 text-sm text-gray-500 font-medium">รายการ</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {submissionHistory.length > 0 ? (
-                                submissionHistory.map((item, index) => (
-                                  <tr key={index} className="border-b border-gray-100">
-                                    <td className="py-3 text-gray-800">{index + 1}</td>
-                                    <td className="py-3 text-gray-800">{item.date}</td>
-                                    <td className="py-3 text-gray-800">{item.description}</td>
-                                  </tr>
-                                ))
-                              ) : (
-                                <>
-                                  <tr className="border-b border-gray-100">
-                                    <td className="py-3 text-gray-800">1</td>
-                                    <td className="py-3 text-gray-800">1/07/68</td>
-                                    <td className="py-3 text-gray-800">ส่งใบ น้ำเสนอผลงานวิจัย</td>
-                                  </tr>
-                                  <tr className="border-b border-gray-100">
-                                    <td className="py-3 text-gray-800">2</td>
-                                    <td className="py-3 text-gray-800">6/07/68</td>
-                                    <td className="py-3 text-gray-800">เข้าร่วมงาน</td>
-                                  </tr>
-                                </>
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </motion.div>
+
                   </>
                 )}
 
