@@ -241,7 +241,7 @@ const LandingPage = () => {
                 color: '#fff'
               }}
             >
-              Welcome To Sacit Symposium
+              Welcome To SACIT Symposium
             </h1>
               </div>
               </div>

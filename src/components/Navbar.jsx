@@ -334,50 +334,57 @@ const Navbar = ({
 
       {/* Overlay Menu */}
       {menuOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-[#533193] bg-opacity-100 flex flex-col"
-          style={{ color: "#fff" }}
-        >
-          <button
-            className="absolute top-6 right-8 text-3xl hover:text-[#B3FFD1] transition-colors duration-200 cursor-pointer"
-            aria-label="Close menu"
-            onClick={() => setMenuOpen(false)}
-          >
-            &times;
-          </button>
-          <div className="flex flex-col md:flex-row justify-center items-start gap-20 w-full h-full pt-24 px-8">
-            {/* Column 1 */}
-            <div className="flex-1 min-w-[220px] space-y-4">
-              <div className="font-bold mb-4 text-2xl">About us</div>
-              <div className="font-bold mb-2 text-lg cursor-pointer hover:text-[#B3FFD1] transition-colors">SACIT Symposium 2025 ▼</div>
-              <div className="mb-2 text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">SACIT Symposium 2026</div>
-              <div className="mb-2 text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">SACIT Symposium 2027</div>
-              <div className="font-bold mt-8 mb-2 text-lg">สื่อและข่าวสาร</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">ข่าวสาร</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">กำหนดการ</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">วิทยากร</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">รายงานการประชุมวิชาการด้านงานศิลปหัตถกรรม</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">Proceeding</div>
-              <div className="font-bold mt-8 mb-2 text-lg">เนื้อหานิทรรศการ</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">Main Exhibition: Lacquer Legacy</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">Creative Works Exhibition (Collaborative Partners)</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">Live Exhibition (Demonstrative Area)</div>
-            </div>
-            {/* Column 2 */}
-            <div className="flex-1 min-w-[220px] space-y-4">
-              <div className="font-bold mb-4 text-2xl">Register</div>
-              <div className="font-bold mb-2 text-lg">บรรยากาศภายในงาน</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">ภาพภายในงาน</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">วิดีโอภายในงาน</div>
-              <div className="font-bold mt-8 mb-2 text-lg">การนำเสนอผลงาน</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">ผลงานวิจัย / บทความวิชาการ</div>
-              <div className="text-base cursor-pointer hover:text-[#B3FFD1] transition-colors">ผลงานสร้างสรรค์</div>
-              <div className="font-bold mt-8 mb-2 text-lg">ค้นหา</div>
-              <div className="font-bold mt-8 mb-2 text-lg">Contact</div>
-            </div>
-          </div>
-        </div>
-      )}
+  <div
+    className="fixed inset-0 z-50 bg-[#533193] text-white overflow-y-auto max-h-screen font-prompt"
+  >
+    <button
+      className="absolute top-6 right-8 text-3xl hover:text-[#B3FFD1] transition-colors duration-200"
+      aria-label="Close menu"
+      onClick={() => setMenuOpen(false)}
+    >
+      &times;
+    </button>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 px-8 pt-24 pb-16 max-w-6xl mx-auto">
+      {/* Column 1 */}
+      <div className="space-y-4">
+        <h3 className="text-2xl font-bold mb-4">About us</h3>
+        <div className="font-semibold text-lg cursor-pointer hover:text-[#B3FFD1] transition">SACIT Symposium 2025 ▼</div>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">SACIT Symposium 2026</div>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">SACIT Symposium 2027</div>
+
+        <h4 className="text-lg font-semibold mt-6">สื่อและข่าวสาร</h4>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">ข่าวสาร</div>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">กำหนดการ</div>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">วิทยากร</div>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">รายงานการประชุมวิชาการด้านงานศิลปหัตถกรรม</div>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">Proceeding</div>
+
+        <h4 className="text-lg font-semibold mt-6">เนื้อหานิทรรศการ</h4>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">Main Exhibition: Lacquer Legacy</div>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">Creative Works Exhibition (Collaborative Partners)</div>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">Live Exhibition (Demonstrative Area)</div>
+      </div>
+
+      {/* Column 2 */}
+      <div className="space-y-4">
+        <h3 className="text-2xl font-bold mb-4">Register</h3>
+        <div className="font-semibold text-lg">บรรยากาศภายในงาน</div>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">ภาพภายในงาน</div>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">วิดีโอภายในงาน</div>
+
+        <h4 className="text-lg font-semibold mt-6">การนำเสนอผลงาน</h4>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">ผลงานวิจัย / บทความวิชาการ</div>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">ผลงานสร้างสรรค์</div>
+
+        <h4 className="text-lg font-semibold mt-6">ค้นหา</h4>
+        <div className="cursor-pointer hover:text-[#B3FFD1] transition">Contact</div>
+      </div>
+    </div>
+  </div>
+)}
+
+
     </header>
   );
 };
