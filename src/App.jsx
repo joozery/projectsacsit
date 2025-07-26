@@ -27,6 +27,8 @@ import Account from '@/pages/Account';
 import { Toaster } from '@/components/ui/toaster';
 import About from '@/pages/About';
 import CookiePolicy from '@/pages/CookiePolicy';
+import SacitSymposiumEN from '@/pages/SacitSymposiumEN';
+import SacitSymposiumTH from '@/pages/SacitSymposiumTH';
 import Footer from '@/components/Footer';
 
 const AdminLayout = () => (
@@ -86,6 +88,9 @@ const AppWithNavbar = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/cookie-policy" element={<CookiePolicy />} />
+        <Route path="/sacit-symposium-en" element={<SacitSymposiumEN />} />
+        <Route path="/sacit-symposium-th" element={<SacitSymposiumTH />} />
+        <Route path="/agenda" element={<AgendaPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register/terms" element={<RegisterTerms />} />
         <Route path="/register/form" element={<RegisterForm />} />

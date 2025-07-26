@@ -302,7 +302,7 @@ const LandingPage = () => {
                 transition={{ duration: 0.6, delay: 0.75 }}
                 viewport={{ once: true }}
               >
-                <button style={{
+                <Link to="/sacit-symposium-en" style={{
                   background: 'linear-gradient(90deg, #B3FFD1 0%, #BFB4EE 100%)',
                   boxShadow: '0px 4px 4px 0px rgba(0,0,0,0.25)',
                   borderRadius: '40px',
@@ -316,8 +316,10 @@ const LandingPage = () => {
                   outline: 'none',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                }}>SACIT Symposium_EN</button>
-                <button style={{
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                }}>SACIT Symposium_EN</Link>
+                <Link to="/sacit-symposium-th" style={{
                   background: 'linear-gradient(90deg, #B3FFD1 0%, #BFB4EE 100%)',
                   boxShadow: '0px 4px 4px 0px rgba(0,0,0,0.25)',
                   borderRadius: '40px',
@@ -331,7 +333,9 @@ const LandingPage = () => {
                   outline: 'none',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                }}>SACIT Symposium_TH</button>
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                }}>SACIT Symposium_TH</Link>
               </motion.div>
             </div>
           </div>
@@ -436,7 +440,7 @@ const LandingPage = () => {
                 Bang Sai District, Phra Nakhon Si Ayutthaya Province, Thailand
                   </div>
               <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <button style={{
+                <Link to="/agenda" style={{
                   fontFamily: 'AWConqueror Std Didot',
                   fontWeight: 700,
                   fontSize: '1.3rem',
@@ -452,7 +456,9 @@ const LandingPage = () => {
                   marginTop: 0,
                   marginBottom: 0,
                   textShadow: '0 1px 2px #fff8',
-                }}>SEE</button>
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                }}>SEE</Link>
               </div>
             </div>
           </div>
