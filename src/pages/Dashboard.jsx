@@ -125,7 +125,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-6 space-y-8 admin-panel" data-admin="true">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

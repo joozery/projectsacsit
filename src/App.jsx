@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import Layout from '@/components/Layout';
+import AdminAuthGuard from '@/components/AdminAuthGuard';
 import Navbar from '@/components/Navbar';
 import Dashboard from '@/pages/Dashboard';
 import CertificatesPage from '@/pages/Certificates';
@@ -19,6 +20,7 @@ import RegisterResearch from '@/pages/RegisterResearch';
 import RegisterCreative from '@/pages/RegisterCreative';
 import RegisterSuccess from '@/pages/RegisterSuccess';
 import Login from '@/pages/Login';
+import AdminLogin from '@/pages/AdminLogin';
 import AgendaPage from '@/pages/Agenda/index';
 import AdminAgenda from '@/pages/Agenda/AdminAgenda';
 import SpeakersPage from '@/pages/Speakers/index';
@@ -111,9 +113,14 @@ const AppWithNavbar = () => {
         <Route path="/register/creative" element={<RegisterCreative />} />
         <Route path="/register/success" element={<RegisterSuccess />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/checkin" element={<CheckInPage />} />
         <Route path="/account" element={<Account />} />
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={
+          <AdminAuthGuard>
+            <AdminLayout />
+          </AdminAuthGuard>
+        }>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="agenda" element={<AdminAgenda />} />

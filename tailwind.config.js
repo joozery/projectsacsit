@@ -18,6 +18,11 @@ export default {
 		},
 		extend: {
 			fontFamily: {
+				'promptp': ['Prompt', 'Noto Sans Thai', 'sans-serif'],
+				'promptp-light': ['Prompt', 'Noto Sans Thai', 'sans-serif'],
+				'promptp-regular': ['Prompt', 'Noto Sans Thai', 'sans-serif'],
+				'promptp-medium': ['Prompt', 'Noto Sans Thai', 'sans-serif'],
+				'promptp-bold': ['Prompt', 'Noto Sans Thai', 'sans-serif'],
 				'custom': ['CustomFont-Regular', 'Noto Sans Thai', 'sans-serif'],
 				'custom-bold': ['CustomFont-Bold', 'Noto Sans Thai', 'sans-serif'],
 				'custom-light': ['CustomFont-Light', 'Noto Sans Thai', 'sans-serif'],

@@ -74,7 +74,7 @@ const UsersPage = () => {
   return (
     <>
       <Helmet><title>จัดการผู้ใช้งาน - ระบบจัดการ SACIT</title></Helmet>
-      <div className="space-y-6">
+      <div className="space-y-6 admin-panel" data-admin="true">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">ผู้ใช้งาน</h1>

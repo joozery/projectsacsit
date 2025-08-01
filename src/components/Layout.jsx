@@ -136,13 +136,38 @@ const Layout = ({ children }) => {
     return <>{children}</>; // Render children directly for non-admin pages
   }
 
-  const handleLogout = () => {
-    // In a real app, this would clear authentication tokens
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      const adminToken = localStorage.getItem('adminToken');
+      
+      if (adminToken) {
+        // เรียก API logout
+        await fetch('/api/auth/admin-logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${adminToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // ลบข้อมูลการเข้าสู่ระบบ
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      
+      toast({
+        title: "ออกจากระบบสำเร็จ",
+        description: "ขอบคุณที่ใช้งานระบบจัดการ SACIT",
+      });
+      
+      navigate('/admin-login');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 admin-panel" data-admin="true">
       <AnimatePresence>
         {sidebarOpen && isMobile && (
           <motion.div

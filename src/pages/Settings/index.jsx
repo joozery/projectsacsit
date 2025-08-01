@@ -125,7 +125,7 @@ const SettingsPage = () => {
       <Helmet>
         <title>ตั้งค่า - ระบบจัดการ SACIT</title>
       </Helmet>
-      <div className="space-y-6">
+      <div className="space-y-6 admin-panel" data-admin="true">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-3xl font-bold text-gray-800">ตั้งค่า</h1>
           <p className="text-gray-600 mt-1">จัดการข้อมูลส่วนตัวและความปลอดภัยของบัญชี</p>

@@ -1,0 +1,270 @@
+/* Admin Panel PromptP Font Styles */
+
+/* Import PromptP font */
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+
+/* Admin Panel Global Font Override */
+.admin-panel,
+.admin-panel *,
+.dashboard,
+.dashboard *,
+[data-admin="true"],
+[data-admin="true"] * {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Specific Admin Components */
+.admin-header,
+.admin-sidebar,
+.admin-content,
+.admin-footer {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Forms */
+.admin-form input,
+.admin-form textarea,
+.admin-form select,
+.admin-form button,
+.admin-form label {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Tables */
+.admin-table,
+.admin-table th,
+.admin-table td,
+.admin-table thead,
+.admin-table tbody {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Navigation */
+.admin-nav,
+.admin-nav-item,
+.admin-nav-link {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Modals and Dialogs */
+.admin-modal,
+.admin-dialog,
+.admin-popup {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Cards */
+.admin-card,
+.admin-card-header,
+.admin-card-body,
+.admin-card-footer {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Buttons */
+.admin-btn,
+.admin-button {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Typography */
+.admin-title,
+.admin-subtitle,
+.admin-heading,
+.admin-text {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Lists */
+.admin-list,
+.admin-list-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Alerts and Notifications */
+.admin-alert,
+.admin-notification,
+.admin-toast {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Tooltips */
+.admin-tooltip {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Dropdowns */
+.admin-dropdown,
+.admin-dropdown-menu,
+.admin-dropdown-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Tabs */
+.admin-tabs,
+.admin-tab,
+.admin-tab-content {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Breadcrumbs */
+.admin-breadcrumb,
+.admin-breadcrumb-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Pagination */
+.admin-pagination,
+.admin-pagination-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Search */
+.admin-search,
+.admin-search-input {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Filters */
+.admin-filter,
+.admin-filter-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Charts and Graphs */
+.admin-chart,
+.admin-graph {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Statistics */
+.admin-stats,
+.admin-stat-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Settings */
+.admin-settings,
+.admin-setting-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Users */
+.admin-users,
+.admin-user-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Reports */
+.admin-reports,
+.admin-report-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Analytics */
+.admin-analytics,
+.admin-analytics-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Logs */
+.admin-logs,
+.admin-log-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Help */
+.admin-help,
+.admin-help-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Profile */
+.admin-profile,
+.admin-profile-item {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Dashboard Widgets */
+.admin-widget,
+.admin-widget-header,
+.admin-widget-body {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Sidebar Menu */
+.admin-sidebar-menu,
+.admin-sidebar-item,
+.admin-sidebar-link {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Header */
+.admin-header-title,
+.admin-header-nav,
+.admin-header-user {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Footer */
+.admin-footer,
+.admin-footer-text {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Loading States */
+.admin-loading,
+.admin-spinner {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Error States */
+.admin-error,
+.admin-error-message {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Success States */
+.admin-success,
+.admin-success-message {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Warning States */
+.admin-warning,
+.admin-warning-message {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Admin Info States */
+.admin-info,
+.admin-info-message {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif !important;
+}
+
+/* Force font weight for better readability */
+.admin-panel h1,
+.admin-panel h2,
+.admin-panel h3,
+.admin-panel h4,
+.admin-panel h5,
+.admin-panel h6 {
+  font-weight: 600 !important;
+}
+
+.admin-panel p,
+.admin-panel span,
+.admin-panel div {
+  font-weight: 400 !important;
+}
+
+.admin-panel strong,
+.admin-panel b {
+  font-weight: 700 !important;
+}
+
+.admin-panel em,
+.admin-panel i {
+  font-weight: 400 !important;
+  font-style: italic !important;
+} 

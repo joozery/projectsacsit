@@ -17,6 +17,7 @@ const initialSpeakers = [
     { id: 1, name: 'ดร. วิชัย รักชาติ', title: 'ผู้เชี่ยวชาญด้านการตลาดดิจิทัล', company: 'Digital Transformation Co.', bio: 'ดร. วิชัย มีประสบการณ์มากกว่า 20 ปีในวงการการตลาดดิจิทัลและเป็นที่ปรึกษาให้กับองค์กรชั้นนำมากมาย', photoUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80' },
     { id: 2, name: 'คุณสมศรี สร้างสรรค์', title: 'นักออกแบบผลิตภัณฑ์ผ้าไทย', company: 'SACIT', bio: 'นักออกแบบรุ่นใหม่ไฟแรงที่ได้รับรางวัลระดับนานาชาติมากมาย และเป็นผู้ผลักดันผ้าไทยสู่สากล', photoUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80' },
     { id: 3, name: 'คุณพัฒนา นวัตกรรม', title: 'CEO & Founder', company: 'Tech Weavers Inc.', bio: 'ผู้ก่อตั้งสตาร์ทอัพที่นำเทคโนโลยีมาประยุกต์ใช้กับอุตสาหกรรมสิ่งทอ สร้างความเปลี่ยนแปลงครั้งใหญ่', photoUrl: 'https://images.unsplash.com/photo-1627161683080-e374ca138804?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80' },
+    { id: 4, name: 'ดร. สุภาพร เทคโนโลยี', title: 'นักวิจัยด้าน AI และ Machine Learning', company: 'AI Research Institute', bio: 'ดร. สุภาพร เป็นผู้เชี่ยวชาญด้านปัญญาประดิษฐ์และแมชชีนเลิร์นนิง มีผลงานวิจัยที่ได้รับการยอมรับในระดับนานาชาติ', photoUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80' },
 ];
 
 
@@ -68,7 +69,7 @@ const SpeakersPage = () => {
   return (
     <>
       <Helmet><title>จัดการผู้บรรยาย - ระบบจัดการ SACIT</title></Helmet>
-      <div className="space-y-6">
+      <div className="space-y-6 admin-panel" data-admin="true">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">ผู้บรรยาย</h1>
@@ -97,7 +98,7 @@ const SpeakersPage = () => {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
           <AnimatePresence>
             {filteredSpeakers.map(speaker => (
               <SpeakerCard 
