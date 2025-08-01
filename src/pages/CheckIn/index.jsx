@@ -13,9 +13,11 @@ import {
   Calendar,
   QrCode,
   Send,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
+import registrationService from '@/services/registrationService';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
@@ -30,99 +32,74 @@ const CheckInPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [requestSuccess, setRequestSuccess] = useState(false);
   const [attendeesData, setAttendeesData] = useState(null);
+  const [loadingData, setLoadingData] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Load data from localStorage on component mount
-  useEffect(() => {
-    const savedData = localStorage.getItem('attendeesData');
-    if (savedData) {
-      setAttendeesData(JSON.parse(savedData));
-    } else {
-      // Default data if no saved data
-      const defaultData = {
-        '2025': {
-          general: [
-            {
-              id: 1,
-              name: 'นายสมชาย ใจดี',
-              email: 'somchai@email.com',
-              phone: '081-234-5678',
-              organization: 'บริษัท ABC จำกัด',
-              registeredAt: '2024-01-15',
-              status: 'confirmed',
-              checkedIn: false,
-              checkInTime: null,
-              checkInRequested: false,
-              checkInRequestTime: null
-            },
-            {
-              id: 2,
-              name: 'นางสาววนิดา สวยงาม',
-              email: 'wanida@email.com',
-              phone: '089-876-5432',
-              organization: 'มหาวิทยาลัย XYZ',
-              registeredAt: '2024-01-16',
-              status: 'confirmed',
-              checkedIn: false,
-              checkInTime: null,
-              checkInRequested: false,
-              checkInRequestTime: null
-            },
-            {
-              id: 3,
-              name: 'นายประยุทธ์ ขยัน',
-              email: 'prayuth@email.com',
-              phone: '092-111-2222',
-              organization: 'สำนักงานศิลปะ',
-              registeredAt: '2024-01-17',
-              status: 'confirmed',
-              checkedIn: true,
-              checkInTime: '2024-01-20 08:30:00',
-              checkInRequested: true,
-              checkInRequestTime: '2024-01-20 08:25:00'
-            }
-          ],
-          research: [
-            {
-              id: 4,
-              name: 'ดร.อนุรักษ์ วิจัยดี',
-              email: 'anurak@university.ac.th',
-              phone: '081-999-8888',
-              organization: 'มหาวิทยาลัยเทคโนโลยี',
-              registeredAt: '2024-01-18',
-              status: 'confirmed',
-              projectTitle: 'การพัฒนาเทคนิคการทำยางรักแบบใหม่',
-              category: 'lacquer',
-              submissionStatus: 'approved',
-              checkedIn: false,
-              checkInTime: null,
-              checkInRequested: false,
-              checkInRequestTime: null
-            }
-          ],
-          creative: [
-            {
-              id: 6,
-              name: 'คุณศิลปิน สร้างสรรค์',
-              email: 'silpin@artist.com',
-              phone: '094-777-6666',
-              organization: 'สตูดิโอศิลปะ',
-              registeredAt: '2024-01-20',
-              status: 'confirmed',
-              projectTitle: 'ผลงานเครื่องปั้นดินเผาร่วมสมัย',
-              category: 'contemporary',
-              submissionStatus: 'approved',
-              checkedIn: false,
-              checkInTime: null,
-              checkInRequested: true,
-              checkInRequestTime: '2024-01-20 08:45:00'
-            }
-          ]
+  // Fetch attendees data from API
+  const fetchAttendeesData = async () => {
+    setLoadingData(true);
+    setError(null);
+    
+    try {
+      // Fetch all types of registrations
+      const [generalResponse, researchResponse, creativeResponse] = await Promise.all([
+        registrationService.getGeneralRegistrations(year),
+        registrationService.getResearchRegistrations(year),
+        registrationService.getCreativeRegistrations(year)
+      ]);
+      
+      // Transform API data to match our format
+      const transformAttendee = (attendee) => ({
+        id: attendee.id,
+        name: `${attendee.title_prefix || ''} ${attendee.first_name} ${attendee.last_name}`.trim(),
+        email: attendee.email,
+        phone: attendee.phone,
+        organization: attendee.organization,
+        education: attendee.education_level || 'ไม่ระบุ',
+        registeredAt: attendee.created_at || attendee.registered_at,
+        status: attendee.status || 'confirmed',
+        checkedIn: attendee.checked_in || false,
+        checkInTime: attendee.check_in_time,
+        checkInRequested: attendee.check_in_requested || false,
+        checkInRequestTime: attendee.check_in_request_time,
+        projectTitle: attendee.project_title,
+        category: attendee.category,
+        submissionStatus: attendee.submission_status
+      });
+
+      const generalAttendees = generalResponse.success ? generalResponse.data?.map(transformAttendee) || [] : [];
+      const researchAttendees = researchResponse.success ? researchResponse.data?.map(transformAttendee) || [] : [];
+      const creativeAttendees = creativeResponse.success ? creativeResponse.data?.map(transformAttendee) || [] : [];
+
+      const newData = {
+        [year]: {
+          general: generalAttendees,
+          research: researchAttendees,
+          creative: creativeAttendees
         }
       };
-      setAttendeesData(defaultData);
-      localStorage.setItem('attendeesData', JSON.stringify(defaultData));
+
+      setAttendeesData(newData);
+      localStorage.setItem('attendeesData', JSON.stringify(newData));
+      
+    } catch (error) {
+      console.error('Error fetching attendees data:', error);
+      setError('ไม่สามารถดึงข้อมูลผู้เข้าร่วมงานได้');
+      
+      // Fallback to localStorage if available
+      const savedData = localStorage.getItem('attendeesData');
+      if (savedData) {
+        setAttendeesData(JSON.parse(savedData));
+      }
+    } finally {
+      setLoadingData(false);
     }
-  }, []);
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    fetchAttendeesData();
+  }, [year]);
 
   const getAllAttendees = () => {
     if (!attendeesData || !attendeesData[year]) {
@@ -185,38 +162,51 @@ const CheckInPage = () => {
       
       setSearchResults(results);
       setIsLoading(false);
-    }, 500);
+    }, 300);
   };
 
   const handleCheckInRequest = async (attendee) => {
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      const requestTime = new Date().toISOString();
-      
-      // Update attendee check-in request status in shared data
-      updateAttendeeData(attendee.id, {
-        checkInRequested: true,
-        checkInRequestTime: requestTime
+    try {
+      // Call API to update check-in request
+      const response = await registrationService.updateCheckInStatus(attendee.id, {
+        check_in_requested: true,
+        check_in_request_time: new Date().toISOString()
       });
-      
-      // Update local state for UI
-      const updatedAttendee = {
-        ...attendee,
-        checkInRequested: true,
-        checkInRequestTime: requestTime
-      };
-      
-      setSelectedAttendee(updatedAttendee);
-      setRequestSuccess(true);
+
+      if (response.success) {
+        const requestTime = new Date().toISOString();
+        
+        // Update attendee check-in request status in shared data
+        updateAttendeeData(attendee.id, {
+          checkInRequested: true,
+          checkInRequestTime: requestTime
+        });
+        
+        // Update local state for UI
+        const updatedAttendee = {
+          ...attendee,
+          checkInRequested: true,
+          checkInRequestTime: requestTime
+        };
+        
+        setSelectedAttendee(updatedAttendee);
+        setRequestSuccess(true);
+        
+        // Update search results
+        setSearchResults(prev => 
+          prev.map(a => a.id === attendee.id ? updatedAttendee : a)
+        );
+      } else {
+        alert('เกิดข้อผิดพลาดในการส่งคำขอ: ' + response.message);
+      }
+    } catch (error) {
+      console.error('Error sending check-in request:', error);
+      alert('เกิดข้อผิดพลาดในการส่งคำขอ กรุณาลองใหม่อีกครั้ง');
+    } finally {
       setIsLoading(false);
-      
-      // Update search results
-      setSearchResults(prev => 
-        prev.map(a => a.id === attendee.id ? updatedAttendee : a)
-      );
-    }, 1000);
+    }
   };
 
   const resetForm = () => {
@@ -254,12 +244,27 @@ const CheckInPage = () => {
   }, [searchTerm, attendeesData]);
 
   // Show loading if data is not loaded yet
-  if (!attendeesData) {
+  if (loadingData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#8B7DC3] via-[#B3FFD1] to-[#BFB4EE] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#533193] mx-auto mb-4"></div>
-          <p className="text-white">กำลังโหลดข้อมูล...</p>
+          <Loader2 className="w-12 h-12 text-white animate-spin mx-auto mb-4" />
+          <p className="text-white" style={{ fontFamily: 'Prompt' }}>กำลังโหลดข้อมูล...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if data loading failed
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#8B7DC3] via-[#B3FFD1] to-[#BFB4EE] flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <p className="text-white mb-4" style={{ fontFamily: 'Prompt' }}>{error}</p>
+          <Button onClick={fetchAttendeesData} className="bg-white text-[#533193]" style={{ fontFamily: 'Prompt' }}>
+            ลองใหม่
+          </Button>
         </div>
       </div>
     );
@@ -297,41 +302,41 @@ const CheckInPage = () => {
               <Send className="w-12 h-12 text-white" />
             </div>
             
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">ส่งคำขอเรียบร้อย!</h2>
-            <p className="text-gray-600 mb-6">คำขอเช็คอินของคุณได้ถูกส่งแล้ว รอการยืนยันจากเจ้าหน้าที่</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Prompt' }}>ส่งคำขอเรียบร้อย!</h2>
+            <p className="text-gray-600 mb-6" style={{ fontFamily: 'Prompt' }}>คำขอเช็คอินของคุณได้ถูกส่งแล้ว รอการยืนยันจากเจ้าหน้าที่</p>
             
-            <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
-              <div className="flex items-center gap-3 mb-3">
-                <User className="w-5 h-5 text-gray-500" />
-                <div>
-                  <p className="font-semibold text-gray-900">{selectedAttendee.name}</p>
-                  <p className="text-sm text-gray-600">{selectedAttendee.email}</p>
+                          <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                <div className="flex items-center gap-3 mb-3">
+                  <User className="w-5 h-5 text-gray-500" />
+                  <div>
+                    <p className="font-semibold text-gray-900" style={{ fontFamily: 'Prompt' }}>{selectedAttendee.name}</p>
+                    <p className="text-sm text-gray-600" style={{ fontFamily: 'Prompt' }}>{selectedAttendee.email}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 mb-3">
+                  <Building className="w-5 h-5 text-gray-500" />
+                  <p className="text-sm text-gray-600" style={{ fontFamily: 'Prompt' }}>{selectedAttendee.organization}</p>
+                </div>
+                
+                <div className="flex items-center gap-3 mb-3">
+                  <Clock className="w-5 h-5 text-gray-500" />
+                  <p className="text-sm text-gray-600" style={{ fontFamily: 'Prompt' }}>
+                    เวลาส่งคำขอ: {new Date(selectedAttendee.checkInRequestTime).toLocaleString('th-TH')}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-yellow-500" />
+                  <p className="text-sm text-yellow-600 font-medium" style={{ fontFamily: 'Prompt' }}>
+                    สถานะ: รอการยืนยันจากเจ้าหน้าที่
+                  </p>
                 </div>
               </div>
-              
-              <div className="flex items-center gap-3 mb-3">
-                <Building className="w-5 h-5 text-gray-500" />
-                <p className="text-sm text-gray-600">{selectedAttendee.organization}</p>
-              </div>
-              
-              <div className="flex items-center gap-3 mb-3">
-                <Clock className="w-5 h-5 text-gray-500" />
-                <p className="text-sm text-gray-600">
-                  เวลาส่งคำขอ: {new Date(selectedAttendee.checkInRequestTime).toLocaleString('th-TH')}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-yellow-500" />
-                <p className="text-sm text-yellow-600 font-medium">
-                  สถานะ: รอการยืนยันจากเจ้าหน้าที่
-                </p>
-              </div>
-            </div>
 
             <div className="bg-blue-50 rounded-lg p-4 mb-6 text-left">
-              <h3 className="font-semibold text-blue-900 mb-2">ขั้นตอนถัดไป:</h3>
-              <ul className="text-sm text-blue-800 space-y-1">
+              <h3 className="font-semibold text-blue-900 mb-2" style={{ fontFamily: 'Prompt' }}>ขั้นตอนถัดไป:</h3>
+              <ul className="text-sm text-blue-800 space-y-1" style={{ fontFamily: 'Prompt' }}>
                 <li>• เจ้าหน้าที่จะตรวจสอบข้อมูลของคุณ</li>
                 <li>• หากข้อมูลถูกต้อง จะได้รับการยืนยันเช็คอิน</li>
                 <li>• คุณสามารถเข้าร่วมงานได้ทันที</li>
@@ -341,6 +346,7 @@ const CheckInPage = () => {
             <Button 
               onClick={resetForm}
               className="w-full bg-[#533193] hover:bg-[#533193]/90 text-white py-3 rounded-xl"
+              style={{ fontFamily: 'Prompt' }}
             >
               ส่งคำขอสำหรับคนอื่น
             </Button>
@@ -354,17 +360,19 @@ const CheckInPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#8B7DC3] via-[#B3FFD1] to-[#BFB4EE] flex flex-col">
       {/* Header */}
       <header className="bg-[#533193] pb-6 pt-6 flex flex-col items-center justify-center text-center">
-        <span className="text-white text-base mb-1">✦ SACIT</span>
-        <span className="text-white font-serif text-4xl md:text-5xl font-bold leading-tight">Symposium</span>
-        <span className="text-white text-2xl md:text-3xl font-bold mt-1">ส่งคำขอเช็คอิน</span>
-        <span className="text-white text-base mt-1">SACIT Symposium 2025</span>
+        <span className="text-white text-base mb-1" style={{ fontFamily: 'Prompt' }}>✦ SACIT</span>
+        <span className="text-white text-4xl md:text-5xl font-bold leading-tight" style={{ fontFamily: 'Prompt' }}>Symposium</span>
+        <span className="text-white text-2xl md:text-3xl font-bold mt-1" style={{ fontFamily: 'Prompt' }}>ส่งคำขอเช็คอิน</span>
+        <span className="text-white text-base mt-1" style={{ fontFamily: 'Prompt' }}>SACIT Symposium {year}</span>
       </header>
+      
       <main className="flex-1 flex flex-col items-center justify-center px-2 py-6">
         <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl px-6 py-8 flex flex-col items-center mx-auto">
           <div className="w-full text-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">ค้นหาชื่อของคุณ</h2>
-            <p className="text-gray-600 text-base">กรอกชื่อ, อีเมล, เบอร์โทร หรือชื่อองค์กร</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1" style={{ fontFamily: 'Prompt' }}>ค้นหาชื่อของคุณ</h2>
+            <p className="text-gray-600 text-base" style={{ fontFamily: 'Prompt' }}>กรอกชื่อ, อีเมล, เบอร์โทร หรือชื่อองค์กร</p>
           </div>
+          
           {/* Search Input */}
           <div className="relative w-full mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -374,21 +382,116 @@ const CheckInPage = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 py-3 text-base rounded-xl border-2 border-gray-200 focus:border-[#533193] focus:ring-0 bg-gray-50"
+              style={{ fontFamily: 'Prompt' }}
             />
           </div>
+
+          {/* Search Results */}
+          {searchResults.length > 0 && (
+            <div className="w-full mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3" style={{ fontFamily: 'Prompt' }}>ผลการค้นหา ({searchResults.length})</h3>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {searchResults.map((attendee) => (
+                  <motion.div
+                    key={attendee.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                  >
+                                         <div className="flex items-start justify-between mb-2">
+                       <div className="flex-1">
+                         <h4 className="font-semibold text-gray-900" style={{ fontFamily: 'Prompt' }}>{attendee.name}</h4>
+                         <p className="text-sm text-gray-600" style={{ fontFamily: 'Prompt' }}>{attendee.email}</p>
+                         <p className="text-sm text-gray-600" style={{ fontFamily: 'Prompt' }}>{attendee.organization}</p>
+                       </div>
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(attendee)}
+                                                 <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(attendee)}`} style={{ fontFamily: 'Prompt' }}>
+                           {getStatusText(attendee)}
+                         </span>
+                      </div>
+                    </div>
+                    
+                    {!attendee.checkedIn && !attendee.checkInRequested && (
+                      <Button
+                        onClick={() => handleCheckInRequest(attendee)}
+                        disabled={isLoading}
+                        className="w-full bg-[#533193] hover:bg-[#533193]/90 text-white py-2 rounded-lg text-sm"
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            กำลังส่งคำขอ...
+                          </>
+                                                 ) : (
+                           <span style={{ fontFamily: 'Prompt' }}>ส่งคำขอเช็คอิน</span>
+                         )}
+                      </Button>
+                    )}
+                    
+                                         {attendee.checkInRequested && !attendee.checkedIn && (
+                       <div className="text-center">
+                         <p className="text-sm text-yellow-600 font-medium" style={{ fontFamily: 'Prompt' }}>
+                           ✓ ส่งคำขอแล้ว รอการยืนยัน
+                         </p>
+                         <p className="text-xs text-gray-500" style={{ fontFamily: 'Prompt' }}>
+                           {attendee.checkInRequestTime && 
+                             new Date(attendee.checkInRequestTime).toLocaleString('th-TH')
+                           }
+                         </p>
+                       </div>
+                     )}
+                    
+                                         {attendee.checkedIn && (
+                       <div className="text-center">
+                         <p className="text-sm text-green-600 font-medium" style={{ fontFamily: 'Prompt' }}>
+                           ✓ เช็คอินแล้ว
+                         </p>
+                         <p className="text-xs text-gray-500" style={{ fontFamily: 'Prompt' }}>
+                           {attendee.checkInTime && 
+                             new Date(attendee.checkInTime).toLocaleString('th-TH')
+                           }
+                         </p>
+                       </div>
+                     )}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+                     {/* Loading indicator */}
+           {isLoading && searchTerm.length >= 2 && (
+             <div className="w-full text-center mb-4">
+               <Loader2 className="w-6 h-6 text-[#533193] animate-spin mx-auto" />
+               <p className="text-sm text-gray-600 mt-2" style={{ fontFamily: 'Prompt' }}>กำลังค้นหา...</p>
+             </div>
+           )}
+
+                     {/* No results */}
+           {searchResults.length === 0 && searchTerm.length >= 2 && !isLoading && (
+             <div className="w-full text-center mb-4">
+               <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+               <p className="text-gray-600" style={{ fontFamily: 'Prompt' }}>ไม่พบข้อมูลที่ตรงกับคำค้นหา</p>
+               <p className="text-sm text-gray-500" style={{ fontFamily: 'Prompt' }}>ลองค้นหาด้วยชื่อ, อีเมล, หรือองค์กร</p>
+             </div>
+           )}
+
           {/* QR Code */}
           <div className="flex flex-col items-center mb-6">
             <QrCode className="w-16 h-16 text-gray-300 mb-2" />
           </div>
+          
           {/* Welcome Text */}
           <div className="text-center mb-4">
-            <div className="font-semibold text-gray-700">ยินดีต้อนรับสู่ SACIT Symposium 2025</div>
-            <div className="text-gray-500 text-sm">กรุณากรอกชื่อหรือข้อมูลของคุณเพื่อส่งคำขอเช็คอิน</div>
+            <div className="font-semibold text-gray-700" style={{ fontFamily: 'Prompt' }}>ยินดีต้อนรับสู่ SACIT Symposium {year}</div>
+            <div className="text-gray-500 text-sm" style={{ fontFamily: 'Prompt' }}>กรุณากรอกชื่อหรือข้อมูลของคุณเพื่อส่งคำขอเช็คอิน</div>
           </div>
+          
           {/* Steps Box */}
           <div className="w-full bg-blue-50 rounded-xl p-4 text-left mt-2 mb-2">
-            <div className="font-bold text-blue-900 mb-2">ขั้นตอนการเช็คอิน:</div>
-            <ol className="text-sm text-blue-800 list-decimal list-inside space-y-1">
+            <div className="font-bold text-blue-900 mb-2" style={{ fontFamily: 'Prompt' }}>ขั้นตอนการเช็คอิน:</div>
+            <ol className="text-sm text-blue-800 list-decimal list-inside space-y-1" style={{ fontFamily: 'Prompt' }}>
               <li>ค้นหาชื่อของคุณในระบบ</li>
               <li>กดปุ่ม "ส่งคำขอ" เพื่อส่งคำขอเช็คอิน</li>
               <li>รอเจ้าหน้าที่ตรวจสอบและยืนยัน</li>
@@ -396,9 +499,10 @@ const CheckInPage = () => {
             </ol>
           </div>
         </div>
+        
         {/* Footer */}
         <div className="text-center mt-6 w-full">
-          <p className="text-green-400 text-sm">
+          <p className="text-green-400 text-sm" style={{ fontFamily: 'Prompt' }}>
             หากมีปัญหาในการส่งคำขอ กรุณาติดต่อเจ้าหน้าที่
           </p>
         </div>

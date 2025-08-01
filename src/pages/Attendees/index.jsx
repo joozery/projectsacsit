@@ -21,8 +21,12 @@ import {
   XCircle,
   MoreHorizontal,
   QrCode,
-  ExternalLink
+  ExternalLink,
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
+import { attendeesAPI } from '@/services/api';
+import registrationService from '@/services/registrationService';
 import { 
   Tabs, 
   TabsContent, 
@@ -67,6 +71,8 @@ const AttendeesPage = () => {
   const [selectedAttendee, setSelectedAttendee] = useState(null);
   const [selectedYear, setSelectedYear] = useState('2025');
   const [showQRModal, setShowQRModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Load data from localStorage and listen for updates
   const [attendeesData, setAttendeesData] = useState(() => {
@@ -74,184 +80,100 @@ const AttendeesPage = () => {
     if (savedData) {
       return JSON.parse(savedData);
     }
-    // Default data if no saved data
+    // Default data structure
     return {
-      '2025': {
-        general: [
-          {
-            id: 1,
-            name: 'นายสมชาย ใจดี',
-            email: 'somchai@email.com',
-            phone: '081-234-5678',
-            organization: 'บริษัท ABC จำกัด',
-            education: 'ปริญญาตรี',
-            registeredAt: '2024-01-15',
-            status: 'confirmed',
-            checkedIn: true,
-            checkInTime: '2024-01-20 08:30:00',
-            checkInRequested: true,
-            checkInRequestTime: '2024-01-20 08:25:00'
-          },
-          {
-            id: 2,
-            name: 'นางสาววนิดา สวยงาม',
-            email: 'wanida@email.com',
-            phone: '089-876-5432',
-            organization: 'มหาวิทยาลัย XYZ',
-            education: 'ปริญญาโท',
-            registeredAt: '2024-01-16',
-            status: 'pending',
-            checkedIn: false,
-            checkInTime: null,
-            checkInRequested: false,
-            checkInRequestTime: null
-          },
-          {
-            id: 3,
-            name: 'นายประยุทธ์ ขยัน',
-            email: 'prayuth@email.com',
-            phone: '092-111-2222',
-            organization: 'สำนักงานศิลปะ',
-            education: 'ปริญญาเอก',
-            registeredAt: '2024-01-17',
-            status: 'confirmed',
-            checkedIn: false,
-            checkInTime: null,
-            checkInRequested: true,
-            checkInRequestTime: '2024-01-20 08:45:00'
-          }
-        ],
-        research: [
-          {
-            id: 4,
-            name: 'ดร.อนุรักษ์ วิจัยดี',
-            email: 'anurak@university.ac.th',
-            phone: '081-999-8888',
-            organization: 'มหาวิทยาลัยเทคโนโลยี',
-            education: 'ปริญญาเอก',
-            registeredAt: '2024-01-18',
-            status: 'confirmed',
-            projectTitle: 'การพัฒนาเทคนิคการทำยางรักแบบใหม่',
-            category: 'lacquer',
-            submissionStatus: 'approved',
-            checkedIn: true,
-            checkInTime: '2024-01-20 09:15:00',
-            checkInRequested: true,
-            checkInRequestTime: '2024-01-20 09:10:00'
-          },
-          {
-            id: 5,
-            name: 'ผศ.ดร.สมหญิง นักวิจัย',
-            email: 'somying@research.org',
-            phone: '087-555-4444',
-            organization: 'สถาบันวิจัยศิลปะ',
-            education: 'ปริญญาเอก',
-            registeredAt: '2024-01-19',
-            status: 'confirmed',
-            projectTitle: 'การอนุรักษ์ภูมิปัญญาท้องถิ่นในยุคดิจิทัล',
-            category: 'preservation',
-            submissionStatus: 'under_review',
-            checkedIn: false,
-            checkInTime: null,
-            checkInRequested: false,
-            checkInRequestTime: null
-          }
-        ],
-        creative: [
-          {
-            id: 6,
-            name: 'คุณศิลปิน สร้างสรรค์',
-            email: 'silpin@artist.com',
-            phone: '094-777-6666',
-            organization: 'สตูดิโอศิลปะ',
-            education: 'ปริญญาตรี',
-            registeredAt: '2024-01-20',
-            status: 'confirmed',
-            projectTitle: 'ผลงานเครื่องปั้นดินเผาร่วมสมัย',
-            category: 'contemporary',
-            submissionStatus: 'approved',
-            checkedIn: false,
-            checkInTime: null,
-            checkInRequested: true,
-            checkInRequestTime: '2024-01-20 08:45:00'
-          },
-          {
-            id: 7,
-            name: 'นางสาวรัตนา ฝีมือดี',
-            email: 'rattana@craft.co.th',
-            phone: '086-333-2222',
-            organization: 'กลุ่มหัตถกรรม',
-            education: 'ปริญญาโท',
-            registeredAt: '2024-01-21',
-            status: 'pending',
-            projectTitle: 'งานจักสานไผ่สมัยใหม่',
-            category: 'traditional',
-            submissionStatus: 'pending',
-            checkedIn: false,
-            checkInTime: null,
-            checkInRequested: false,
-            checkInRequestTime: null
-          }
-        ]
-      },
-      '2024': {
-        general: [
-          {
-            id: 8,
-            name: 'นายสมศักดิ์ ประสบการณ์',
-            email: 'somsak@email.com',
-            phone: '081-111-1111',
-            organization: 'บริษัท DEF จำกัด',
-            education: 'ปริญญาตรี',
-            registeredAt: '2023-12-15',
-            status: 'confirmed',
-            checkedIn: true,
-            checkInTime: '2023-12-20 08:00:00',
-            checkInRequested: true,
-            checkInRequestTime: '2023-12-20 07:55:00'
-          }
-        ],
-        research: [
-          {
-            id: 9,
-            name: 'ดร.วิทยา งานวิจัย',
-            email: 'wittaya@university.ac.th',
-            phone: '082-222-2222',
-            organization: 'มหาวิทยาลัยราชภัฏ',
-            education: 'ปริญญาเอก',
-            registeredAt: '2023-12-16',
-            status: 'confirmed',
-            projectTitle: 'การศึกษาเทคนิคการทำลายไม้แบบดั้งเดิม',
-            category: 'traditional',
-            submissionStatus: 'approved',
-            checkedIn: true,
-            checkInTime: '2023-12-20 09:00:00',
-            checkInRequested: true,
-            checkInRequestTime: '2023-12-20 08:55:00'
-          }
-        ],
-        creative: [
-          {
-            id: 10,
-            name: 'คุณสุภาพ ศิลปะ',
-            email: 'suparp@artist.com',
-            phone: '083-333-3333',
-            organization: 'กลุ่มศิลปิน',
-            education: 'ปริญญาโท',
-            registeredAt: '2023-12-17',
-            status: 'confirmed',
-            projectTitle: 'ผลงานจิตรกรรมร่วมสมัย',
-            category: 'contemporary',
-            submissionStatus: 'approved',
-            checkedIn: true,
-            checkInTime: '2023-12-20 08:30:00',
-            checkInRequested: true,
-            checkInRequestTime: '2023-12-20 08:25:00'
-          }
-        ]
-      }
+      '2025': { general: [], research: [], creative: [] },
+      '2024': { general: [], research: [], creative: [] }
     };
   });
+
+  // Fetch attendees data from API
+  const fetchAttendeesData = async (year) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch all types of registrations
+      const [generalResponse, researchResponse, creativeResponse] = await Promise.all([
+        registrationService.getGeneralRegistrations(year),
+        registrationService.getResearchRegistrations(year),
+        registrationService.getCreativeRegistrations(year)
+      ]);
+      
+      // Transform general attendees data
+      const generalAttendees = generalResponse.success ? generalResponse.data?.map(attendee => ({
+        id: attendee.id,
+        name: `${attendee.title_prefix || ''} ${attendee.first_name} ${attendee.last_name}`.trim(),
+        email: attendee.email,
+        phone: attendee.phone,
+        organization: attendee.organization,
+        education: attendee.education_level || 'ไม่ระบุ',
+        registeredAt: attendee.created_at || attendee.registered_at,
+        status: attendee.status || 'confirmed',
+        checkedIn: attendee.checked_in || false,
+        checkInTime: attendee.check_in_time,
+        checkInRequested: attendee.check_in_requested || false,
+        checkInRequestTime: attendee.check_in_request_time
+      })) || [] : [];
+
+      // Transform research attendees data
+      const researchAttendees = researchResponse.success ? researchResponse.data?.map(attendee => ({
+        id: attendee.id,
+        name: `${attendee.title_prefix || ''} ${attendee.first_name} ${attendee.last_name}`.trim(),
+        email: attendee.email,
+        phone: attendee.phone,
+        organization: attendee.organization,
+        education: attendee.education_level || 'ไม่ระบุ',
+        registeredAt: attendee.created_at || attendee.registered_at,
+        status: attendee.status || 'confirmed',
+        checkedIn: attendee.checked_in || false,
+        checkInTime: attendee.check_in_time,
+        checkInRequested: attendee.check_in_requested || false,
+        checkInRequestTime: attendee.check_in_request_time,
+        projectTitle: attendee.project_title,
+        category: attendee.category,
+        submissionStatus: attendee.submission_status
+      })) || [] : [];
+
+      // Transform creative attendees data
+      const creativeAttendees = creativeResponse.success ? creativeResponse.data?.map(attendee => ({
+        id: attendee.id,
+        name: `${attendee.title_prefix || ''} ${attendee.first_name} ${attendee.last_name}`.trim(),
+        email: attendee.email,
+        phone: attendee.phone,
+        organization: attendee.organization,
+        education: attendee.education_level || 'ไม่ระบุ',
+        registeredAt: attendee.created_at || attendee.registered_at,
+        status: attendee.status || 'confirmed',
+        checkedIn: attendee.checked_in || false,
+        checkInTime: attendee.check_in_time,
+        checkInRequested: attendee.check_in_requested || false,
+        checkInRequestTime: attendee.check_in_request_time,
+        projectTitle: attendee.project_title,
+        category: attendee.category,
+        submissionStatus: attendee.submission_status
+      })) || [] : [];
+
+      setAttendeesData(prev => ({
+        ...prev,
+        [year]: {
+          general: generalAttendees,
+          research: researchAttendees,
+          creative: creativeAttendees
+        }
+      }));
+
+    } catch (error) {
+      console.error('Error fetching attendees data:', error);
+      setError(error.message || 'ไม่สามารถดึงข้อมูลผู้เข้าร่วมงานได้');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load data when component mounts and when year changes
+  useEffect(() => {
+    fetchAttendeesData(selectedYear);
+  }, [selectedYear]);
 
   // Listen for data updates from check-in page
   useEffect(() => {
@@ -352,33 +274,65 @@ const AttendeesPage = () => {
     // In a real app, this would trigger the export functionality
   };
 
-  const handleCheckIn = (attendeeId, type) => {
-    const currentTime = new Date().toISOString();
-    setAttendeesData(prev => ({
-      ...prev,
-      [selectedYear]: {
-        ...prev[selectedYear],
-        [type]: prev[selectedYear][type].map(attendee =>
-          attendee.id === attendeeId
-            ? { ...attendee, checkedIn: true, checkInTime: currentTime, checkInRequested: true, checkInRequestTime: currentTime }
-            : attendee
-        )
+  const handleCheckIn = async (attendeeId, type) => {
+    try {
+      const currentTime = new Date().toISOString();
+      
+      // Call API to update check-in status
+      const response = await registrationService.updateCheckInStatus(attendeeId, {
+        checked_in: true,
+        check_in_time: currentTime,
+        check_in_requested: true,
+        check_in_request_time: currentTime
+      });
+
+      if (response.success) {
+        // Update local state
+        setAttendeesData(prev => ({
+          ...prev,
+          [selectedYear]: {
+            ...prev[selectedYear],
+            [type]: prev[selectedYear][type].map(attendee =>
+              attendee.id === attendeeId
+                ? { ...attendee, checkedIn: true, checkInTime: currentTime, checkInRequested: true, checkInRequestTime: currentTime }
+                : attendee
+            )
+          }
+        }));
+      } else {
+        console.error('Check-in failed:', response.message);
+        // You can show a toast notification here
       }
-    }));
+    } catch (error) {
+      console.error('Error during check-in:', error);
+    }
   };
 
-  const handleCheckOut = (attendeeId, type) => {
-    setAttendeesData(prev => ({
-      ...prev,
-      [selectedYear]: {
-        ...prev[selectedYear],
-        [type]: prev[selectedYear][type].map(attendee =>
-          attendee.id === attendeeId
-            ? { ...attendee, checkedIn: false, checkInTime: null }
-            : attendee
-        )
+  const handleCheckOut = async (attendeeId, type) => {
+    try {
+      // Call API to cancel check-in
+      const response = await registrationService.cancelCheckIn(attendeeId);
+
+      if (response.success) {
+        // Update local state
+        setAttendeesData(prev => ({
+          ...prev,
+          [selectedYear]: {
+            ...prev[selectedYear],
+            [type]: prev[selectedYear][type].map(attendee =>
+              attendee.id === attendeeId
+                ? { ...attendee, checkedIn: false, checkInTime: null }
+                : attendee
+            )
+          }
+        }));
+      } else {
+        console.error('Check-out failed:', response.message);
+        // You can show a toast notification here
       }
-    }));
+    } catch (error) {
+      console.error('Error during check-out:', error);
+    }
   };
 
   const getCheckInStatusColor = (attendee) => {
@@ -464,262 +418,322 @@ const AttendeesPage = () => {
     return allAttendees.filter(a => a.checkInRequested && !a.checkedIn).length;
   };
 
-  const handleApproveCheckIn = (attendeeId, type) => {
-    const currentTime = new Date().toISOString();
-    setAttendeesData(prev => ({
-      ...prev,
-      [selectedYear]: {
-        ...prev[selectedYear],
-        [type]: prev[selectedYear][type].map(attendee =>
-          attendee.id === attendeeId
-            ? { ...attendee, checkedIn: true, checkInTime: currentTime }
-            : attendee
-        )
+  const handleApproveCheckIn = async (attendeeId, type) => {
+    try {
+      const currentTime = new Date().toISOString();
+      
+      // Call API to approve check-in
+      const response = await registrationService.updateCheckInStatus(attendeeId, {
+        checked_in: true,
+        check_in_time: currentTime
+      });
+
+      if (response.success) {
+        // Update local state
+        setAttendeesData(prev => ({
+          ...prev,
+          [selectedYear]: {
+            ...prev[selectedYear],
+            [type]: prev[selectedYear][type].map(attendee =>
+              attendee.id === attendeeId
+                ? { ...attendee, checkedIn: true, checkInTime: currentTime }
+                : attendee
+            )
+          }
+        }));
+      } else {
+        console.error('Approve check-in failed:', response.message);
+        // You can show a toast notification here
       }
-    }));
+    } catch (error) {
+      console.error('Error during approve check-in:', error);
+    }
   };
 
-  const handleRejectCheckIn = (attendeeId, type) => {
-    setAttendeesData(prev => ({
-      ...prev,
-      [selectedYear]: {
-        ...prev[selectedYear],
-        [type]: prev[selectedYear][type].map(attendee =>
-          attendee.id === attendeeId
-            ? { ...attendee, checkInRequested: false, checkInRequestTime: null }
-            : attendee
-        )
+  const handleRejectCheckIn = async (attendeeId, type) => {
+    try {
+      // Call API to reject check-in request
+      const response = await registrationService.updateCheckInStatus(attendeeId, {
+        check_in_requested: false,
+        check_in_request_time: null
+      });
+
+      if (response.success) {
+        // Update local state
+        setAttendeesData(prev => ({
+          ...prev,
+          [selectedYear]: {
+            ...prev[selectedYear],
+            [type]: prev[selectedYear][type].map(attendee =>
+              attendee.id === attendeeId
+                ? { ...attendee, checkInRequested: false, checkInRequestTime: null }
+                : attendee
+            )
+          }
+        }));
+      } else {
+        console.error('Reject check-in failed:', response.message);
+        // You can show a toast notification here
       }
-    }));
+    } catch (error) {
+      console.error('Error during reject check-in:', error);
+    }
   };
 
-  const AttendeeTable = ({ attendees, type }) => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>ชื่อผู้เข้าร่วม</TableHead>
-            <TableHead>องค์กร</TableHead>
-            <TableHead>สถานะลงทะเบียน</TableHead>
-            <TableHead>สถานะเช็คอิน</TableHead>
-            {(type === 'research' || type === 'creative') && <TableHead>ชื่อผลงาน</TableHead>}
-            <TableHead>วันที่ลงทะเบียน</TableHead>
-            <TableHead className="text-right">การดำเนินการ</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {attendees.map((attendee) => (
-            <TableRow key={attendee.id}>
-              <TableCell>
-                <div>
-                  <div className="font-medium text-gray-900">{attendee.name}</div>
-                  <div className="text-sm text-gray-500">{attendee.email}</div>
-                  <div className="text-sm text-gray-500">{attendee.phone}</div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="text-sm">{attendee.organization}</div>
-                <div className="text-xs text-gray-500">{attendee.education}</div>
-              </TableCell>
-              <TableCell>
-                <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(attendee.status)}`}>
-                  {getStatusText(attendee.status)}
-                </span>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getCheckInStatusColor(attendee)}`}>
-                    {getCheckInStatusText(attendee)}
-                  </span>
-                  <div className="text-xs text-gray-500">
-                    {attendee.checkedIn && attendee.checkInTime && (
-                      <div>เช็คอิน: {new Date(attendee.checkInTime).toLocaleString('th-TH')}</div>
-                    )}
-                    {attendee.checkInRequested && attendee.checkInRequestTime && !attendee.checkedIn && (
-                      <div>ส่งคำขอ: {new Date(attendee.checkInRequestTime).toLocaleString('th-TH')}</div>
-                    )}
-                  </div>
-                </div>
-              </TableCell>
-              {(type === 'research' || type === 'creative') && (
+  const AttendeeTable = ({ attendees, type }) => {
+    if (loading) {
+      return (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">กำลังโหลดข้อมูลผู้เข้าร่วมงาน...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12">
+          <div className="text-center">
+            <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={() => fetchAttendeesData(selectedYear)} variant="outline">
+              ลองใหม่
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ชื่อผู้เข้าร่วม</TableHead>
+              <TableHead>องค์กร</TableHead>
+              <TableHead>สถานะลงทะเบียน</TableHead>
+              <TableHead>สถานะเช็คอิน</TableHead>
+              {(type === 'research' || type === 'creative') && <TableHead>ชื่อผลงาน</TableHead>}
+              <TableHead>วันที่ลงทะเบียน</TableHead>
+              <TableHead className="text-right">การดำเนินการ</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {attendees.map((attendee) => (
+              <TableRow key={attendee.id}>
                 <TableCell>
-                  {attendee.projectTitle ? (
-                    <div>
-                      <div className="text-sm font-medium">{attendee.projectTitle}</div>
-                      <div className="text-xs text-gray-500">{getCategoryText(attendee.category)}</div>
-                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium mt-1 ${getSubmissionStatusColor(attendee.submissionStatus)}`}>
-                        {getSubmissionStatusText(attendee.submissionStatus)}
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-gray-400">-</span>
-                  )}
+                  <div>
+                    <div className="font-medium text-gray-900">{attendee.name}</div>
+                    <div className="text-sm text-gray-500">{attendee.email}</div>
+                    <div className="text-sm text-gray-500">{attendee.phone}</div>
+                  </div>
                 </TableCell>
-              )}
-              <TableCell>
-                <div className="text-sm">
-                  {new Date(attendee.registeredAt).toLocaleDateString('th-TH')}
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex items-center justify-end gap-2">
-                  {attendee.checkInRequested && !attendee.checkedIn ? (
-                    <>
+                <TableCell>
+                  <div className="text-sm">{attendee.organization}</div>
+                  <div className="text-xs text-gray-500">{attendee.education}</div>
+                </TableCell>
+                <TableCell>
+                  <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(attendee.status)}`}>
+                    {getStatusText(attendee.status)}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getCheckInStatusColor(attendee)}`}>
+                      {getCheckInStatusText(attendee)}
+                    </span>
+                    <div className="text-xs text-gray-500">
+                      {attendee.checkedIn && attendee.checkInTime && (
+                        <div>เช็คอิน: {new Date(attendee.checkInTime).toLocaleString('th-TH')}</div>
+                      )}
+                      {attendee.checkInRequested && attendee.checkInRequestTime && !attendee.checkedIn && (
+                        <div>ส่งคำขอ: {new Date(attendee.checkInRequestTime).toLocaleString('th-TH')}</div>
+                      )}
+                    </div>
+                  </div>
+                </TableCell>
+                {(type === 'research' || type === 'creative') && (
+                  <TableCell>
+                    {attendee.projectTitle ? (
+                      <div>
+                        <div className="text-sm font-medium">{attendee.projectTitle}</div>
+                        <div className="text-xs text-gray-500">{getCategoryText(attendee.category)}</div>
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium mt-1 ${getSubmissionStatusColor(attendee.submissionStatus)}`}>
+                          {getSubmissionStatusText(attendee.submissionStatus)}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </TableCell>
+                )}
+                <TableCell>
+                  <div className="text-sm">
+                    {new Date(attendee.registeredAt).toLocaleDateString('th-TH')}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    {attendee.checkInRequested && !attendee.checkedIn ? (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleApproveCheckIn(attendee.id, type)}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          อนุมัติ
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRejectCheckIn(attendee.id, type)}
+                          className="border-red-300 text-red-600 hover:bg-red-50"
+                        >
+                          <XCircle className="w-4 h-4 mr-1" />
+                          ปฏิเสธ
+                        </Button>
+                      </>
+                    ) : !attendee.checkedIn ? (
                       <Button
                         size="sm"
-                        onClick={() => handleApproveCheckIn(attendee.id, type)}
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => handleCheckIn(attendee.id, type)}
+                        className="bg-blue-600 hover:bg-blue-700"
                       >
                         <CheckCircle className="w-4 h-4 mr-1" />
-                        อนุมัติ
+                        เช็คอิน
                       </Button>
+                    ) : (
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleRejectCheckIn(attendee.id, type)}
-                        className="border-red-300 text-red-600 hover:bg-red-50"
+                        onClick={() => handleCheckOut(attendee.id, type)}
                       >
                         <XCircle className="w-4 h-4 mr-1" />
-                        ปฏิเสธ
+                        ยกเลิกเช็คอิน
                       </Button>
-                    </>
-                  ) : !attendee.checkedIn ? (
-                    <Button
-                      size="sm"
-                      onClick={() => handleCheckIn(attendee.id, type)}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      เช็คอิน
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleCheckOut(attendee.id, type)}
-                    >
-                      <XCircle className="w-4 h-4 mr-1" />
-                      ยกเลิกเช็คอิน
-                    </Button>
-                  )}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>การดำเนินการ</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                            <Eye className="w-4 h-4 mr-2" />
-                            ดูรายละเอียด
-                          </DropdownMenuItem>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>รายละเอียดผู้เข้าร่วม</DialogTitle>
-                            <DialogDescription>
-                              ข้อมูลการลงทะเบียนของ {attendee.name}
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-2">
-                                <Users className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">ชื่อ:</span>
-                                <span className="text-sm font-medium">{attendee.name}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Mail className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">อีเมล:</span>
-                                <span className="text-sm">{attendee.email}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Phone className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">โทรศัพท์:</span>
-                                <span className="text-sm">{attendee.phone}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Building className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">องค์กร:</span>
-                                <span className="text-sm">{attendee.organization}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <GraduationCap className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">การศึกษา:</span>
-                                <span className="text-sm">{attendee.education}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">วันที่ลงทะเบียน:</span>
-                                <span className="text-sm">{new Date(attendee.registeredAt).toLocaleDateString('th-TH')}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">สถานะเช็คอิน:</span>
-                                <span className={`text-sm px-2 py-1 rounded-full ${getCheckInStatusColor(attendee)}`}>
-                                  {getCheckInStatusText(attendee)}
-                                </span>
-                              </div>
-                              {attendee.checkInRequestTime && (
+                    )}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>การดำเนินการ</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                              <Eye className="w-4 h-4 mr-2" />
+                              ดูรายละเอียด
+                            </DropdownMenuItem>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>รายละเอียดผู้เข้าร่วม</DialogTitle>
+                              <DialogDescription>
+                                ข้อมูลการลงทะเบียนของ {attendee.name}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                              <div className="space-y-3">
                                 <div className="flex items-center gap-2">
-                                  <Clock className="w-4 h-4 text-gray-500" />
-                                  <span className="text-sm text-gray-600">เวลาส่งคำขอ:</span>
-                                  <span className="text-sm">{new Date(attendee.checkInRequestTime).toLocaleString('th-TH')}</span>
+                                  <Users className="w-4 h-4 text-gray-500" />
+                                  <span className="text-sm text-gray-600">ชื่อ:</span>
+                                  <span className="text-sm font-medium">{attendee.name}</span>
                                 </div>
-                              )}
-                              {attendee.checkedIn && attendee.checkInTime && (
                                 <div className="flex items-center gap-2">
-                                  <Clock className="w-4 h-4 text-gray-500" />
-                                  <span className="text-sm text-gray-600">เวลาเช็คอิน:</span>
-                                  <span className="text-sm">{new Date(attendee.checkInTime).toLocaleString('th-TH')}</span>
+                                  <Mail className="w-4 h-4 text-gray-500" />
+                                  <span className="text-sm text-gray-600">อีเมล:</span>
+                                  <span className="text-sm">{attendee.email}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Phone className="w-4 h-4 text-gray-500" />
+                                  <span className="text-sm text-gray-600">โทรศัพท์:</span>
+                                  <span className="text-sm">{attendee.phone}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Building className="w-4 h-4 text-gray-500" />
+                                  <span className="text-sm text-gray-600">องค์กร:</span>
+                                  <span className="text-sm">{attendee.organization}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <GraduationCap className="w-4 h-4 text-gray-500" />
+                                  <span className="text-sm text-gray-600">การศึกษา:</span>
+                                  <span className="text-sm">{attendee.education}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-4 h-4 text-gray-500" />
+                                  <span className="text-sm text-gray-600">วันที่ลงทะเบียน:</span>
+                                  <span className="text-sm">{new Date(attendee.registeredAt).toLocaleDateString('th-TH')}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle className="w-4 h-4 text-gray-500" />
+                                  <span className="text-sm text-gray-600">สถานะเช็คอิน:</span>
+                                  <span className={`text-sm px-2 py-1 rounded-full ${getCheckInStatusColor(attendee)}`}>
+                                    {getCheckInStatusText(attendee)}
+                                  </span>
+                                </div>
+                                {attendee.checkInRequestTime && (
+                                  <div className="flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-gray-500" />
+                                    <span className="text-sm text-gray-600">เวลาส่งคำขอ:</span>
+                                    <span className="text-sm">{new Date(attendee.checkInRequestTime).toLocaleString('th-TH')}</span>
+                                  </div>
+                                )}
+                                {attendee.checkedIn && attendee.checkInTime && (
+                                  <div className="flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-gray-500" />
+                                    <span className="text-sm text-gray-600">เวลาเช็คอิน:</span>
+                                    <span className="text-sm">{new Date(attendee.checkInTime).toLocaleString('th-TH')}</span>
+                                  </div>
+                                )}
+                              </div>
+                              {attendee.projectTitle && (
+                                <div className="space-y-3">
+                                  <div>
+                                    <span className="text-sm text-gray-600">ชื่อผลงาน:</span>
+                                    <p className="text-sm font-medium mt-1">{attendee.projectTitle}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-sm text-gray-600">ประเภท:</span>
+                                    <p className="text-sm mt-1">{getCategoryText(attendee.category)}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-sm text-gray-600">สถานะการส่งผลงาน:</span>
+                                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${getSubmissionStatusColor(attendee.submissionStatus)}`}>
+                                      {getSubmissionStatusText(attendee.submissionStatus)}
+                                    </span>
+                                  </div>
                                 </div>
                               )}
                             </div>
-                            {attendee.projectTitle && (
-                              <div className="space-y-3">
-                                <div>
-                                  <span className="text-sm text-gray-600">ชื่อผลงาน:</span>
-                                  <p className="text-sm font-medium mt-1">{attendee.projectTitle}</p>
-                                </div>
-                                <div>
-                                  <span className="text-sm text-gray-600">ประเภท:</span>
-                                  <p className="text-sm mt-1">{getCategoryText(attendee.category)}</p>
-                                </div>
-                                <div>
-                                  <span className="text-sm text-gray-600">สถานะการส่งผลงาน:</span>
-                                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${getSubmissionStatusColor(attendee.submissionStatus)}`}>
-                                    {getSubmissionStatusText(attendee.submissionStatus)}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      <DropdownMenuItem>
-                        <Mail className="w-4 h-4 mr-2" />
-                        ส่งอีเมล
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {attendees.length === 0 && (
-        <div className="text-center py-12">
-          <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">ไม่พบข้อมูลผู้เข้าร่วมที่ตรงกับเงื่อนไขการค้นหา</p>
-        </div>
-      )}
-    </div>
-  );
+                          </DialogContent>
+                        </Dialog>
+                        <DropdownMenuItem>
+                          <Mail className="w-4 h-4 mr-2" />
+                          ส่งอีเมล
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {attendees.length === 0 && !loading && !error && (
+          <div className="text-center py-12">
+            <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">ไม่พบข้อมูลผู้เข้าร่วมที่ตรงกับเงื่อนไขการค้นหา</p>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -772,6 +786,18 @@ const AttendeesPage = () => {
               </div>
             </SelectContent>
           </Select>
+          <Button 
+            variant="outline" 
+            onClick={() => fetchAttendeesData(selectedYear)}
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4 mr-2" />
+            )}
+            รีเฟรช
+          </Button>
           <Button variant="outline" onClick={() => handleExport('all')}>
             <Download className="w-4 h-4 mr-2" />
             Export ทั้งหมด

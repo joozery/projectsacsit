@@ -51,48 +51,7 @@ const LandingPage = () => {
     console.log("Feature not implemented yet.");
   };
 
-  // Hide scrollbar when component mounts
-  useEffect(() => {
-    // Add CSS to hide scrollbar
-    const style = document.createElement('style');
-    style.textContent = `
-      html, body {
-        overflow-x: hidden !important;
-      }
-      
-      html::-webkit-scrollbar,
-      body::-webkit-scrollbar {
-        display: none !important;
-        width: 0 !important;
-      }
-      
-      html {
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
-      }
-      
-      body {
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
-      }
-      
-      /* Hide scrollbar for all containers */
-      *::-webkit-scrollbar {
-        display: none !important;
-      }
-      
-      * {
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    // Cleanup when component unmounts
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
+
 
   // Close mobile menu when clicking outside
   const handleOutsideClick = (e) => {
@@ -155,10 +114,10 @@ const LandingPage = () => {
   ];
   
   const newsItems = [
-    { title: 'ผาสาทแก้ว', description: 'ผ้าไหมทอลายโบราณ ผาสาทแก้ว', author: 'ครูณกรณ์ ตั้งหลัก', imgSrc: 'intricate silk fabric texture', type: 'ผลิตภัณฑ์', category: 'ผ้าทอพื้นเมือง' },
-    { title: 'หัตถกรรมจักสาน', description: 'ตะกร้าไม้ไผ่ลวดลายประณีต', author: 'กลุ่มแม่บ้านสร้างสรรค์', imgSrc: 'woven bamboo basket detail', type: 'บทความ', category: 'งานจักสาน' },
-    { title: 'Crafts Bangkok 2025', description: 'ประกาศรายชื่อผู้ผ่านการคัดเลือกเข้าร่วมจำหน่ายสินค้าในงาน Crafts Bangkok 2025', author: '', imgSrc: 'Crafts Bangkok event poster', type: 'ประกาศ', category: 'งานแสดงสินค้า' },
-    { title: 'เครื่องปั้นดินเผาลายคราม', description: 'ศิลปะเครื่องปั้นดินเผาแบบดั้งเดิม ลวดลายสีคราม', author: 'อาจารย์สมศรี วิจิตรศิลป์', imgSrc: 'blue ceramic pottery', type: 'บทความ', category: 'เครื่องปั้นดินเผา' },
+    { title: 'ผาสาทแก้ว', description: 'ผ้าไหมทอลายโบราณ ผาสาทแก้ว', author: 'ครูณกรณ์ ตั้งหลัก', imgSrc: gallery01, type: 'ผลิตภัณฑ์', category: 'ผ้าทอพื้นเมือง' },
+    { title: 'หัตถกรรมจักสาน', description: 'ตะกร้าไม้ไผ่ลวดลายประณีต', author: 'กลุ่มแม่บ้านสร้างสรรค์', imgSrc: gallery02, type: 'บทความ', category: 'งานจักสาน' },
+    { title: 'Crafts Bangkok 2025', description: 'ประกาศรายชื่อผู้ผ่านการคัดเลือกเข้าร่วมจำหน่ายสินค้าในงาน Crafts Bangkok 2025', author: '', imgSrc: gallery03, type: 'ประกาศ', category: 'งานแสดงสินค้า' },
+    { title: 'เครื่องปั้นดินเผาลายคราม', description: 'ศิลปะเครื่องปั้นดินเผาแบบดั้งเดิม ลวดลายสีคราม', author: 'อาจารย์สมศรี วิจิตรศิลป์', imgSrc: gallery04, type: 'บทความ', category: 'เครื่องปั้นดินเผา' },
   ];
 
   const galleryImages = [
@@ -537,10 +496,15 @@ const LandingPage = () => {
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             {/* Header */}
             <div className="flex justify-between items-center mb-12">
-              <h2 className="text-4xl font-custom-bold text-[#533193]">Media and news</h2>
+              <h2 className="text-4xl font-custom-bold text-[#533193]" style={{
+              fontFamily: 'Prompt'
+            }}>Media and news</h2>
               <Button 
                 variant="outline" 
                 className="border-[#533193] text-[#533193] hover:bg-[#533193] hover:text-white transition-colors px-6 py-2 rounded-full text-sm font-custom-bold"
+                style={{
+                  fontFamily: 'Prompt'
+                }}
                 onClick={handleFeatureClick}
               >
                 all media and news
@@ -556,8 +520,7 @@ const LandingPage = () => {
                   style={{
                     width: '300px',
                     height: '380px',
-                    borderRadius: '15px',
-                    background: `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #533192 100%), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="%23lightgray"/></svg>') lightgray 50% / cover no-repeat`
+                    borderRadius: '15px'
                   }}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -567,7 +530,7 @@ const LandingPage = () => {
                 >
                   {/* Background Image */}
                   <div className="absolute inset-0">
-                    <img-replace alt={item.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    <img src={item.imgSrc} alt={item.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                   </div>
                   
                   {/* Gradient Overlay */}
@@ -579,27 +542,46 @@ const LandingPage = () => {
                   ></div>
                   
                   {/* Content */}
-                  <div className="relative z-10 p-6 h-full flex flex-col justify-between">
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2">
-                      {item.category && (
-                        <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-custom-bold px-3 py-1 rounded-full border border-white/30">
-                          {item.category}
-                        </span>
-                      )}
-                      {item.type && (
-                        <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-custom-bold px-3 py-1 rounded-full border border-white/30">
-                          {item.type}
-                        </span>
-                      )}
-                    </div>
-                    
-                    {/* Bottom Content */}
-                    <div className="space-y-3">
-                      <h3 className="text-xl font-custom-bold text-white leading-tight">{item.title}</h3>
-                      <p className="text-white/90 font-custom text-sm leading-relaxed">{item.description}</p>
+                  <div className="relative z-10 p-6 h-full flex flex-col justify-end">
+                    {/* Content Section - All content at bottom */}
+                    <div className="space-y-4">
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-2">
+                        {item.category && (
+                          <span className="text-white text-xs font-custom-bold px-3 py-1" style={{
+                            fontFamily: 'Prompt',
+                            borderRadius: '15px',
+                            border: '1px solid #B3FFD1'
+                          }}>
+                            {item.category}
+                          </span>
+                        )}
+                        {item.type && (
+                          <span className="text-white text-xs font-custom-bold px-3 py-1" style={{
+                            fontFamily: 'Prompt',
+                            borderRadius: '15px',
+                            border: '1px solid #B3FFD1'
+                          }}>
+                            {item.type}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Title */}
+                      <h3 className="text-xl font-custom-bold text-white leading-tight" style={{
+                        fontFamily: 'Prompt'
+                      }}>{item.title}</h3>
+                      
+                      {/* Description */}
+                      <p className="text-white/90 font-custom text-sm leading-relaxed" style={{
+                        fontFamily: 'Prompt'
+                      }}>{item.description}</p>
+                      
+                      {/* Author */}
                       {item.author && (
-                        <p className="text-white/80 font-custom text-sm font-medium">{item.author}</p>
+                        <p className="text-white/80 font-custom text-sm font-medium" style={{
+                          fontFamily: 'Prompt'
+                        }}>{item.author}</p>
                       )}
                       
                       {/* Arrow Button */}

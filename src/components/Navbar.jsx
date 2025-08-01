@@ -87,7 +87,7 @@ const Navbar = ({
                 <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
               </div>
             </Link>
-            <span className="text-white font-medium ml-8 relative group cursor-pointer transition-all duration-300 hover:text-purple-200">
+            <Link to="/news" className="text-white font-medium ml-8 relative group transition-all duration-300 hover:text-purple-200">
               News/Update
               {/* Hover dots */}
               <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-1">
@@ -95,7 +95,7 @@ const Navbar = ({
                 <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                 <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
               </div>
-            </span>
+            </Link>
           </div>
         )}
         
@@ -297,16 +297,14 @@ const Navbar = ({
             >
               About Us
             </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full text-left text-white hover:bg-white/10 transition-all duration-300 justify-start font-custom"
-              onClick={() => {
-                onFeatureClick();
-                setMobileMenuOpen(false);
-              }}
-            >
-              News/Update
-            </Button>
+            <Link to="/news" onClick={() => setMobileMenuOpen(false)}>
+              <Button 
+                variant="ghost" 
+                className="w-full text-left text-white hover:bg-white/10 transition-all duration-300 justify-start font-custom"
+              >
+                News/Update
+              </Button>
+            </Link>
             
             {/* Mobile Auth Buttons - when not logged in */}
             {!isLoggedIn && showAuthButtons && (
@@ -354,7 +352,9 @@ const Navbar = ({
         <div className="cursor-pointer hover:text-[#B3FFD1] transition">SACIT Symposium 2027</div>
 
         <h4 className="text-lg font-semibold mt-6">สื่อและข่าวสาร</h4>
-        <div className="cursor-pointer hover:text-[#B3FFD1] transition">ข่าวสาร</div>
+        <Link to="/news" onClick={() => setMenuOpen(false)}>
+          <div className="cursor-pointer hover:text-[#B3FFD1] transition">ข่าวสาร</div>
+        </Link>
         <div className="cursor-pointer hover:text-[#B3FFD1] transition">กำหนดการ</div>
         <div className="cursor-pointer hover:text-[#B3FFD1] transition">วิทยากร</div>
         <div className="cursor-pointer hover:text-[#B3FFD1] transition">รายงานการประชุมวิชาการด้านงานศิลปหัตถกรรม</div>

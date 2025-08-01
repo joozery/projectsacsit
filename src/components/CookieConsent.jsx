@@ -8,23 +8,17 @@ const CookieConsent = () => {
   useEffect(() => {
     // Check if user has already consented
     const hasConsented = localStorage.getItem('cookieConsent');
-    console.log('Cookie consent status:', hasConsented); // Debug log
     
     if (!hasConsented) {
       // Show popup after a short delay
       const timer = setTimeout(() => {
-        console.log('Showing cookie popup'); // Debug log
         setIsVisible(true);
-      }, 1000); // ลดเวลาเหลือ 1 วินาที
+      }, 1000);
       return () => clearTimeout(timer);
     }
   }, []);
 
-  // Debug: เพิ่มฟังก์ชันเพื่อรีเซ็ต localStorage สำหรับทดสอบ
-  useEffect(() => {
-    // Uncomment บรรทัดด้านล่างเพื่อรีเซ็ต cookie consent (สำหรับทดสอบ)
-    localStorage.removeItem('cookieConsent'); // ให้รีเซ็ตทุกครั้งเพื่อทดสอบ
-  }, []);
+
 
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'accepted');

@@ -45,7 +45,7 @@ const Footer = () => (
           <ul className="space-y-2 text-sm opacity-90">
             <li><a href="#" className="hover:underline">ข่าวสาร</a></li>
             <li><a href="#" className="hover:underline">นิทรรศการ</a></li>
-            <li><a href="#" className="hover:underline">หลองเสริมสร้าง</a></li>
+            <li><a href="#" className="hover:underline">ผลงานสร้างสรรค์</a></li>
             <li><a href="#" className="hover:underline">Proceeding</a></li>
             <li><a href="#" className="hover:underline">กำหนดการ</a></li>
             <li><a href="#" className="hover:underline">วิทยากร</a></li>

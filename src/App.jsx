@@ -20,6 +20,7 @@ import RegisterCreative from '@/pages/RegisterCreative';
 import RegisterSuccess from '@/pages/RegisterSuccess';
 import Login from '@/pages/Login';
 import AgendaPage from '@/pages/Agenda/index';
+import AdminAgenda from '@/pages/Agenda/AdminAgenda';
 import SpeakersPage from '@/pages/Speakers/index';
 import AttendeesPage from '@/pages/Attendees/index';
 import CheckInPage from '@/pages/CheckIn/index';
@@ -29,6 +30,12 @@ import About from '@/pages/About';
 import CookiePolicy from '@/pages/CookiePolicy';
 import SacitSymposiumEN from '@/pages/SacitSymposiumEN';
 import SacitSymposiumTH from '@/pages/SacitSymposiumTH';
+import News from '@/pages/News';
+import Exhibition from '@/pages/News/Exhibition';
+import CreativeWorks from '@/pages/News/CreativeWorks';
+import Images from '@/pages/News/Images';
+import Videos from '@/pages/News/Videos';
+import Proceeding from '@/pages/News/Proceeding';
 import Footer from '@/components/Footer';
 
 const AdminLayout = () => (
@@ -91,6 +98,12 @@ const AppWithNavbar = () => {
         <Route path="/sacit-symposium-en" element={<SacitSymposiumEN />} />
         <Route path="/sacit-symposium-th" element={<SacitSymposiumTH />} />
         <Route path="/agenda" element={<AgendaPage />} />
+        <Route path="/news" element={<News />} />
+        <Route path="/exhibition" element={<Exhibition />} />
+        <Route path="/creative-works" element={<CreativeWorks />} />
+        <Route path="/images" element={<Images />} />
+        <Route path="/videos" element={<Videos />} />
+        <Route path="/proceeding" element={<Proceeding />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register/terms" element={<RegisterTerms />} />
         <Route path="/register/form" element={<RegisterForm />} />
@@ -103,7 +116,7 @@ const AppWithNavbar = () => {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="agenda" element={<AgendaPage />} />
+          <Route path="agenda" element={<AdminAgenda />} />
           <Route path="speakers" element={<SpeakersPage />} />
           <Route path="attendees" element={<AttendeesPage />} />
           <Route path="certificates" element={<CertificatesPage />} />

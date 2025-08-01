@@ -1,4 +1,5 @@
 import api from './api';
+import { mockGeneralRegistrations, mockApiDelay, mockApiError } from './mockData';
 
 // Registration Service
 class RegistrationService {
@@ -160,6 +161,144 @@ class RegistrationService {
       return {
         success: false,
         message: error.response?.data?.message || 'ไม่พบข้อมูลการลงทะเบียน'
+      };
+    }
+  }
+
+  // ดึงข้อมูลการลงทะเบียนทั่วไปตามปี
+  async getGeneralRegistrations(year) {
+    try {
+      // Use real API call
+      const response = await api.get('/registrations', { 
+        params: { 
+          year,
+          type: 'general'
+        } 
+      });
+      
+      return {
+        success: true,
+        data: response.data.data || response.data || []
+      };
+    } catch (error) {
+      console.error('Get general registrations error:', error);
+      
+      // Fallback to mock data if API is not available
+      if (error.code === 'ERR_NETWORK' || error.response?.status === 404) {
+        console.log('API not available, using mock data');
+        const mockData = mockGeneralRegistrations[year] || [];
+        return {
+          success: true,
+          data: mockData
+        };
+      }
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || 'ไม่สามารถดึงข้อมูลการลงทะเบียนทั่วไปได้'
+      };
+    }
+  }
+
+  // ดึงข้อมูลการลงทะเบียนวิจัยตามปี
+  async getResearchRegistrations(year) {
+    try {
+      const response = await api.get('/registrations', { 
+        params: { 
+          year,
+          type: 'research'
+        } 
+      });
+      
+      return {
+        success: true,
+        data: response.data.data || response.data || []
+      };
+    } catch (error) {
+      console.error('Get research registrations error:', error);
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || 'ไม่สามารถดึงข้อมูลการลงทะเบียนวิจัยได้'
+      };
+    }
+  }
+
+  // ดึงข้อมูลการลงทะเบียนสร้างสรรค์ตามปี
+  async getCreativeRegistrations(year) {
+    try {
+      const response = await api.get('/registrations', { 
+        params: { 
+          year,
+          type: 'creative'
+        } 
+      });
+      
+      return {
+        success: true,
+        data: response.data.data || response.data || []
+      };
+    } catch (error) {
+      console.error('Get creative registrations error:', error);
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || 'ไม่สามารถดึงข้อมูลการลงทะเบียนสร้างสรรค์ได้'
+      };
+    }
+  }
+
+  // ดึงข้อมูลการลงทะเบียนทั้งหมดตามปี
+  async getAllRegistrations(year) {
+    try {
+      const response = await api.get('/registrations', { 
+        params: { year } 
+      });
+      return {
+        success: true,
+        data: response.data.data || response.data
+      };
+    } catch (error) {
+      console.error('Get all registrations error:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'ไม่สามารถดึงข้อมูลการลงทะเบียนได้'
+      };
+    }
+  }
+
+  // อัปเดตสถานะเช็คอิน
+  async updateCheckInStatus(registrationId, checkInData) {
+    try {
+      const response = await api.put(`/registrations/${registrationId}/checkin`, checkInData);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+        message: 'อัปเดตสถานะเช็คอินสำเร็จ'
+      };
+    } catch (error) {
+      console.error('Update check-in status error:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'เกิดข้อผิดพลาดในการอัปเดตสถานะเช็คอิน'
+      };
+    }
+  }
+
+  // ยกเลิกการเช็คอิน
+  async cancelCheckIn(registrationId) {
+    try {
+      const response = await api.put(`/registrations/${registrationId}/checkin/cancel`);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+        message: 'ยกเลิกการเช็คอินสำเร็จ'
+      };
+    } catch (error) {
+      console.error('Cancel check-in error:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิกการเช็คอิน'
       };
     }
   }
