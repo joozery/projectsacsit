@@ -63,7 +63,7 @@ const SacitSymposiumTH = () => {
             fontWeight: 400,
             lineHeight: 'normal'
           }}>
-            "สร้างสรรค์ความยั่งยืนศิลปหัตถกรรมในอาเซียนและภูมิภาค"
+            "Crafting Sustainability across ASEAN and Beyond"
           </p>
           <p className="mb-3" style={{
             color: '#000',
@@ -105,7 +105,7 @@ const SacitSymposiumTH = () => {
             </p>
             <p className="text-gray-700 mb-4 leading-relaxed">
               เพื่อจุดประสงค์นี้ เราได้จัดงานประชุมวิชาการศิลปหัตถกรรมครั้งที่ 1 หรือ SACIT Symposium 2025 
-              ภายใต้ธีม "สร้างสรรค์ความยั่งยืนศิลปหัตถกรรมในอาเซียนและภูมิภาค"
+              ภายใต้ธีม "Crafting Sustainability across ASEAN and Beyond"
             </p>
             <p className="text-gray-700 mb-2 leading-relaxed">งานจะประกอบด้วยโปรแกรมหลัก 4 ประเภท:</p>
             <ul className="list-disc list-inside text-gray-700 mb-4 ml-4 space-y-1">

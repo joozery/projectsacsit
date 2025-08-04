@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import agenda071 from '/src/assets/agenda/071.png';
+import agenda072 from '/src/assets/agenda/072.png';
+import agenda081 from '/src/assets/agenda/081.png';
+import agenda082 from '/src/assets/agenda/082.png';
+import agenda083 from '/src/assets/agenda/083.png';
+import agenda084 from '/src/assets/agenda/084.png';
 
 const Agenda = () => {
   const [activeTab, setActiveTab] = useState('day1');
@@ -152,103 +158,21 @@ const Agenda = () => {
 
             {/* Day 1 Content */}
             {activeTab === 'day1' && (
-              <div className="p-8" style={{ background: 'linear-gradient(180deg, #533192 0%, #31195C 100%)' }}>
-                
-                {/* Timeline */}
-                <div className="relative">
-                  {/* Timeline Line */}
-                  <div className="absolute left-6 top-0 bottom-0 w-0.5 border-l-2 border-dashed border-white"></div>
-                  
-                  {/* Event 1 */}
-                  <div className="flex items-start mb-8 relative">
-                    <div className="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center mr-6 z-10 border-2 border-purple-800">
-                      <span className="text-purple-800 font-bold text-lg">1</span>
-                    </div>
-                    <div className="flex-1 bg-purple-200 text-purple-800 p-4 rounded-lg">
-                      <h4 className="font-semibold text-lg">Opening Registration & Welcome Coffee</h4>
-                    </div>
+              <div className="bg-white rounded-b-lg p-4">
+                <div className="space-y-6">
+                  <div className="w-full">
+                    <img 
+                      src={agenda071} 
+                      alt="Day 1 Agenda - Part 1"
+                      className="w-full h-auto rounded-lg shadow-lg"
+                    />
                   </div>
-
-                  {/* Event 2 */}
-                  <div className="flex items-start mb-8 relative">
-                    <div className="w-12 h-12 bg-green-300 rounded-full flex items-center justify-center mr-6 z-10 border-2 border-green-800">
-                      <span className="text-green-800 font-bold text-lg">2</span>
-                    </div>
-                    <div className="flex-1 bg-green-300 text-green-800 p-4 rounded-lg">
-                      <h4 className="font-semibold text-lg mb-2">Keynote Speech : Dr. Feng Jing (UNESCO)</h4>
-                      <div className="flex items-center">
-                        <div className="w-12 h-12 bg-gray-400 rounded-full mr-4"></div>
-                        <div>
-                          <p className="text-sm">Craft as Cultural Infrastructure: Crafting Sustainability in the ASEAN Context</p>
-                          <p className="text-xs text-green-600">(Speech 20 Mins)</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Event 3 */}
-                  <div className="flex items-start mb-8 relative">
-                    <div className="w-12 h-12 bg-green-300 rounded-full flex items-center justify-center mr-6 z-10 border-2 border-green-800">
-                      <span className="text-green-800 font-bold text-lg">3</span>
-                    </div>
-                    <div className="flex-1 bg-green-300 text-green-800 p-4 rounded-lg">
-                      <h4 className="font-semibold text-lg mb-2">Presentation of the 2025 Honorary Awards for Thai Artisans</h4>
-                      <p className="text-sm mb-2">Recognizing master artisans selected by the Sustainable Arts and Crafts Institute of Thailand (SACIT) as:</p>
-                      <ul className="text-sm space-y-1 ml-4">
-                        <li>- The Master Artisans of Thailand</li>
-                        <li>- The Master Craftsmen</li>
-                        <li>- The Craftsmen Descendants</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Event 4 */}
-                  <div className="flex items-start mb-8 relative">
-                    <div className="w-12 h-12 bg-orange-300 rounded-full flex items-center justify-center mr-6 z-10 border-2 border-orange-800">
-                      <span className="text-orange-800 font-bold text-lg">4</span>
-                    </div>
-                    <div className="flex-1 bg-orange-300 text-orange-800 p-4 rounded-lg">
-                      <h4 className="font-semibold text-lg mb-2">Plenary lecture</h4>
-                      <p className="text-sm mb-2">"Crafting Sustainability: Institutional Visions and Regional Practices"</p>
-                      <ul className="text-sm space-y-1 ml-4">
-                        <li>- Thailand: The Sustainable Arts and Crafts Institute of Thailand (Public Organization): SACIT</li>
-                        <li>- Thailand: Aracha Boon-Long NGOs in Thai Arts and Crafts</li>
-                        <li>- Singapore: National Heritage Board (NHB)</li>
-                        <li>- Malaysian: Sukaseni non-profit organization in Malaysia</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Event 5 */}
-                  <div className="flex items-start mb-8 relative">
-                    <div className="w-12 h-12 bg-orange-300 rounded-full flex items-center justify-center mr-6 z-10 border-2 border-orange-800">
-                      <span className="text-orange-800 font-bold text-lg">5</span>
-                    </div>
-                    <div className="flex-1 bg-orange-300 text-orange-800 p-4 rounded-lg">
-                      <h4 className="font-semibold text-lg mb-2">Special Lecture from Ms.Witchada Sitakalin, Creative Director at Jim Thompson</h4>
-                      <div className="flex items-center">
-                        <div className="w-12 h-12 bg-gray-400 rounded-full mr-4"></div>
-                        <div>
-                          <p className="text-sm">"Designing and Curating Craft: Creation and Cultural Intention in the Making of Sustainable Luxury"</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Event 6 */}
-                  <div className="flex items-start mb-8 relative">
-                    <div className="w-12 h-12 bg-green-300 rounded-full flex items-center justify-center mr-6 z-10 border-2 border-green-800">
-                      <span className="text-green-800 font-bold text-lg">6</span>
-                    </div>
-                    <div className="flex-1 bg-green-300 text-green-800 p-4 rounded-lg">
-                      <h4 className="font-semibold text-lg mb-2">Special Lecture from Mr. Gaspard R.Pleansuk (Rush Pleansuk), Cultural Curator and the Founder of Sumphat Gallery</h4>
-                      <div className="flex items-center">
-                        <div className="w-12 h-12 bg-gray-400 rounded-full mr-4"></div>
-                        <div>
-                          <p className="text-sm">"Conversations Between Craft and Art, the Role of Craft as a Living Encyclopaedia"</p>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="w-full">
+                    <img 
+                      src={agenda072} 
+                      alt="Day 1 Agenda - Part 2"
+                      className="w-full h-auto rounded-lg shadow-lg"
+                    />
                   </div>
                 </div>
               </div>
@@ -256,66 +180,35 @@ const Agenda = () => {
 
             {/* Day 2 Content */}
             {activeTab === 'day2' && (
-              <div className="bg-white rounded-b-lg p-8">
-                
-                {/* Timeline */}
-                <div className="relative">
-                  {/* Timeline Line */}
-                  <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-white border-l-2 border-dashed border-white"></div>
-                  
-                  {/* Event 1 */}
-                  <div className="flex items-start mb-8 relative">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-6 z-10">
-                      <span className="text-purple-800 font-bold text-lg">1</span>
-                    </div>
-                    <div className="flex-1 bg-purple-800 text-white p-4 rounded-lg">
-                      <h4 className="font-semibold text-lg">Research Presentations</h4>
-                      <p className="text-sm">Academic papers and research findings</p>
-                    </div>
+              <div className="bg-white rounded-b-lg p-4">
+                <div className="space-y-6">
+                  <div className="w-full">
+                    <img 
+                      src={agenda081} 
+                      alt="Day 2 Agenda - Part 1"
+                      className="w-full h-auto rounded-lg shadow-lg"
+                    />
                   </div>
-
-                  {/* Event 2 */}
-                  <div className="flex items-start mb-8 relative">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-6 z-10">
-                      <span className="text-purple-800 font-bold text-lg">2</span>
-                    </div>
-                    <div className="flex-1 bg-purple-800 text-white p-4 rounded-lg">
-                      <h4 className="font-semibold text-lg">Industry Panel</h4>
-                      <p className="text-sm">Craft Industry Development and Innovation</p>
-                    </div>
+                  <div className="w-full">
+                    <img 
+                      src={agenda082} 
+                      alt="Day 2 Agenda - Part 2"
+                      className="w-full h-auto rounded-lg shadow-lg"
+                    />
                   </div>
-
-                  {/* Event 3 */}
-                  <div className="flex items-start mb-8 relative">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-6 z-10">
-                      <span className="text-purple-800 font-bold text-lg">3</span>
-                    </div>
-                    <div className="flex-1 bg-purple-800 text-white p-4 rounded-lg">
-                      <h4 className="font-semibold text-lg">Lunch & Networking</h4>
-                      <p className="text-sm">Collaboration opportunities</p>
-                    </div>
+                  <div className="w-full">
+                    <img 
+                      src={agenda083} 
+                      alt="Day 2 Agenda - Part 3"
+                      className="w-full h-auto rounded-lg shadow-lg"
+                    />
                   </div>
-
-                  {/* Event 4 */}
-                  <div className="flex items-start mb-8 relative">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-6 z-10">
-                      <span className="text-purple-800 font-bold text-lg">4</span>
-                    </div>
-                    <div className="flex-1 bg-purple-800 text-white p-4 rounded-lg">
-                      <h4 className="font-semibold text-lg">Future of Crafts</h4>
-                      <p className="text-sm">Sustainability and innovation in craft industry</p>
-                    </div>
-                  </div>
-
-                  {/* Event 5 */}
-                  <div className="flex items-start mb-8 relative">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-6 z-10">
-                      <span className="text-purple-800 font-bold text-lg">5</span>
-                    </div>
-                    <div className="flex-1 bg-purple-800 text-white p-4 rounded-lg">
-                      <h4 className="font-semibold text-lg">Closing Ceremony</h4>
-                      <p className="text-sm">Summary and future directions</p>
-                    </div>
+                  <div className="w-full">
+                    <img 
+                      src={agenda084} 
+                      alt="Day 2 Agenda - Part 4"
+                      className="w-full h-auto rounded-lg shadow-lg"
+                    />
                   </div>
                 </div>
               </div>
