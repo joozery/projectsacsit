@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DialogFooter, DialogClose } from "@/components/ui/dialog";
 
 const AgendaForm = ({ item, onSubmit, onCancel }) => {
@@ -52,16 +52,16 @@ const AgendaForm = ({ item, onSubmit, onCancel }) => {
       </div>
       <div>
         <Label htmlFor="type">ประเภท</Label>
-        <Select name="type" value={formData.type} onValueChange={handleSelectChange}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="talk">การบรรยาย/เสวนา</SelectItem>
-            <SelectItem value="break">พัก</SelectItem>
-            <SelectItem value="other">อื่นๆ</SelectItem>
-          </SelectContent>
-        </Select>
+        <select 
+          name="type" 
+          value={formData.type} 
+          onChange={(e) => handleSelectChange(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+          <option value="talk">การบรรยาย/เสวนา</option>
+          <option value="break">พัก</option>
+          <option value="other">อื่นๆ</option>
+        </select>
       </div>
       <DialogFooter>
         <DialogClose asChild>

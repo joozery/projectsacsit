@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'framer-motion';
 import {
   DropdownMenu,
@@ -28,14 +28,14 @@ const AgendaHeader = ({
         <p className="text-gray-600 mt-1">เลือก Symposium เพื่อจัดการกำหนดการ</p>
       </div>
       <div className="flex items-center gap-2">
-        <Select value={currentSymposiumId || ''} onValueChange={(val) => val && onSymposiumChange(val)}>
-          <SelectTrigger className="w-full md:w-[250px]">
-            <SelectValue placeholder="เลือก Symposium..." />
-          </SelectTrigger>
-          <SelectContent>
-            {symposiums.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <select 
+          value={currentSymposiumId || ''} 
+          onChange={(e) => e.target.value && onSymposiumChange(e.target.value)}
+          className="w-full md:w-[250px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+          <option value="">เลือก Symposium...</option>
+          {symposiums.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
         <Button variant="outline" onClick={onAddSymposium}>
           <Plus className="w-4 h-4 mr-2" /> สร้างใหม่
         </Button>

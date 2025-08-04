@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import AdminAuthGuard from '@/components/AdminAuthGuard';
+// import AdminAuthGuard from '@/components/AdminAuthGuard';
 import Navbar from '@/components/Navbar';
 import Dashboard from '@/pages/Dashboard';
 import CertificatesPage from '@/pages/Certificates';
@@ -20,7 +20,7 @@ import RegisterResearch from '@/pages/RegisterResearch';
 import RegisterCreative from '@/pages/RegisterCreative';
 import RegisterSuccess from '@/pages/RegisterSuccess';
 import Login from '@/pages/Login';
-import AdminLogin from '@/pages/AdminLogin';
+// import AdminLogin from '@/pages/AdminLogin';
 import AgendaPage from '@/pages/Agenda/index';
 import AdminAgenda from '@/pages/Agenda/AdminAgenda';
 import SpeakersPage from '@/pages/Speakers/index';
@@ -34,7 +34,11 @@ import SacitSymposiumEN from '@/pages/SacitSymposiumEN';
 import SacitSymposiumTH from '@/pages/SacitSymposiumTH';
 import News from '@/pages/News';
 import Exhibition from '@/pages/News/Exhibition';
-import CreativeWorks from '@/pages/News/CreativeWorks';
+import CreativeWorks from '@/pages/CreativeWorks';
+import LacquerwarePage from '@/pages/CreativeWorks/LacquerwarePage';
+import HandicraftsPage from '@/pages/CreativeWorks/HandicraftsPage';
+import AppliedHandicraftsPage from '@/pages/CreativeWorks/AppliedHandicraftsPage';
+import LocalHandicraftsPage from '@/pages/CreativeWorks/LocalHandicraftsPage';
 import Images from '@/pages/News/Images';
 import Videos from '@/pages/News/Videos';
 import Proceeding from '@/pages/News/Proceeding';
@@ -100,9 +104,14 @@ const AppWithNavbar = () => {
         <Route path="/sacit-symposium-en" element={<SacitSymposiumEN />} />
         <Route path="/sacit-symposium-th" element={<SacitSymposiumTH />} />
         <Route path="/agenda" element={<AgendaPage />} />
-        <Route path="/news" element={<News />} />
+        <Route path="/news" element={<CreativeWorks />} />
+        <Route path="/news-old" element={<News />} />
         <Route path="/exhibition" element={<Exhibition />} />
         <Route path="/creative-works" element={<CreativeWorks />} />
+        <Route path="/creative-works/lacquerware" element={<LacquerwarePage />} />
+        <Route path="/creative-works/handicrafts" element={<HandicraftsPage />} />
+        <Route path="/creative-works/applied" element={<AppliedHandicraftsPage />} />
+        <Route path="/creative-works/local" element={<LocalHandicraftsPage />} />
         <Route path="/images" element={<Images />} />
         <Route path="/videos" element={<Videos />} />
         <Route path="/proceeding" element={<Proceeding />} />
@@ -113,14 +122,10 @@ const AppWithNavbar = () => {
         <Route path="/register/creative" element={<RegisterCreative />} />
         <Route path="/register/success" element={<RegisterSuccess />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/admin-login" element={<AdminLogin />} />
+        {/* <Route path="/admin-login" element={<AdminLogin />} /> */}
         <Route path="/checkin" element={<CheckInPage />} />
         <Route path="/account" element={<Account />} />
-        <Route path="/admin" element={
-          <AdminAuthGuard>
-            <AdminLayout />
-          </AdminAuthGuard>
-        }>
+        <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="agenda" element={<AdminAgenda />} />

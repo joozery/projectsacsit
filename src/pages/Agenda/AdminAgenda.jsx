@@ -24,21 +24,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableHead,
+//   TableHeader,
+//   TableRow,
+// } from "@/components/ui/table";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 const AdminAgenda = () => {
@@ -225,45 +225,43 @@ const AdminAgenda = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <Select value={selectedDay} onValueChange={setSelectedDay}>
-              <SelectTrigger className="w-40">
-                <Calendar className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="วันที่" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">ทุกวัน</SelectItem>
-                <SelectItem value="1">วันที่ 1</SelectItem>
-                <SelectItem value="2">วันที่ 2</SelectItem>
-              </SelectContent>
-            </Select>
+            <select 
+              value={selectedDay} 
+              onChange={(e) => setSelectedDay(e.target.value)}
+              className="w-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="all">ทุกวัน</option>
+              <option value="1">วันที่ 1</option>
+              <option value="2">วันที่ 2</option>
+            </select>
           </div>
         </div>
       </div>
 
       {/* Agenda Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>รายการ</TableHead>
-              <TableHead>เวลา</TableHead>
-              <TableHead>สถานที่</TableHead>
-              <TableHead>ผู้พูด</TableHead>
-              <TableHead>ประเภท</TableHead>
-              <TableHead>จำนวนผู้เข้าร่วม</TableHead>
-              <TableHead className="text-right">การดำเนินการ</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รายการ</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">เวลา</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานที่</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ผู้พูด</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ประเภท</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">จำนวนผู้เข้าร่วม</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">การดำเนินการ</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
             {filteredItems.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>
+              <tr key={item.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div className="font-medium text-gray-900">{item.title}</div>
                     <div className="text-sm text-gray-500 mt-1">{item.description}</div>
                   </div>
-                </TableCell>
-                <TableCell>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">
@@ -273,31 +271,31 @@ const AdminAgenda = () => {
                   <div className="text-xs text-gray-500 mt-1">
                     วันที่ {item.day}
                   </div>
-                </TableCell>
-                <TableCell>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-1">
                     <MapPin className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">{item.location}</span>
                   </div>
-                </TableCell>
-                <TableCell>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-1">
                     <Users className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">{item.speaker}</span>
                   </div>
-                </TableCell>
-                <TableCell>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(item.type)}`}>
                     {getTypeText(item.type)}
                   </span>
-                </TableCell>
-                <TableCell>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-1">
                     <FileText className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">{item.capacity} คน</span>
                   </div>
-                </TableCell>
-                <TableCell className="text-right">
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
                   <div className="flex items-center justify-end gap-2">
                     <Button
                       size="sm"
@@ -315,11 +313,11 @@ const AdminAgenda = () => {
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
         {filteredItems.length === 0 && (
           <div className="text-center py-12">
             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -351,15 +349,14 @@ const AdminAgenda = () => {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">วันที่</label>
-                <Select value={formData.day} onValueChange={(value) => setFormData(prev => ({ ...prev, day: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">วันที่ 1</SelectItem>
-                    <SelectItem value="2">วันที่ 2</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select 
+                  value={formData.day} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, day: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="1">วันที่ 1</option>
+                  <option value="2">วันที่ 2</option>
+                </select>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -399,18 +396,17 @@ const AdminAgenda = () => {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">ประเภท</label>
-                <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ceremony">พิธีการ</SelectItem>
-                    <SelectItem value="keynote">ปาฐกถา</SelectItem>
-                    <SelectItem value="workshop">เวิร์กช็อป</SelectItem>
-                    <SelectItem value="panel">เสวนา</SelectItem>
-                    <SelectItem value="session">การประชุม</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select 
+                  value={formData.type} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="ceremony">พิธีการ</option>
+                  <option value="keynote">ปาฐกถา</option>
+                  <option value="workshop">เวิร์กช็อป</option>
+                  <option value="panel">เสวนา</option>
+                  <option value="session">การประชุม</option>
+                </select>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">จำนวนผู้เข้าร่วม</label>
@@ -423,15 +419,14 @@ const AdminAgenda = () => {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">สถานะ</label>
-                <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">เปิดใช้งาน</SelectItem>
-                    <SelectItem value="inactive">ปิดใช้งาน</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select 
+                  value={formData.status} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="active">เปิดใช้งาน</option>
+                  <option value="inactive">ปิดใช้งาน</option>
+                </select>
               </div>
             </div>
           </div>

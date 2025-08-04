@@ -27,19 +27,19 @@ import {
 } from 'lucide-react';
 import { attendeesAPI } from '@/services/api';
 import registrationService from '@/services/registrationService';
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import { 
+//   Tabs, 
+//   TabsContent, 
+//   TabsList, 
+//   TabsTrigger 
+// } from '@/components/ui/tabs';
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -56,14 +56,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+// import {
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableHead,
+//   TableHeader,
+//   TableRow,
+// } from "@/components/ui/table";
 
 const AttendeesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -73,6 +73,7 @@ const AttendeesPage = () => {
   const [showQRModal, setShowQRModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('general');
 
   // Load data from localStorage and listen for updates
   const [attendeesData, setAttendeesData] = useState(() => {
@@ -508,38 +509,38 @@ const AttendeesPage = () => {
 
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ชื่อผู้เข้าร่วม</TableHead>
-              <TableHead>องค์กร</TableHead>
-              <TableHead>สถานะลงทะเบียน</TableHead>
-              <TableHead>สถานะเช็คอิน</TableHead>
-              {(type === 'research' || type === 'creative') && <TableHead>ชื่อผลงาน</TableHead>}
-              <TableHead>วันที่ลงทะเบียน</TableHead>
-              <TableHead className="text-right">การดำเนินการ</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อผู้เข้าร่วม</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">องค์กร</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะลงทะเบียน</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะเช็คอิน</th>
+              {(type === 'research' || type === 'creative') && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อผลงาน</th>}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่ลงทะเบียน</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">การดำเนินการ</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
             {attendees.map((attendee) => (
-              <TableRow key={attendee.id}>
-                <TableCell>
+              <tr key={attendee.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div className="font-medium text-gray-900">{attendee.name}</div>
                     <div className="text-sm text-gray-500">{attendee.email}</div>
                     <div className="text-sm text-gray-500">{attendee.phone}</div>
                   </div>
-                </TableCell>
-                <TableCell>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm">{attendee.organization}</div>
                   <div className="text-xs text-gray-500">{attendee.education}</div>
-                </TableCell>
-                <TableCell>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(attendee.status)}`}>
                     {getStatusText(attendee.status)}
                   </span>
-                </TableCell>
-                <TableCell>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getCheckInStatusColor(attendee)}`}>
                       {getCheckInStatusText(attendee)}
@@ -553,9 +554,9 @@ const AttendeesPage = () => {
                       )}
                     </div>
                   </div>
-                </TableCell>
+                </td>
                 {(type === 'research' || type === 'creative') && (
-                  <TableCell>
+                  <td className="px-6 py-4 whitespace-nowrap">
                     {attendee.projectTitle ? (
                       <div>
                         <div className="text-sm font-medium">{attendee.projectTitle}</div>
@@ -567,14 +568,14 @@ const AttendeesPage = () => {
                     ) : (
                       <span className="text-gray-400">-</span>
                     )}
-                  </TableCell>
+                  </td>
                 )}
-                <TableCell>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm">
                     {new Date(attendee.registeredAt).toLocaleDateString('th-TH')}
                   </div>
-                </TableCell>
-                <TableCell className="text-right">
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
                   <div className="flex items-center justify-end gap-2">
                     {attendee.checkInRequested && !attendee.checkedIn ? (
                       <>
@@ -720,11 +721,11 @@ const AttendeesPage = () => {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
         {attendees.length === 0 && !loading && !error && (
           <div className="text-center py-12">
             <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -760,32 +761,27 @@ const AttendeesPage = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="w-32">
-              <Calendar className="w-4 h-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {getAvailableYears().map((year) => (
-                <SelectItem key={year} value={year}>
-                  ปี {year}
-                </SelectItem>
-              ))}
-              <div className="border-t border-gray-200 mt-2 pt-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    const nextYear = (parseInt(selectedYear) + 1).toString();
-                    createNewYear(nextYear);
-                  }}
-                >
-                  + เพิ่มปี {parseInt(selectedYear) + 1}
-                </Button>
-              </div>
-            </SelectContent>
-          </Select>
+          <select 
+            value={selectedYear} 
+            onChange={(e) => setSelectedYear(e.target.value)}
+            className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            {getAvailableYears().map((year) => (
+              <option key={year} value={year}>
+                ปี {year}
+              </option>
+            ))}
+          </select>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const nextYear = (parseInt(selectedYear) + 1).toString();
+              createNewYear(nextYear);
+            }}
+          >
+            + เพิ่มปี {parseInt(selectedYear) + 1}
+          </Button>
           <Button 
             variant="outline" 
             onClick={() => fetchAttendeesData(selectedYear)}
@@ -984,72 +980,97 @@ const AttendeesPage = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <Select value={selectedFilter} onValueChange={setSelectedFilter}>
-              <SelectTrigger className="w-40">
-                <Filter className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="สถานะ" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">ทั้งหมด</SelectItem>
-                <SelectItem value="confirmed">ยืนยันแล้ว</SelectItem>
-                <SelectItem value="pending">รอยืนยัน</SelectItem>
-                <SelectItem value="cancelled">ยกเลิก</SelectItem>
-              </SelectContent>
-            </Select>
+            <select 
+              value={selectedFilter} 
+              onChange={(e) => setSelectedFilter(e.target.value)}
+              className="w-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="all">ทั้งหมด</option>
+              <option value="confirmed">ยืนยันแล้ว</option>
+              <option value="pending">รอยืนยัน</option>
+              <option value="cancelled">ยกเลิก</option>
+            </select>
           </div>
         </div>
       </div>
 
       {/* Attendees Tabs */}
-      <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="general" className="flex items-center gap-2">
+      <div className="space-y-6">
+        <div className="grid w-full grid-cols-3 gap-2">
+          <button
+            onClick={() => setActiveTab('general')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'general'
+                ? 'bg-purple-100 text-purple-700 border-2 border-purple-300'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
             <Users className="w-4 h-4" />
             เข้าร่วมทั่วไป ({getCurrentYearData().general.length})
-          </TabsTrigger>
-          <TabsTrigger value="research" className="flex items-center gap-2">
+          </button>
+          <button
+            onClick={() => setActiveTab('research')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'research'
+                ? 'bg-purple-100 text-purple-700 border-2 border-purple-300'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
             <FileText className="w-4 h-4" />
             นำเสนอวิจัย ({getCurrentYearData().research.length})
-          </TabsTrigger>
-          <TabsTrigger value="creative" className="flex items-center gap-2">
+          </button>
+          <button
+            onClick={() => setActiveTab('creative')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'creative'
+                ? 'bg-purple-100 text-purple-700 border-2 border-purple-300'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
             <Palette className="w-4 h-4" />
             นำเสนอสร้างสรรค์ ({getCurrentYearData().creative.length})
-          </TabsTrigger>
-        </TabsList>
+          </button>
+        </div>
 
-        <TabsContent value="general" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">ผู้เข้าร่วมทั่วไป</h3>
-            <Button variant="outline" size="sm" onClick={() => handleExport('general')}>
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
+        {activeTab === 'general' && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">ผู้เข้าร่วมทั่วไป</h3>
+              <Button variant="outline" size="sm" onClick={() => handleExport('general')}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+            <AttendeeTable attendees={filterAttendees(getCurrentYearData().general)} type="general" />
           </div>
-          <AttendeeTable attendees={filterAttendees(getCurrentYearData().general)} type="general" />
-        </TabsContent>
+        )}
 
-        <TabsContent value="research" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">ผู้นำเสนอผลงานวิจัย/บทความวิชาการ</h3>
-            <Button variant="outline" size="sm" onClick={() => handleExport('research')}>
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
+        {activeTab === 'research' && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">ผู้นำเสนอผลงานวิจัย/บทความวิชาการ</h3>
+              <Button variant="outline" size="sm" onClick={() => handleExport('research')}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+            <AttendeeTable attendees={filterAttendees(getCurrentYearData().research)} type="research" />
           </div>
-          <AttendeeTable attendees={filterAttendees(getCurrentYearData().research)} type="research" />
-        </TabsContent>
+        )}
 
-        <TabsContent value="creative" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">ผู้นำเสนอผลงานสร้างสรรค์</h3>
-            <Button variant="outline" size="sm" onClick={() => handleExport('creative')}>
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
+        {activeTab === 'creative' && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">ผู้นำเสนอผลงานสร้างสรรค์</h3>
+              <Button variant="outline" size="sm" onClick={() => handleExport('creative')}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+            <AttendeeTable attendees={filterAttendees(getCurrentYearData().creative)} type="creative" />
           </div>
-          <AttendeeTable attendees={filterAttendees(getCurrentYearData().creative)} type="creative" />
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
 
       {/* QR Code Modal */}
       <Dialog open={showQRModal} onOpenChange={setShowQRModal}>

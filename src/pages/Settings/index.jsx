@@ -5,7 +5,7 @@ import { User, Lock, Bell, Palette, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+// import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 
 const SettingsPage = () => {
@@ -78,21 +78,21 @@ const SettingsPage = () => {
                   <p className="font-medium">การแจ้งเตือนทางอีเมล</p>
                   <p className="text-sm text-gray-500">รับการแจ้งเตือนสำคัญทางอีเมล</p>
                 </div>
-                <Switch defaultChecked/>
+                <input type="checkbox" defaultChecked className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"/>
               </div>
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
                   <p className="font-medium">การแจ้งเตือนในแอป</p>
                   <p className="text-sm text-gray-500">แสดงการแจ้งเตือนผ่านไอคอนกระดิ่ง</p>
                 </div>
-                <Switch defaultChecked/>
+                <input type="checkbox" defaultChecked className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"/>
               </div>
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
                   <p className="font-medium">สรุปรายงานรายสัปดาห์</p>
                   <p className="text-sm text-gray-500">ส่งสรุปกิจกรรมรายสัปดาห์ทางอีเมล</p>
                 </div>
-                <Switch />
+                <input type="checkbox" className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"/>
               </div>
             </div>
             <Button onClick={() => handleSave('การแจ้งเตือน')}><Save className="w-4 h-4 mr-2" />บันทึก</Button>

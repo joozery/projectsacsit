@@ -144,11 +144,10 @@ const News = () => {
               </Link>
               <Link to="/proceeding" className="cursor-pointer">
                 <span style={{
-                  background: 'var(--gra-1, linear-gradient(90deg, #BFB4EE 0%, #B3FFD1 100%))',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  fontFamily: 'Prompt'
+                  color: '#FFFFFF',
+                  fontFamily: 'Prompt',
+                  fontWeight: '600',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
                 }}>Proceeding</span>
               </Link>
             </div>
