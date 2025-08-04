@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import symposiam from '/src/assets/symposiam.png';
+import logo from '/src/assets/logo.png';
+import sacitvision from '/src/assets/sacitvision.webp';
+import group107 from '/src/assets/Group107.jpg';
+import logo1 from '/src/assets/logo1.png';
+import vinyl from '/src/assets/Vinyl.png';
 
 const CreativeWorks = () => {
   // Add CSS animation
@@ -40,7 +46,7 @@ const CreativeWorks = () => {
       excerpt: 'ผลงานศิลปะครั่งร่วมสมัยที่ผสมผสานเทคนิคดั้งเดิมกับแนวคิดสมัยใหม่',
       category: 'art',
       date: '20 มกราคม 2568',
-      image: '/src/assets/symposiam.png',
+      image: symposiam,
       featured: true
     },
     {
@@ -49,7 +55,7 @@ const CreativeWorks = () => {
       excerpt: 'โครงการอนุรักษ์มรดกทางวัฒนธรรมผ่านเทคโนโลยีดิจิทัล',
       category: 'digital',
       date: '18 มกราคม 2568',
-      image: '/src/assets/logo.png'
+      image: logo
     },
     {
       id: 3,
@@ -57,7 +63,7 @@ const CreativeWorks = () => {
       excerpt: 'นวัตกรรมในงานหัตถกรรมไทยที่รักษาเอกลักษณ์ดั้งเดิม',
       category: 'craft',
       date: '15 มกราคม 2568',
-      image: '/src/assets/sacitvision.webp'
+      image: sacitvision
     },
     {
       id: 4,
@@ -65,7 +71,7 @@ const CreativeWorks = () => {
       excerpt: 'การออกแบบสมัยใหม่ที่นำองค์ประกอบไทยมาประยุกต์ใช้',
       category: 'design',
       date: '12 มกราคม 2568',
-      image: '/src/assets/Group107.jpg'
+      image: group107
     },
     {
       id: 5,
@@ -73,7 +79,7 @@ const CreativeWorks = () => {
       excerpt: 'งานศิลปะเชิงโต้ตอบที่เชื่อมโยงผู้ชมกับผลงานศิลปะ',
       category: 'art',
       date: '10 มกราคม 2568',
-      image: '/src/assets/logo1.png'
+      image: logo1
     },
     {
       id: 6,
@@ -81,7 +87,7 @@ const CreativeWorks = () => {
       excerpt: 'แนวทางปฏิบัติงานหัตถกรรมที่ยั่งยืนและเป็นมิตรต่อสิ่งแวดล้อม',
       category: 'craft',
       date: '8 มกราคม 2568',
-      image: '/src/assets/Vinyl.png'
+      image: vinyl
     }
   ];
 

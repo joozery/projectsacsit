@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import gallery04 from '/src/assets/gallery/04.jpg';
+import gallery05 from '/src/assets/gallery/05.jpg';
+import gallery06 from '/src/assets/gallery/06.jpg';
 
 const Videos = () => {
   // Add CSS animation
@@ -38,7 +41,7 @@ const Videos = () => {
       title: 'การทำครั่งแบบดั้งเดิม',
       category: 'tutorials',
       date: '15 มกราคม 2568',
-      thumbnail: '/src/assets/gallery/04.jpg',
+      thumbnail: gallery04,
       duration: '15:30',
       featured: true
     },
@@ -47,7 +50,7 @@ const Videos = () => {
       title: 'SACIT Symposium 2024 Highlights',
       category: 'events',
       date: '10 มกราคม 2568',
-      thumbnail: '/src/assets/gallery/05.jpg',
+      thumbnail: gallery05,
       duration: '8:45'
     },
     {
@@ -55,7 +58,7 @@ const Videos = () => {
       title: 'สัมภาษณ์ศิลปินแห่งชาติ',
       category: 'interviews',
       date: '5 มกราคม 2568',
-      thumbnail: '/src/assets/gallery/06.jpg',
+      thumbnail: gallery06,
       duration: '12:20'
     }
   ];

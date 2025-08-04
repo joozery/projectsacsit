@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import logo from '/src/assets/logo.png';
 
 const Proceeding = () => {
   // Add CSS animation
@@ -183,7 +184,7 @@ const Proceeding = () => {
               {/* Background Image */}
               <div className="absolute inset-0">
                 <img 
-                  src={item.image || '/src/assets/logo.png'} 
+                  src={item.image || logo} 
                   alt={item.title}
                   className="w-full h-full object-cover"
                 />

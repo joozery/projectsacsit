@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import symposiam from '/src/assets/symposiam.png';
+import logo from '/src/assets/logo.png';
+import sacitvision from '/src/assets/sacitvision.webp';
 
 const Exhibition = () => {
   // Add CSS animation
@@ -39,7 +42,7 @@ const Exhibition = () => {
       excerpt: 'นิทรรศการหลักที่แสดงประวัติศาสตร์และวิวัฒนาการของงานครั่งไทย',
       category: 'main',
       date: '15 มกราคม 2568',
-      image: '/src/assets/symposiam.png',
+      image: symposiam,
       featured: true
     },
     {
@@ -48,7 +51,7 @@ const Exhibition = () => {
       excerpt: 'นิทรรศการผลงานสร้างสรรค์จากพันธมิตรและศิลปินร่วมสมัย',
       category: 'creative',
       date: '10 มกราคม 2568',
-      image: '/src/assets/logo.png'
+      image: logo
     },
     {
       id: 3,
@@ -56,7 +59,7 @@ const Exhibition = () => {
       excerpt: 'พื้นที่สาธิตการทำงานศิลปหัตถกรรมไทยแบบสดๆ',
       category: 'live',
       date: '5 มกราคม 2568',
-      image: '/src/assets/sacitvision.webp'
+      image: sacitvision
     }
   ];
 

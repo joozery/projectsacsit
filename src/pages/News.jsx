@@ -1,5 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import sacitvision from '/src/assets/sacitvision.webp';
+import group107 from '/src/assets/Group107.jpg';
+import logo1 from '/src/assets/logo1.png';
+import sacsit from '/src/assets/sacsit.jpg';
 
 const News = () => {
   // Add CSS animation
@@ -37,7 +41,7 @@ const News = () => {
       excerpt: 'พบกับผลงานศิลปหัตถกรรมไทยที่สวยงามและทรงคุณค่าในงานแสดงผลงานประจำปี',
       category: 'events',
       date: '5 มกราคม 2568',
-      image: '/src/assets/sacitvision.webp',
+      image: sacitvision,
       featured: true
     },
     {
@@ -46,7 +50,7 @@ const News = () => {
       excerpt: 'ประกาศผลการประกวดศิลปหัตถกรรมไทยรุ่นใหม่ประจำปี 2567 พร้อมมอบรางวัลให้กับผู้ชนะ',
       category: 'press',
       date: '30 ธันวาคม 2567',
-      image: '/src/assets/Group107.jpg'
+      image: group107
     },
     {
       id: 3,
@@ -54,7 +58,7 @@ const News = () => {
       excerpt: 'สถาบันส่งเสริมศิลปหัตถกรรมไทยลงนามความร่วมมือกับสถาบันการศึกษาชั้นนำเพื่อพัฒนาศิลปหัตถกรรมไทย',
       category: 'press',
       date: '25 ธันวาคม 2567',
-      image: '/src/assets/logo1.png'
+      image: logo1
     },
     {
       id: 4,
@@ -62,7 +66,7 @@ const News = () => {
       excerpt: 'SACIT เปิดตัวโครงการใหม่เพื่อส่งเสริมและอนุรักษ์ศิลปหัตถกรรมไทยในชุมชนต่างๆ ทั่วประเทศ',
       category: 'events',
       date: '20 ธันวาคม 2567',
-      image: '/src/assets/sacsit.jpg'
+      image: sacsit
     }
   ];
 

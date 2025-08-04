@@ -1,3 +1,5 @@
+import sacitvision from '/src/assets/sacitvision.webp';
+
 const VisionSection = () => {
   return (
     <div 
@@ -95,7 +97,7 @@ const VisionSection = () => {
               }}
             >
               <img
-                src="/src/assets/sacitvision.webp"
+                src={sacitvision}
                 alt="SACIT Vision"
                 className="w-full h-full object-cover shadow-lg"
               />

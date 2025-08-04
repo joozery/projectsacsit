@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import cover5 from '/src/assets/cover5.jpg';
 
 const CreativeWorks = () => {
   // Add CSS animation
@@ -30,7 +31,7 @@ const CreativeWorks = () => {
       title: '01 เครื่องรัก เครื่องเขิน',
       subtitle: 'Lacquerware, Gilded Lacquerware',
       description: 'ผลงานศิลปะเครื่องรัก เครื่องเขิน ที่แสดงถึงภูมิปัญญาและเทคนิคการทำเครื่องรักแบบดั้งเดิม',
-      image: '/src/assets/cover5.jpg',
+      image: cover5,
       count: 12,
       path: '/creative-works/lacquerware'
     },
@@ -39,7 +40,7 @@ const CreativeWorks = () => {
       title: '02 งานหัตถศิลป์และประณีตศิลป์',
       subtitle: 'Handicrafts and Fine Arts',
       description: 'ผลงานหัตถศิลป์และประณีตศิลป์ที่เน้นความประณีตและความงามทางศิลปะ',
-      image: '/src/assets/cover5.jpg',
+      image: cover5,
       count: 8,
       path: '/creative-works/handicrafts'
     },
@@ -48,7 +49,7 @@ const CreativeWorks = () => {
       title: '03 งานหัตถกรรมเชิงประยุกต์',
       subtitle: 'Applied Handicrafts',
       description: 'ผลงานหัตถกรรมที่นำมาประยุกต์ใช้ในชีวิตประจำวันและอุตสาหกรรม',
-      image: '/src/assets/cover5.jpg',
+      image: cover5,
       count: 15,
       path: '/creative-works/applied'
     },
@@ -57,7 +58,7 @@ const CreativeWorks = () => {
       title: '04 งานหัตถกรรมพื้นถิ่น และอื่น ๆ',
       subtitle: 'Local Handicrafts and Others',
       description: 'ผลงานหัตถกรรมพื้นถิ่นและผลงานสร้างสรรค์อื่นๆ ที่แสดงถึงวัฒนธรรมท้องถิ่น',
-      image: '/src/assets/cover5.jpg',
+      image: cover5,
       count: 20,
       path: '/creative-works/local'
     }

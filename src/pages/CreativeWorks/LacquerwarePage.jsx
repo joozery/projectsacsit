@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import cover5 from '/src/assets/cover5.jpg';
 
 const LacquerwarePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -214,7 +215,7 @@ const LacquerwarePage = () => {
       artist: 'คุณ อรพิน มุกแดง',
       organization: 'โรงเรียนศิลปะ',
       description: 'ชุดเครื่องรักมุกที่ใช้สีแดงเป็นหลัก สื่อถึงความมงคลและความเจริญรุ่งเรือง',
-      image: '/src/assets/cover5.jpg',
+              image: cover5,
       pdfUrl: 'https://sacsitsymposium.s3.ap-southeast-1.amazonaws.com/Creative+work/%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%82%E0%B8%B4%E0%B8%99/16.+%E0%B8%99%E0%B8%B2%E0%B8%87%E0%B8%AA%E0%B8%B2%E0%B8%A7%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%B4%E0%B8%9E%E0%B8%A2%E0%B9%8C+%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%A3%E0%B8%8A%E0%B8%99%E0%B8%A1/16.+%E0%B8%99%E0%B8%B2%E0%B8%87%E0%B8%AA%E0%B8%B2%E0%B8%A7%E0%B8%9B%E0%B9%88%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%B4%E0%B8%9E%E0%B8%A2%E0%B9%8C+%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%A3%E0%B8%8A%E0%B8%99%E0%B8%A1.pdf',
       category: 'เครื่องรักมุก',
       year: '2024',
@@ -226,7 +227,7 @@ const LacquerwarePage = () => {
       artist: 'อาจารย์ สมชาย มังกรทอง',
       organization: 'วิทยาลัยช่างศิลป์',
       description: 'ถาดเครื่องเขินที่ตกแต่งด้วยลายมังกรแบบจีน-ไทย ผสมผสานวัฒนธรรมอย่างลงตัว',
-      image: '/src/assets/cover5.jpg',
+              image: cover5,
       pdfUrl: 'https://sacsitsymposium.s3.ap-southeast-1.amazonaws.com/Creative+work/%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%82%E0%B8%B4%E0%B8%99/17.+%E0%B8%99%E0%B8%B2%E0%B8%87%E0%B8%AA%E0%B8%B2%E0%B8%A7%E0%B8%A3%E0%B8%B1%E0%B8%95%E0%B8%99%E0%B8%A3%E0%B8%B1%E0%B8%95%E0%B8%99%E0%B9%8C++%E0%B8%82%E0%B8%B2%E0%B8%A7%E0%B8%97%E0%B8%B8%E0%B9%88%E0%B8%87/17.+%E0%B8%99%E0%B8%B2%E0%B8%87%E0%B8%AA%E0%B8%B2%E0%B8%A7%E0%B8%A3%E0%B8%B1%E0%B8%95%E0%B8%99%E0%B8%A3%E0%B8%B1%E0%B8%95%E0%B8%99%E0%B9%8C++%E0%B8%82%E0%B8%B2%E0%B8%A7%E0%B8%97%E0%B8%B8%E0%B9%88%E0%B8%87.pdf',
       category: 'เครื่องเขิน',
       year: '2024',

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import gallery01 from '/src/assets/gallery/01.jpg';
+import gallery02 from '/src/assets/gallery/02.jpg';
+import gallery03 from '/src/assets/gallery/03.jpg';
 
 const Images = () => {
   // Add CSS animation
@@ -38,7 +41,7 @@ const Images = () => {
       title: 'ภาพงาน SACIT Symposium 2024',
       category: 'events',
       date: '15 มกราคม 2568',
-      image: '/src/assets/gallery/01.jpg',
+      image: gallery01,
       featured: true
     },
     {
@@ -46,14 +49,14 @@ const Images = () => {
       title: 'ผลงานศิลปหัตถกรรมไทย',
       category: 'artworks',
       date: '10 มกราคม 2568',
-      image: '/src/assets/gallery/02.jpg'
+      image: gallery02
     },
     {
       id: 3,
       title: 'เวิร์คช็อปการทำครั่ง',
       category: 'workshops',
       date: '5 มกราคม 2568',
-      image: '/src/assets/gallery/03.jpg'
+      image: gallery03
     }
   ];
 
