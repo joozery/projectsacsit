@@ -123,4 +123,127 @@ export const attendeesAPI = {
   }
 };
 
+// Exhibitions API functions
+export const exhibitionsAPI = {
+  // Get all exhibitions
+  getExhibitions: async (filters = {}) => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.status) params.append('status', filters.status);
+      if (filters.category_id) params.append('category_id', filters.category_id);
+      if (filters.search) params.append('search', filters.search);
+
+      const response = await api.get(`/exhibitions?${params}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching exhibitions:', error);
+      throw error;
+    }
+  },
+
+  // Get single exhibition by ID
+  getExhibition: async (id) => {
+    try {
+      const response = await api.get(`/exhibitions/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching exhibition:', error);
+      throw error;
+    }
+  },
+
+  // Create new exhibition
+  createExhibition: async (exhibitionData) => {
+    try {
+      const response = await api.post('/exhibitions', exhibitionData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating exhibition:', error);
+      throw error;
+    }
+  },
+
+  // Update exhibition
+  updateExhibition: async (id, exhibitionData) => {
+    try {
+      const response = await api.put(`/exhibitions/${id}`, exhibitionData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating exhibition:', error);
+      throw error;
+    }
+  },
+
+  // Delete exhibition
+  deleteExhibition: async (id) => {
+    try {
+      const response = await api.delete(`/exhibitions/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting exhibition:', error);
+      throw error;
+    }
+  },
+
+  // Get exhibition categories
+  getCategories: async () => {
+    try {
+      const response = await api.get('/exhibitions/categories/list');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      throw error;
+    }
+  },
+
+  // Upload file
+  uploadFile: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.post('/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
+  },
+
+  // Upload multiple files
+  uploadMultipleFiles: async (files) => {
+    try {
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
+
+      const response = await api.post('/upload/multiple', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error uploading multiple files:', error);
+      throw error;
+    }
+  },
+
+  // Delete file from S3
+  deleteFile: async (fileKey) => {
+    try {
+      const response = await api.delete(`/upload/delete?key=${encodeURIComponent(fileKey)}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      throw error;
+    }
+  }
+};
+
 export default api; 
