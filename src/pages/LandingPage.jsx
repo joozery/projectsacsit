@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronLeft, Diamond, Sparkles, Users, Image as ImageIcon, Newspaper as LucideNewspaper, BarChart2, Send, Search, Menu, X } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Diamond, Sparkles, Users, Image as ImageIcon, Newspaper as LucideNewspaper, BarChart2, Send, Search, Menu, X, FileText } from 'lucide-react';
 import Lightbox from '@/components/Lightbox';
 import authService from '@/services/authService';
 import ReactPlayer from 'react-player';
@@ -49,6 +49,24 @@ const LandingPage = () => {
     // In a real app, this would trigger a toast notification.
     // For this example, it does nothing as Toaster is part of Admin layout.
     console.log("Feature not implemented yet.");
+  };
+
+  const handleExhibitionClick = (exhibition) => {
+    if (exhibition.pdfUrl) {
+      // เปิด PDF ในแท็บใหม่
+      const link = document.createElement('a');
+      link.href = exhibition.pdfUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.download = exhibition.pdfFileName || `${exhibition.name}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // ถ้าไม่มี PDF ให้แสดง alert หรือ modal ข้อมูล
+      console.log("Exhibition details:", exhibition);
+      // สามารถเพิ่มฟังก์ชันแสดง modal รายละเอียดได้ที่นี่
+    }
   };
 
 
@@ -112,6 +130,38 @@ const LandingPage = () => {
     { name: 'คุณรัตนา ต่อยอด', title: 'นักออกแบบเครื่องประดับร่วมสมัย', imgSrc: speaker04 },
     { name: 'คุณวิชัย พัฒนา', title: 'ผู้ประกอบการ OTOP ระดับประเทศ', imgSrc: speaker05 },
   ];
+
+  // Load exhibitions from admin system
+  const [exhibitions, setExhibitions] = useState([
+    { name: 'Traditional Weaving', title: 'ผ้าทอพื้นเมืองภาคเหนือ', imgSrc: gallery01 },
+    { name: 'Ceramic Workshop', title: 'เครื่องปั้นดินเผาร่วมสมัย', imgSrc: gallery02 },
+    { name: 'Wood Carving', title: 'งานแกะสลักไม้ดั้งเดิม', imgSrc: gallery03 },
+    { name: 'Jewelry Making', title: 'เครื่องประดับจากวัสดุธรรมชาติ', imgSrc: gallery04 },
+    { name: 'Local Handicrafts', title: 'หัตถกรรมพื้นถิ่นอาเซียน', imgSrc: gallery05 },
+  ]);
+
+  // Load exhibitions from localStorage (admin system)
+  useEffect(() => {
+    const savedExhibitions = localStorage.getItem('sacit_exhibitions_v1');
+    if (savedExhibitions) {
+      const parsedExhibitions = JSON.parse(savedExhibitions);
+      const activeExhibitions = parsedExhibitions
+        .filter(e => e.status === 'active')
+        .slice(0, 5) // Show max 5 exhibitions
+        .map(e => ({
+          name: e.name,
+          title: e.title,
+          imgSrc: e.imageUrl || gallery01, // Use uploaded image or fallback
+          pdfUrl: e.pdfUrl,
+          pdfFileName: e.pdfFileName,
+          description: e.description
+        }));
+      
+      if (activeExhibitions.length > 0) {
+        setExhibitions(activeExhibitions);
+      }
+    }
+  }, []);
   
   const newsItems = [
     { title: 'ผาสาทแก้ว', description: 'ผ้าไหมทอลายโบราณ ผาสาทแก้ว', author: 'ครูณกรณ์ ตั้งหลัก', imgSrc: gallery01, type: 'ผลิตภัณฑ์', category: 'ผ้าทอพื้นเมือง' },
@@ -483,6 +533,85 @@ const LandingPage = () => {
               onClick={handleFeatureClick}
             >
               all speakers
+            </Button>
+          </div>
+        </section>
+
+        {/* Live Exhibition Section */}
+        <section className="py-16 sm:py-24 bg-white relative overflow-hidden" style={{marginTop: 0, paddingTop: '2rem'}}>
+          {/* Background decorative elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#B3FFD1] rounded-full opacity-30 translate-x-32 -translate-y-32 z-0"></div>
+          <div className="absolute top-20 left-0 w-48 h-48 bg-[#8B7DC3] rounded-full opacity-20 -translate-x-24 -translate-y-12 transform rotate-45 z-0"></div>
+          <div className="absolute bottom-0 right-20 w-32 h-32 bg-[#BFB4EE] rounded-full opacity-25 z-0"></div>
+          
+          <div className="text-center mb-16">
+            <motion.h2 
+              className="text-4xl font-custom-bold text-center text-[#533193]"
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              Live Exhibition (Demonstrative Area)
+            </motion.h2>
+          </div>
+          
+          <div className="flex gap-0 mb-12 w-full">
+            {exhibitions.map((exhibition, index) => (
+              <motion.div 
+                key={index} 
+                className="relative group overflow-hidden flex-1"
+                style={{
+                  height: '356px',
+                  cursor: exhibition.pdfUrl ? 'pointer' : 'default'
+                }}
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                onClick={() => handleExhibitionClick(exhibition)}
+                title={exhibition.pdfUrl ? `คลิกเพื่อดู ${exhibition.pdfFileName || 'เอกสาร'}` : exhibition.description || exhibition.title}
+              >
+                <img 
+                  src={exhibition.imgSrc} 
+                  alt={`${exhibition.name} - ${exhibition.title}`} 
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  onError={(e) => {
+                    e.target.style.backgroundColor = '#f3f4f6';
+                    e.target.style.display = 'flex';
+                    e.target.style.alignItems = 'center';
+                    e.target.style.justifyContent = 'center';
+                    e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                
+                {/* PDF Indicator */}
+                {exhibition.pdfUrl && (
+                  <div className="absolute top-4 right-4 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                    <FileText className="w-3 h-3" />
+                    PDF
+                  </div>
+                )}
+                
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h3 className="text-lg font-custom-bold mb-1">{exhibition.name}</h3>
+                  <p className="text-sm font-custom opacity-90">{exhibition.title}</p>
+                  {exhibition.pdfUrl && (
+                    <p className="text-xs text-green-300 mt-1">คลิกเพื่อดูเอกสาร</p>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          
+          <div className="text-center">
+            <Button 
+              variant="outline" 
+              className="border-[#533193] text-[#533193] hover:bg-[#533193] hover:text-white transition-colors px-8 py-3 rounded-full text-lg font-custom-bold"
+              onClick={handleFeatureClick}
+            >
+              explore exhibitions
             </Button>
           </div>
         </section>

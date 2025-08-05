@@ -12,6 +12,7 @@ import UsersPage from '@/pages/Users/index';
 import TemplatesPage from '@/pages/Templates/index';
 import EbooksPage from '@/pages/Ebooks/index';
 import SettingsPage from '@/pages/Settings/index';
+import ExhibitionsPage from '@/pages/Exhibitions/index';
 import LandingPage from '@/pages/LandingPage';
 import Register from '@/pages/Register';
 import RegisterTerms from '@/pages/RegisterTerms';
@@ -130,6 +131,7 @@ const AppWithNavbar = () => {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="agenda" element={<AdminAgenda />} />
           <Route path="speakers" element={<SpeakersPage />} />
+          <Route path="exhibitions" element={<ExhibitionsPage />} />
           <Route path="attendees" element={<AttendeesPage />} />
           <Route path="certificates" element={<CertificatesPage />} />
           <Route path="google-analytics" element={<GoogleAnalytics />} />
