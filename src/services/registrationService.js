@@ -168,8 +168,8 @@ class RegistrationService {
   // ดึงข้อมูลการลงทะเบียนทั่วไปตามปี
   async getGeneralRegistrations(year) {
     try {
-      // Use real API call
-      const response = await api.get('/registrations', { 
+      // Use correct API endpoint
+      const response = await api.get('/attendees', { 
         params: { 
           year,
           type: 'general'

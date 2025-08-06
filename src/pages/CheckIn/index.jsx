@@ -18,13 +18,14 @@ import {
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import registrationService from '@/services/registrationService';
+import { api } from '@/services/api';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
 
 const CheckInPage = () => {
   const [searchParams] = useSearchParams();
-  const year = searchParams.get('year') || '2025';
+  const year = searchParams.get('year') || '2025'; // ใช้ปี 2025 แทน 2025
   
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -41,11 +42,11 @@ const CheckInPage = () => {
     setError(null);
     
     try {
-      // Fetch all types of registrations
+      // Fetch registrations data directly from registrations API
       const [generalResponse, researchResponse, creativeResponse] = await Promise.all([
-        registrationService.getGeneralRegistrations(year),
-        registrationService.getResearchRegistrations(year),
-        registrationService.getCreativeRegistrations(year)
+        api.get('/registrations', { params: { year, type: 'general' } }),
+        api.get('/registrations', { params: { year, type: 'research' } }),
+        api.get('/registrations', { params: { year, type: 'creative' } })
       ]);
       
       // Transform API data to match our format
@@ -64,12 +65,13 @@ const CheckInPage = () => {
         checkInRequestTime: attendee.check_in_request_time,
         projectTitle: attendee.project_title,
         category: attendee.category,
-        submissionStatus: attendee.submission_status
+        submissionStatus: attendee.submission_status,
+        type: attendee.registration_type
       });
 
-      const generalAttendees = generalResponse.success ? generalResponse.data?.map(transformAttendee) || [] : [];
-      const researchAttendees = researchResponse.success ? researchResponse.data?.map(transformAttendee) || [] : [];
-      const creativeAttendees = creativeResponse.success ? creativeResponse.data?.map(transformAttendee) || [] : [];
+      const generalAttendees = generalResponse.data.success ? generalResponse.data.data?.map(transformAttendee) || [] : [];
+      const researchAttendees = researchResponse.data.success ? researchResponse.data.data?.map(transformAttendee) || [] : [];
+      const creativeAttendees = creativeResponse.data.success ? creativeResponse.data.data?.map(transformAttendee) || [] : [];
 
       const newData = {
         [year]: {
@@ -169,13 +171,12 @@ const CheckInPage = () => {
     setIsLoading(true);
     
     try {
-      // Call API to update check-in request
-      const response = await registrationService.updateCheckInStatus(attendee.id, {
-        check_in_requested: true,
-        check_in_request_time: new Date().toISOString()
+      // Use the attendee.id directly as it's now the registration ID
+      const response = await api.put(`/registrations/${attendee.id}/checkin`, {
+        check_in_requested: true
       });
 
-      if (response.success) {
+      if (response.data.success) {
         const requestTime = new Date().toISOString();
         
         // Update attendee check-in request status in shared data
@@ -199,7 +200,7 @@ const CheckInPage = () => {
           prev.map(a => a.id === attendee.id ? updatedAttendee : a)
         );
       } else {
-        alert('เกิดข้อผิดพลาดในการส่งคำขอ: ' + response.message);
+        alert('เกิดข้อผิดพลาดในการส่งคำขอ: ' + response.data.message);
       }
     } catch (error) {
       console.error('Error sending check-in request:', error);

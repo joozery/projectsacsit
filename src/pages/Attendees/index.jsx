@@ -25,8 +25,8 @@ import {
   Loader2,
   RefreshCw
 } from 'lucide-react';
-import { attendeesAPI } from '@/services/api';
-import registrationService from '@/services/registrationService';
+import { attendeesAPI, api } from '@/services/api';
+import Swal from 'sweetalert2';
 // import { 
 //   Tabs, 
 //   TabsContent, 
@@ -74,6 +74,7 @@ const AttendeesPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('general');
+  const [loadingActions, setLoadingActions] = useState({});
 
   // Load data from localStorage and listen for updates
   const [attendeesData, setAttendeesData] = useState(() => {
@@ -93,65 +94,65 @@ const AttendeesPage = () => {
     setLoading(true);
     setError(null);
     try {
-      // Fetch all types of registrations
+      // ใช้ attendeesAPI เพื่อดึงข้อมูลทั้งหมดจาก attendees endpoint
       const [generalResponse, researchResponse, creativeResponse] = await Promise.all([
-        registrationService.getGeneralRegistrations(year),
-        registrationService.getResearchRegistrations(year),
-        registrationService.getCreativeRegistrations(year)
+        attendeesAPI.getAttendeesByType(year, 'general'),
+        attendeesAPI.getAttendeesByType(year, 'research'),
+        attendeesAPI.getAttendeesByType(year, 'creative')
       ]);
       
       // Transform general attendees data
       const generalAttendees = generalResponse.success ? generalResponse.data?.map(attendee => ({
         id: attendee.id,
-        name: `${attendee.title_prefix || ''} ${attendee.first_name} ${attendee.last_name}`.trim(),
+        name: attendee.name,
         email: attendee.email,
         phone: attendee.phone,
         organization: attendee.organization,
-        education: attendee.education_level || 'ไม่ระบุ',
-        registeredAt: attendee.created_at || attendee.registered_at,
+        education: attendee.education || 'ไม่ระบุ',
+        registeredAt: attendee.registeredAt,
         status: attendee.status || 'confirmed',
-        checkedIn: attendee.checked_in || false,
-        checkInTime: attendee.check_in_time,
-        checkInRequested: attendee.check_in_requested || false,
-        checkInRequestTime: attendee.check_in_request_time
+        checkedIn: attendee.checkInStatus === 'checked_in',
+        checkInTime: attendee.checkInTime,
+        checkInRequested: attendee.checkInStatus === 'pending_approval',
+        checkInRequestTime: attendee.checkInRequestTime
       })) || [] : [];
 
       // Transform research attendees data
       const researchAttendees = researchResponse.success ? researchResponse.data?.map(attendee => ({
         id: attendee.id,
-        name: `${attendee.title_prefix || ''} ${attendee.first_name} ${attendee.last_name}`.trim(),
+        name: attendee.name,
         email: attendee.email,
         phone: attendee.phone,
         organization: attendee.organization,
-        education: attendee.education_level || 'ไม่ระบุ',
-        registeredAt: attendee.created_at || attendee.registered_at,
+        education: attendee.education || 'ไม่ระบุ',
+        registeredAt: attendee.registeredAt,
         status: attendee.status || 'confirmed',
-        checkedIn: attendee.checked_in || false,
-        checkInTime: attendee.check_in_time,
-        checkInRequested: attendee.check_in_requested || false,
-        checkInRequestTime: attendee.check_in_request_time,
-        projectTitle: attendee.project_title,
+        checkedIn: attendee.checkInStatus === 'checked_in',
+        checkInTime: attendee.checkInTime,
+        checkInRequested: attendee.checkInStatus === 'pending_approval',
+        checkInRequestTime: attendee.checkInRequestTime,
+        projectTitle: attendee.projectTitle,
         category: attendee.category,
-        submissionStatus: attendee.submission_status
+        submissionStatus: attendee.submissionStatus
       })) || [] : [];
 
       // Transform creative attendees data
       const creativeAttendees = creativeResponse.success ? creativeResponse.data?.map(attendee => ({
         id: attendee.id,
-        name: `${attendee.title_prefix || ''} ${attendee.first_name} ${attendee.last_name}`.trim(),
+        name: attendee.name,
         email: attendee.email,
         phone: attendee.phone,
         organization: attendee.organization,
-        education: attendee.education_level || 'ไม่ระบุ',
-        registeredAt: attendee.created_at || attendee.registered_at,
+        education: attendee.education || 'ไม่ระบุ',
+        registeredAt: attendee.registeredAt,
         status: attendee.status || 'confirmed',
-        checkedIn: attendee.checked_in || false,
-        checkInTime: attendee.check_in_time,
-        checkInRequested: attendee.check_in_requested || false,
-        checkInRequestTime: attendee.check_in_request_time,
-        projectTitle: attendee.project_title,
+        checkedIn: attendee.checkInStatus === 'checked_in',
+        checkInTime: attendee.checkInTime,
+        checkInRequested: attendee.checkInStatus === 'pending_approval',
+        checkInRequestTime: attendee.checkInRequestTime,
+        projectTitle: attendee.projectTitle,
         category: attendee.category,
-        submissionStatus: attendee.submission_status
+        submissionStatus: attendee.submissionStatus
       })) || [] : [];
 
       setAttendeesData(prev => ({
@@ -195,6 +196,7 @@ const AttendeesPage = () => {
     switch (status) {
       case 'confirmed': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'not_registered': return 'bg-gray-100 text-gray-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -214,6 +216,7 @@ const AttendeesPage = () => {
     switch (status) {
       case 'confirmed': return 'ยืนยันแล้ว';
       case 'pending': return 'รอยืนยัน';
+      case 'not_registered': return 'ยังไม่ลงทะเบียน';
       case 'cancelled': return 'ยกเลิก';
       default: return status;
     }
@@ -227,6 +230,17 @@ const AttendeesPage = () => {
       case 'rejected': return 'ไม่อนุมัติ';
       default: return status;
     }
+  };
+
+  // ฟังก์ชันแสดงวันที่ที่ถูกต้อง
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
   };
 
   const getCategoryText = (category) => {
@@ -277,10 +291,11 @@ const AttendeesPage = () => {
 
   const handleCheckIn = async (attendeeId, type) => {
     try {
+      setLoadingActions(prev => ({ ...prev, [`checkin-${attendeeId}`]: true }));
       const currentTime = new Date().toISOString();
       
       // Call API to update check-in status
-      const response = await registrationService.updateCheckInStatus(attendeeId, {
+      const response = await attendeesAPI.updateCheckInStatus(attendeeId, {
         checked_in: true,
         check_in_time: currentTime,
         check_in_requested: true,
@@ -300,21 +315,59 @@ const AttendeesPage = () => {
             )
           }
         }));
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'เช็คอินสำเร็จ!',
+          text: 'ผู้เข้าร่วมได้รับการเช็คอินแล้ว',
+          timer: 2000,
+          showConfirmButton: false
+        });
       } else {
         console.error('Check-in failed:', response.message);
-        // You can show a toast notification here
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'เกิดข้อผิดพลาดในการเช็คอิน: ' + response.message
+        });
       }
     } catch (error) {
       console.error('Error during check-in:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'เกิดข้อผิดพลาดในการเช็คอิน กรุณาลองใหม่อีกครั้ง'
+      });
+    } finally {
+      setLoadingActions(prev => ({ ...prev, [`checkin-${attendeeId}`]: false }));
     }
   };
 
   const handleCheckOut = async (attendeeId, type) => {
     try {
-      // Call API to cancel check-in
-      const response = await registrationService.cancelCheckIn(attendeeId);
+      setLoadingActions(prev => ({ ...prev, [`checkout-${attendeeId}`]: true }));
+      console.log('🔧 Canceling check-in for attendee:', attendeeId, 'type:', type);
+      
+      // Get the attendee data
+      const attendee = getCurrentYearData()[type].find(a => a.id === attendeeId);
+      if (!attendee) {
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่พบข้อมูลผู้เข้าร่วมงาน'
+        });
+        return;
+      }
 
-      if (response.success) {
+      // Call API to cancel check-in directly using attendee ID
+      const response = await api.put(`/attendees/${attendeeId}/checkin`, {
+        checked_in: false,
+        check_in_time: null,
+        check_in_requested: false,
+        check_in_request_time: null
+      });
+
+      if (response.data.success) {
         // Update local state
         setAttendeesData(prev => ({
           ...prev,
@@ -322,17 +375,38 @@ const AttendeesPage = () => {
             ...prev[selectedYear],
             [type]: prev[selectedYear][type].map(attendee =>
               attendee.id === attendeeId
-                ? { ...attendee, checkedIn: false, checkInTime: null }
+                ? { ...attendee, checkedIn: false, checkInTime: null, checkInRequested: false, checkInRequestTime: null }
                 : attendee
             )
           }
         }));
+        
+        // Show success message
+        Swal.fire({
+          icon: 'success',
+          title: 'ยกเลิกเช็คอินสำเร็จ!',
+          text: 'ผู้เข้าร่วมได้รับการยกเลิกเช็คอินแล้ว',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        console.log('✅ Check-in canceled successfully');
       } else {
-        console.error('Check-out failed:', response.message);
-        // You can show a toast notification here
+        console.error('Check-out failed:', response.data.message);
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'เกิดข้อผิดพลาดในการยกเลิกเช็คอิน: ' + response.data.message
+        });
       }
     } catch (error) {
       console.error('Error during check-out:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'เกิดข้อผิดพลาดในการยกเลิกเช็คอิน กรุณาลองใหม่อีกครั้ง'
+      });
+    } finally {
+      setLoadingActions(prev => ({ ...prev, [`checkout-${attendeeId}`]: false }));
     }
   };
 
@@ -421,15 +495,42 @@ const AttendeesPage = () => {
 
   const handleApproveCheckIn = async (attendeeId, type) => {
     try {
+      setLoadingActions(prev => ({ ...prev, [`approve-${attendeeId}`]: true }));
+      console.log('🔧 Approving check-in for attendee:', attendeeId, 'type:', type);
       const currentTime = new Date().toISOString();
       
-      // Call API to approve check-in
-      const response = await registrationService.updateCheckInStatus(attendeeId, {
+      // First, find the registration ID for this attendee
+      const registrationsResponse = await api.get('/registrations', {
+        params: { year: selectedYear, type }
+      });
+      
+      let registrationId = null;
+      if (registrationsResponse.data.success) {
+        // Find the registration that matches this attendee
+        const attendee = getCurrentYearData()[type].find(a => a.id === attendeeId);
+        if (attendee) {
+          const registration = registrationsResponse.data.data.find(r => 
+            r.email === attendee.email
+          );
+          if (registration) {
+            registrationId = registration.id;
+            console.log('✅ Found registration ID:', registrationId);
+          }
+        }
+      }
+      
+      if (!registrationId) {
+        alert('ไม่พบข้อมูลการลงทะเบียนสำหรับผู้ใช้นี้ กรุณาติดต่อเจ้าหน้าที่');
+        return;
+      }
+      
+      // Call API to approve check-in using the registration ID
+      const response = await api.put(`/registrations/${registrationId}/checkin`, {
         checked_in: true,
-        check_in_time: currentTime
+        check_in_requested: false
       });
 
-      if (response.success) {
+      if (response.data.success) {
         // Update local state
         setAttendeesData(prev => ({
           ...prev,
@@ -437,29 +538,77 @@ const AttendeesPage = () => {
             ...prev[selectedYear],
             [type]: prev[selectedYear][type].map(attendee =>
               attendee.id === attendeeId
-                ? { ...attendee, checkedIn: true, checkInTime: currentTime }
+                ? { ...attendee, checkedIn: true, checkInTime: currentTime, checkInRequested: false }
                 : attendee
             )
           }
         }));
+        
+        // Show success message
+        Swal.fire({
+          icon: 'success',
+          title: 'อนุมัติเช็คอินสำเร็จ!',
+          text: 'ผู้เข้าร่วมได้รับการอนุมัติเช็คอินแล้ว',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        console.log('✅ Check-in approved successfully');
       } else {
-        console.error('Approve check-in failed:', response.message);
-        // You can show a toast notification here
+        console.error('Approve check-in failed:', response.data.message);
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'เกิดข้อผิดพลาดในการอนุมัติ: ' + response.data.message
+        });
       }
     } catch (error) {
       console.error('Error during approve check-in:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'เกิดข้อผิดพลาดในการอนุมัติ กรุณาลองใหม่อีกครั้ง'
+      });
+    } finally {
+      setLoadingActions(prev => ({ ...prev, [`approve-${attendeeId}`]: false }));
     }
   };
 
   const handleRejectCheckIn = async (attendeeId, type) => {
     try {
-      // Call API to reject check-in request
-      const response = await registrationService.updateCheckInStatus(attendeeId, {
-        check_in_requested: false,
-        check_in_request_time: null
+      setLoadingActions(prev => ({ ...prev, [`reject-${attendeeId}`]: true }));
+      console.log('🔧 Rejecting check-in for attendee:', attendeeId, 'type:', type);
+      
+      // First, find the registration ID for this attendee
+      const registrationsResponse = await api.get('/registrations', {
+        params: { year: selectedYear, type }
+      });
+      
+      let registrationId = null;
+      if (registrationsResponse.data.success) {
+        // Find the registration that matches this attendee
+        const attendee = getCurrentYearData()[type].find(a => a.id === attendeeId);
+        if (attendee) {
+          const registration = registrationsResponse.data.data.find(r => 
+            r.email === attendee.email
+          );
+          if (registration) {
+            registrationId = registration.id;
+            console.log('✅ Found registration ID:', registrationId);
+          }
+        }
+      }
+      
+      if (!registrationId) {
+        alert('ไม่พบข้อมูลการลงทะเบียนสำหรับผู้ใช้นี้ กรุณาติดต่อเจ้าหน้าที่');
+        return;
+      }
+      
+      // Call API to reject check-in request using the registration ID
+      const response = await api.put(`/registrations/${registrationId}/checkin`, {
+        check_in_requested: false
       });
 
-      if (response.success) {
+      if (response.data.success) {
         // Update local state
         setAttendeesData(prev => ({
           ...prev,
@@ -472,12 +621,33 @@ const AttendeesPage = () => {
             )
           }
         }));
+        
+        // Show success message
+        Swal.fire({
+          icon: 'success',
+          title: 'ปฏิเสธคำขอเช็คอินสำเร็จ!',
+          text: 'คำขอเช็คอินได้รับการปฏิเสธแล้ว',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        console.log('✅ Check-in rejected successfully');
       } else {
-        console.error('Reject check-in failed:', response.message);
-        // You can show a toast notification here
+        console.error('Reject check-in failed:', response.data.message);
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'เกิดข้อผิดพลาดในการปฏิเสธ: ' + response.data.message
+        });
       }
     } catch (error) {
       console.error('Error during reject check-in:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'เกิดข้อผิดพลาดในการปฏิเสธ กรุณาลองใหม่อีกครั้ง'
+      });
+    } finally {
+      setLoadingActions(prev => ({ ...prev, [`reject-${attendeeId}`]: false }));
     }
   };
 
@@ -572,7 +742,7 @@ const AttendeesPage = () => {
                 )}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm">
-                    {new Date(attendee.registeredAt).toLocaleDateString('th-TH')}
+                    {formatDate(attendee.registeredAt)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -581,41 +751,69 @@ const AttendeesPage = () => {
                       <>
                         <Button
                           size="sm"
-                          onClick={() => handleApproveCheckIn(attendee.id, type)}
+                          onClick={() => {
+                            console.log('🔘 Approve button clicked for attendee:', attendee.id, 'type:', type);
+                            handleApproveCheckIn(attendee.id, type);
+                          }}
+                          disabled={loadingActions[`approve-${attendee.id}`]}
                           className="bg-green-600 hover:bg-green-700 text-white"
                         >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          อนุมัติ
+                          {loadingActions[`approve-${attendee.id}`] ? (
+                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                          ) : (
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                          )}
+                          {loadingActions[`approve-${attendee.id}`] ? 'กำลังดำเนินการ...' : 'อนุมัติ'}
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleRejectCheckIn(attendee.id, type)}
+                          onClick={() => {
+                            console.log('🔘 Reject button clicked for attendee:', attendee.id, 'type:', type);
+                            handleRejectCheckIn(attendee.id, type);
+                          }}
+                          disabled={loadingActions[`reject-${attendee.id}`]}
                           className="border-red-300 text-red-600 hover:bg-red-50"
                         >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          ปฏิเสธ
+                          {loadingActions[`reject-${attendee.id}`] ? (
+                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                          ) : (
+                            <XCircle className="w-4 h-4 mr-1" />
+                          )}
+                          {loadingActions[`reject-${attendee.id}`] ? 'กำลังดำเนินการ...' : 'ปฏิเสธ'}
                         </Button>
                       </>
                     ) : !attendee.checkedIn ? (
                       <Button
                         size="sm"
                         onClick={() => handleCheckIn(attendee.id, type)}
+                        disabled={loadingActions[`checkin-${attendee.id}`]}
                         className="bg-blue-600 hover:bg-blue-700"
                       >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        เช็คอิน
+                        {loadingActions[`checkin-${attendee.id}`] ? (
+                          <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                        ) : (
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                        )}
+                        {loadingActions[`checkin-${attendee.id}`] ? 'กำลังดำเนินการ...' : 'เช็คอิน'}
                       </Button>
                     ) : (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleCheckOut(attendee.id, type)}
+                        disabled={loadingActions[`checkout-${attendee.id}`]}
+                        className="border-red-300 text-red-600 hover:bg-red-50"
                       >
-                        <XCircle className="w-4 h-4 mr-1" />
-                        ยกเลิกเช็คอิน
+                        {loadingActions[`checkout-${attendee.id}`] ? (
+                          <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                        ) : (
+                          <XCircle className="w-4 h-4 mr-1" />
+                        )}
+                        {loadingActions[`checkout-${attendee.id}`] ? 'กำลังดำเนินการ...' : 'ยกเลิกเช็คอิน'}
                       </Button>
                     )}
+                    
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="sm">
@@ -669,7 +867,7 @@ const AttendeesPage = () => {
                                 <div className="flex items-center gap-2">
                                   <Calendar className="w-4 h-4 text-gray-500" />
                                   <span className="text-sm text-gray-600">วันที่ลงทะเบียน:</span>
-                                  <span className="text-sm">{new Date(attendee.registeredAt).toLocaleDateString('th-TH')}</span>
+                                  <span className="text-sm">{formatDate(attendee.registeredAt)}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <CheckCircle className="w-4 h-4 text-gray-500" />
