@@ -37,6 +37,93 @@ import gallery08 from '@/assets/gallery/08.jpg';
 import gallery09 from '@/assets/gallery/09.jpg';
 import bghero from '@/assets/bghero.mp4';
 
+// Mobile Speaker Carousel Component
+const MobileSpeakerCarousel = ({ speakers, onSpeakerClick }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const nextSlide = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === speakers.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? speakers.length - 1 : prevIndex - 1
+    );
+  };
+
+  return (
+    <div className="relative">
+      {/* Carousel Container */}
+      <div className="relative overflow-hidden rounded-lg" style={{ height: '400px' }}>
+        <motion.div
+          className="flex transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {speakers.map((speaker, index) => (
+            <div
+              key={index}
+              className="relative w-full flex-shrink-0 cursor-pointer"
+              style={{ height: '400px' }}
+              onClick={() => onSpeakerClick(speaker)}
+            >
+              <img 
+                src={speaker.imgSrc} 
+                alt={`${speaker.name} - ${speaker.title}`} 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.backgroundColor = '#f3f4f6';
+                  e.target.style.display = 'flex';
+                  e.target.style.alignItems = 'center';
+                  e.target.style.justifyContent = 'center';
+                  e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+              
+              <div className="absolute bottom-6 left-6 text-white">
+                <h3 className="text-xl font-custom-bold mb-2">{speaker.name}</h3>
+                <p className="text-base font-custom opacity-90">{speaker.title}</p>
+              </div>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* Navigation Buttons */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110"
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+      
+      <button
+        onClick={nextSlide}
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110"
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+
+      {/* Dots Indicator */}
+      <div className="flex justify-center mt-4 space-x-2">
+        {speakers.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-200 ${
+              index === currentIndex 
+                ? 'bg-[#533193] scale-125' 
+                : 'bg-gray-300 hover:bg-gray-400'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -499,63 +586,81 @@ const LandingPage = () => {
           
           {/* Loading State */}
           {speakersLoading && (
-            <div className="flex gap-0 mb-12 w-full">
-              {[1, 2, 3, 4, 5].map((index) => (
-                <motion.div 
-                  key={index} 
-                  className="relative overflow-hidden flex-1"
-                  style={{ height: '356px' }}
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
-                    <div className="text-gray-400">กำลังโหลด...</div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            <>
+              {/* Desktop Loading */}
+              <div className="hidden md:flex gap-0 mb-12 w-full">
+                {[1, 2, 3, 4, 5].map((index) => (
+                  <motion.div 
+                    key={index} 
+                    className="relative overflow-hidden flex-1"
+                    style={{ height: '356px' }}
+                    initial={{ opacity: 0, x: 50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
+                    <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+                      <div className="text-gray-400">กำลังโหลด...</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              
+              {/* Mobile Loading */}
+              <div className="md:hidden mb-12">
+                <div className="w-full h-64 bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
+                  <div className="text-gray-400">กำลังโหลด...</div>
+                </div>
+              </div>
+            </>
           )}
           
           {/* Speakers Grid */}
           {!speakersLoading && (
-            <div className="flex gap-0 mb-12 w-full">
-              {speakers.map((speaker, index) => (
-                <motion.div 
-                  key={index} 
-                  className="relative group overflow-hidden flex-1 cursor-pointer"
-                  style={{
-                    height: '356px'
-                  }}
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  onClick={() => handleSpeakerClick(speaker)}
-                  title={speaker.pdfUrl ? `คลิกเพื่อดู ${speaker.pdfFileName || 'เอกสาร'}` : `ข้อมูลผู้บรรยาย: ${speaker.name}`}
-                >
-                  <img 
-                    src={speaker.imgSrc} 
-                    alt={`${speaker.name} - ${speaker.title}`} 
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    onError={(e) => {
-                      e.target.style.backgroundColor = '#f3f4f6';
-                      e.target.style.display = 'flex';
-                      e.target.style.alignItems = 'center';
-                      e.target.style.justifyContent = 'center';
-                      e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
+            <>
+              {/* Desktop View */}
+              <div className="hidden md:flex gap-0 mb-12 w-full">
+                {speakers.map((speaker, index) => (
+                  <motion.div 
+                    key={index} 
+                    className="relative group overflow-hidden flex-1 cursor-pointer"
+                    style={{
+                      height: '356px'
                     }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                  
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <h3 className="text-lg font-custom-bold mb-1">{speaker.name}</h3>
-                    <p className="text-sm font-custom opacity-90">{speaker.title}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                    initial={{ opacity: 0, x: 50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    onClick={() => handleSpeakerClick(speaker)}
+                    title={speaker.pdfUrl ? `คลิกเพื่อดู ${speaker.pdfFileName || 'เอกสาร'}` : `ข้อมูลผู้บรรยาย: ${speaker.name}`}
+                  >
+                    <img 
+                      src={speaker.imgSrc} 
+                      alt={`${speaker.name} - ${speaker.title}`} 
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      onError={(e) => {
+                        e.target.style.backgroundColor = '#f3f4f6';
+                        e.target.style.display = 'flex';
+                        e.target.style.alignItems = 'center';
+                        e.target.style.justifyContent = 'center';
+                        e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    
+                    <div className="absolute bottom-4 left-4 text-white">
+                      <h3 className="text-lg font-custom-bold mb-1">{speaker.name}</h3>
+                      <p className="text-sm font-custom opacity-90">{speaker.title}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              
+              {/* Mobile Carousel */}
+              <div className="md:hidden mb-12">
+                <MobileSpeakerCarousel speakers={speakers} onSpeakerClick={handleSpeakerClick} />
+              </div>
+            </>
           )}
           
           <div className="text-center">
