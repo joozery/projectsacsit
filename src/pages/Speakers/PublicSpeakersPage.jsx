@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import useSpeakers from '@/hooks/useSpeakers';
 
 // Fallback speaker images
@@ -13,6 +13,7 @@ import speaker05 from '@/assets/speker/05.jpg';
 
 const PublicSpeakersPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [hoveredCard, setHoveredCard] = useState(null);
   const speakersPerPage = 6;
   
   // Use speakers API
@@ -114,7 +115,7 @@ const PublicSpeakersPage = () => {
 
       <div className="min-h-screen">
         {/* Hero Section */}
-        <div 
+        <motion.div 
           className="w-full flex items-center justify-center relative"
           style={{
             width: '100%',
@@ -122,8 +123,11 @@ const PublicSpeakersPage = () => {
             flexShrink: 0,
             background: 'linear-gradient(90deg, #BFB4EE 0%, #B3FFD1 100%)',
           }}
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h1
+          <motion.h1
             className="relative z-10"
             style={{
               fontFamily: 'AWConqueror Std Didot',
@@ -138,15 +142,55 @@ const PublicSpeakersPage = () => {
               marginTop: '60px',
               fontStyle: 'normal'
             }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
           >
             วิทยากร
-          </h1>
-        </div>
+          </motion.h1>
+          
+          {/* Floating sparkles */}
+          <motion.div
+            className="absolute top-10 right-10"
+            animate={{ 
+              rotate: 360,
+              scale: [1, 1.2, 1]
+            }}
+            transition={{ 
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <Sparkles className="w-6 h-6 text-white/60" />
+          </motion.div>
+          
+          <motion.div
+            className="absolute bottom-10 left-10"
+            animate={{ 
+              rotate: -360,
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ 
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <Sparkles className="w-4 h-4 text-white/40" />
+          </motion.div>
+        </motion.div>
         
         {/* Breadcrumb Section */}
-        <div className="w-full py-4 shadow-md border-b-4" style={{background: 'linear-gradient(90deg, #533193 0%, #BFB4EE 100%)', borderBottomColor: '#533193', borderBottomWidth: '4px'}}>
+        <motion.div 
+          className="w-full py-4 shadow-md border-b-4" 
+          style={{background: 'linear-gradient(90deg, #533193 0%, #BFB4EE 100%)', borderBottomColor: '#533193', borderBottomWidth: '4px'}}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
           <div className="container mx-auto flex justify-center items-center">
-            <span
+            <motion.span
               className="flex items-center gap-2 text-lg font-medium drop-shadow"
               style={{
                 fontFamily: 'Poppins',
@@ -159,14 +203,23 @@ const PublicSpeakersPage = () => {
                 WebkitTextFillColor: 'transparent',
                 lineHeight: 'normal',
               }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
             >
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <motion.svg 
+                width="18" 
+                height="18" 
+                viewBox="0 0 18 18" 
+                fill="none"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
                 <polygon points="9,2 16,9 9,16 2,9" fill="#C7BFFF"/>
-              </svg>
+              </motion.svg>
               รายชื่อวิทยากรทั้งหมด
-            </span>
+            </motion.span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -177,7 +230,7 @@ const PublicSpeakersPage = () => {
                 <motion.div 
                   key={index} 
                   className="bg-white rounded-lg shadow-lg overflow-hidden"
-                  style={{ height: '400px' }}
+                  style={{ height: '500px' }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -191,76 +244,157 @@ const PublicSpeakersPage = () => {
           )}
 
           {/* Speakers Grid */}
-          {!speakersLoading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {currentSpeakers.map((speaker, index) => (
-                <motion.div 
-                  key={index} 
-                  className="bg-white rounded-lg shadow-lg overflow-hidden relative"
-                  style={{ height: '500px' }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  {/* Image - Full Card */}
-                  <div className="relative w-full h-full">
-                    <img 
-                      src={speaker.imgSrc} 
-                      alt={`${speaker.name} - ${speaker.title}`} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.style.backgroundColor = '#f3f4f6';
-                        e.target.style.display = 'flex';
-                        e.target.style.alignItems = 'center';
-                        e.target.style.justifyContent = 'center';
-                        e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
-                      }}
-                    />
-                    
-                    {/* Text Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                      <div>
-                        {/* Department/Unit */}
-                        <p className="text-gray-300 text-sm mb-2">หน่วยงาน</p>
-                        
-                        {/* Name */}
-                        <h3 className="text-xl font-bold text-white mb-2">{speaker.name}</h3>
-                        
-                        {/* Title */}
-                        <p className="text-gray-300 text-sm">{speaker.title}</p>
-                      </div>
+          <AnimatePresence mode="wait">
+            {!speakersLoading && (
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                {currentSpeakers.map((speaker, index) => (
+                  <motion.div 
+                    key={`${speaker.name}-${currentPage}-${index}`}
+                    className="bg-white rounded-lg shadow-lg overflow-hidden relative cursor-pointer"
+                    style={{ height: '500px' }}
+                    initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ 
+                      duration: 0.6, 
+                      delay: index * 0.1,
+                      ease: "easeOut"
+                    }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      y: -10,
+                      transition: { duration: 0.3 }
+                    }}
+                    onHoverStart={() => setHoveredCard(index)}
+                    onHoverEnd={() => setHoveredCard(null)}
+                  >
+                    {/* Image - Full Card */}
+                    <div className="relative w-full h-full">
+                      <motion.img 
+                        src={speaker.imgSrc} 
+                        alt={`${speaker.name} - ${speaker.title}`} 
+                        className="w-full h-full object-cover"
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ duration: 0.5 }}
+                        onError={(e) => {
+                          e.target.style.backgroundColor = '#f3f4f6';
+                          e.target.style.display = 'flex';
+                          e.target.style.alignItems = 'center';
+                          e.target.style.justifyContent = 'center';
+                          e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
+                        }}
+                      />
                       
-                      {/* Navigation Button */}
-                      <div className="flex justify-end mt-4">
-                        <button
-                          onClick={() => handleSpeakerClick(speaker)}
-                          className="w-12 h-12 bg-purple-600 hover:bg-purple-700 rounded-full flex items-center justify-center transition-colors duration-200 shadow-lg"
-                          title={speaker.pdfUrl ? `คลิกเพื่อดู ${speaker.pdfFileName || 'เอกสาร'}` : `ข้อมูลผู้บรรยาย: ${speaker.name}`}
+                      {/* Text Overlay */}
+                      <motion.div 
+                        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.1 + 0.2 }}
+                      >
+                        <div>
+                          {/* Department/Unit */}
+                          <motion.p 
+                            className="text-gray-300 text-sm mb-2"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.1 + 0.4 }}
+                          >
+                            หน่วยงาน
+                          </motion.p>
+                          
+                          {/* Name */}
+                          <motion.h3 
+                            className="text-xl font-bold text-white mb-2"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.1 + 0.5 }}
+                          >
+                            {speaker.name}
+                          </motion.h3>
+                          
+                          {/* Title */}
+                          <motion.p 
+                            className="text-gray-300 text-sm"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.1 + 0.6 }}
+                          >
+                            {speaker.title}
+                          </motion.p>
+                        </div>
+                        
+                        {/* Navigation Button */}
+                        <motion.div 
+                          className="flex justify-end mt-4"
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.3, delay: index * 0.1 + 0.7 }}
                         >
-                          <ArrowRight className="w-5 h-5 text-white" />
-                        </button>
-                      </div>
+                          <motion.button
+                            onClick={() => handleSpeakerClick(speaker)}
+                            className="w-12 h-12 bg-purple-600 hover:bg-purple-700 rounded-full flex items-center justify-center transition-colors duration-200 shadow-lg"
+                            title={speaker.pdfUrl ? `คลิกเพื่อดู ${speaker.pdfFileName || 'เอกสาร'}` : `ข้อมูลผู้บรรยาย: ${speaker.name}`}
+                            whileHover={{ 
+                              scale: 1.2,
+                              rotate: 15,
+                              transition: { duration: 0.2 }
+                            }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            <ArrowRight className="w-5 h-5 text-white" />
+                          </motion.button>
+                        </motion.div>
+                      </motion.div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Empty State */}
           {!speakersLoading && speakers.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-6xl mb-4">👥</div>
+            <motion.div 
+              className="text-center py-12"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <motion.div 
+                className="text-gray-400 text-6xl mb-4"
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                👥
+              </motion.div>
               <h3 className="text-xl font-semibold text-gray-600 mb-2">ยังไม่มีวิทยากร</h3>
               <p className="text-gray-500">วิทยากรจะปรากฏที่นี่เมื่อมีการเพิ่มข้อมูล</p>
-            </div>
+            </motion.div>
           )}
 
           {/* Pagination */}
           {!speakersLoading && speakers.length > 0 && totalPages > 1 && (
-            <div className="flex justify-center items-center space-x-2 mt-12">
+            <motion.div 
+              className="flex justify-center items-center space-x-2 mt-12"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+            >
               {getPaginationNumbers().map((number, index) => (
-                <button
+                <motion.button
                   key={index}
                   onClick={() => typeof number === 'number' && handlePageChange(number)}
                   disabled={typeof number !== 'number'}
@@ -273,11 +407,19 @@ const PublicSpeakersPage = () => {
                       : 'text-gray-400 cursor-default'
                     }
                   `}
+                  whileHover={{ 
+                    scale: typeof number === 'number' ? 1.1 : 1,
+                    y: typeof number === 'number' ? -2 : 0
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
                   {number}
-                </button>
+                </motion.button>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
