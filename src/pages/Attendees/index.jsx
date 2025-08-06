@@ -284,9 +284,113 @@ const AttendeesPage = () => {
     return allAttendees.filter(a => a.status === 'confirmed').length;
   };
 
-  const handleExport = (type) => {
-    console.log(`Exporting ${type} attendees data...`);
-    // In a real app, this would trigger the export functionality
+  const handleExport = async (type) => {
+    try {
+      setLoading(true);
+      console.log(`Exporting ${type} attendees data...`);
+      
+      let dataToExport = [];
+      const yearData = getCurrentYearData();
+      
+      if (type === 'all') {
+        // Export all types
+        dataToExport = [
+          ...yearData.general.map(item => ({ ...item, type: 'general' })),
+          ...yearData.research.map(item => ({ ...item, type: 'research' })),
+          ...yearData.creative.map(item => ({ ...item, type: 'creative' }))
+        ];
+      } else {
+        // Export specific type
+        dataToExport = yearData[type].map(item => ({ ...item, type }));
+      }
+      
+      if (dataToExport.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไม่มีข้อมูล',
+          text: 'ไม่มีข้อมูลสำหรับการส่งออก'
+        });
+        return;
+      }
+      
+      // Create CSV content
+      const headers = [
+        'ชื่อ',
+        'อีเมล', 
+        'โทรศัพท์',
+        'องค์กร',
+        'การศึกษา',
+        'สถานะลงทะเบียน',
+        'สถานะเช็คอิน',
+        'วันที่ลงทะเบียน',
+        'ประเภท'
+      ];
+      
+      // Add research/creative specific headers
+      if (type === 'research' || type === 'creative' || type === 'all') {
+        headers.push('ชื่อผลงาน', 'ประเภทผลงาน', 'สถานะการส่งผลงาน');
+      }
+      
+      const csvContent = [
+        headers.join(','),
+        ...dataToExport.map(attendee => {
+          const row = [
+            `"${attendee.name || ''}"`,
+            `"${attendee.email || ''}"`,
+            `"${attendee.phone || ''}"`,
+            `"${attendee.organization || ''}"`,
+            `"${attendee.education || ''}"`,
+            `"${getStatusText(attendee.status)}"`,
+            `"${getCheckInStatusText(attendee)}"`,
+            `"${formatDate(attendee.registeredAt)}"`,
+            `"${attendee.type === 'general' ? 'เข้าร่วมทั่วไป' : attendee.type === 'research' ? 'นำเสนอวิจัย' : 'นำเสนอสร้างสรรค์'}"`
+          ];
+          
+          // Add research/creative specific data
+          if (attendee.type === 'research' || attendee.type === 'creative') {
+            row.push(
+              `"${attendee.projectTitle || ''}"`,
+              `"${getCategoryText(attendee.category) || ''}"`,
+              `"${getSubmissionStatusText(attendee.submissionStatus) || ''}"`
+            );
+          } else if (type === 'all') {
+            // For all export, add empty columns for non-research/creative
+            row.push('""', '""', '""');
+          }
+          
+          return row.join(',');
+        })
+      ].join('\n');
+      
+      // Create and download file
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `attendees-${type}-${selectedYear}-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'ส่งออกสำเร็จ!',
+        text: `ไฟล์ CSV ได้ถูกดาวน์โหลดแล้ว (${dataToExport.length} รายการ)`,
+        timer: 3000,
+        showConfirmButton: false
+      });
+      
+    } catch (error) {
+      console.error('Export error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'เกิดข้อผิดพลาดในการส่งออกข้อมูล กรุณาลองใหม่อีกครั้ง'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCheckIn = async (attendeeId, type) => {

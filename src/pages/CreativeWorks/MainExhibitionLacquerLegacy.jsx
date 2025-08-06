@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Download, Eye, Calendar, MapPin, User, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, Download, Eye, Calendar, MapPin, User, Image as ImageIcon, FileText } from 'lucide-react';
 
 // Import images from Lacquer Legacy folder
 import lacquerImage1 from '/src/assets/Lacquer Legacy/1.png';
@@ -90,6 +90,14 @@ const MainExhibitionLacquerLegacy = () => {
     setSelectedImage(null);
   };
 
+  const handleReadPDF = () => {
+    // PDF URL - เปลี่ยนเป็น URL จริงที่ผู้ใช้ให้มา
+    const pdfUrl = 'https://sacsitsymposium.s3.ap-southeast-1.amazonaws.com/Creative+work/%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B9%83%E0%B8%AB%E0%B8%8D%E0%B9%88+%E0%B9%84%E0%B8%A1%E0%B9%89%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%99%E0%B8%B4%E0%B8%94%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B9%83%E0%B8%AB%E0%B8%8D%E0%B9%88+%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%81%E0%B8%99%E0%B8%A7%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AAj%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B4%E0%B8%A1+%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2+%E0%B8%95%E0%B9%88%E0%B8%AD%E0%B8%A2%E0%B8%AD%E0%B8%94.pdf';
+    
+    // เปิด PDF ในแท็บใหม่
+    window.open(pdfUrl, '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -175,6 +183,22 @@ const MainExhibitionLacquerLegacy = () => {
               </div>
             </motion.div>
           ))}
+        </div>
+      </div>
+
+      {/* PDF Button Section - Moved to bottom */}
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="flex justify-center">
+          <motion.button
+            onClick={handleReadPDF}
+            className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            style={{ fontFamily: 'Prompt' }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <FileText className="w-6 h-6" />
+            <span className="text-lg font-semibold">อ่าน PDF</span>
+          </motion.button>
         </div>
       </div>
 
