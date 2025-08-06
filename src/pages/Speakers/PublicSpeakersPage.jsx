@@ -35,7 +35,7 @@ const PublicSpeakersPage = () => {
   const speakers = apiSpeakers.length > 0 
     ? apiSpeakers.map(speaker => ({
         name: speaker.name,
-        title: 'บทความ/ผลงานสร้างสรรค์', // Default title
+        title: speaker.position || 'บทความ/ผลงานสร้างสรรค์', // Use position from API or default title
         imgSrc: speaker.photo_url || speaker01, // Use API photo or fallback
         pdfUrl: speaker.pdf_url, // Add PDF URL
         pdfFileName: speaker.pdf_filename // Add PDF filename

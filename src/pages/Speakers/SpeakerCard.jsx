@@ -44,9 +44,12 @@ const SpeakerCard = ({ speaker, onEdit, onDelete }) => {
 
       {/* Content Section */}
       <div className="relative px-6 pb-6">
-        {/* Name */}
+        {/* Name and Position */}
         <div className="text-center mb-4 mt-4">
           <h3 className="text-2xl font-bold text-gray-800">{speaker.name}</h3>
+          {speaker.position && (
+            <p className="text-sm text-gray-600 mt-1">{speaker.position}</p>
+          )}
         </div>
 
         {/* PDF Download */}

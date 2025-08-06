@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { speakersAPI } from '@/services/api';
 
 const SpeakerForm = ({ speaker, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ name: '' });
+  const [formData, setFormData] = useState({ name: '', position: '' });
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
@@ -21,11 +21,14 @@ const SpeakerForm = ({ speaker, onSubmit, onCancel }) => {
 
   useEffect(() => {
     if (speaker) {
-      setFormData({ name: speaker.name || '' });
+      setFormData({ 
+        name: speaker.name || '', 
+        position: speaker.position || '' 
+      });
       setPhotoPreview(speaker.photo_url || null);
       setPdfFileName(speaker.pdf_filename || '');
     } else {
-      setFormData({ name: '' });
+      setFormData({ name: '', position: '' });
       setPhotoPreview(null);
       setPhotoFile(null);
       setPdfFile(null);
@@ -103,6 +106,7 @@ const SpeakerForm = ({ speaker, onSubmit, onCancel }) => {
     try {
       const submitData = {
         name: formData.name.trim(),
+        position: formData.position.trim(),
         photoFile: photoFile,
         pdfFile: pdfFile
       };
@@ -183,6 +187,18 @@ const SpeakerForm = ({ speaker, onSubmit, onCancel }) => {
           onChange={handleChange} 
           placeholder="กรอกชื่อ-นามสกุลผู้บรรยาย"
           required 
+        />
+      </div>
+
+      {/* Position Input */}
+      <div>
+        <Label htmlFor="position">ตำแหน่ง/วิชาชีพ</Label>
+        <Input 
+          id="position" 
+          name="position" 
+          value={formData.position} 
+          onChange={handleChange} 
+          placeholder="เช่น อาจารย์ประจำคณะ, หัวหน้าภาควิชา, นักวิจัย"
         />
       </div>
 

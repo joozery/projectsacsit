@@ -4,7 +4,7 @@ import axios from 'axios';
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://backendsacit-42f532a9097c.herokuapp.com') + '/api';
 
 // Create axios instance with default config
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000, // 10 seconds timeout
   headers: {
@@ -280,6 +280,11 @@ export const speakersAPI = {
         formData.append('name', speakerData.name.trim());
       }
       
+      // Add speaker position
+      if (speakerData.position) {
+        formData.append('position', speakerData.position.trim());
+      }
+      
       // Add photo file if exists
       if (speakerData.photoFile && speakerData.photoFile instanceof File) {
         formData.append('photo', speakerData.photoFile);
@@ -310,6 +315,11 @@ export const speakersAPI = {
       // Add speaker name if provided
       if (speakerData.name) {
         formData.append('name', speakerData.name.trim());
+      }
+      
+      // Add speaker position if provided
+      if (speakerData.position !== undefined) {
+        formData.append('position', speakerData.position.trim());
       }
       
       // Add new photo file if provided

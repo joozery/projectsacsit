@@ -12,6 +12,7 @@ import authService from '@/services/authService';
 import ReactPlayer from 'react-player';
 import CookieConsent from '@/components/CookieConsent';
 import useSpeakers from '@/hooks/useSpeakers';
+import useExhibitions from '@/hooks/useExhibitions';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
@@ -109,6 +110,93 @@ const MobileSpeakerCarousel = ({ speakers, onSpeakerClick }) => {
       {/* Dots Indicator */}
       <div className="flex justify-center mt-4 space-x-2">
         {speakers.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-200 ${
+              index === currentIndex 
+                ? 'bg-[#533193] scale-125' 
+                : 'bg-gray-300 hover:bg-gray-400'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Mobile Exhibition Carousel Component
+const MobileExhibitionCarousel = ({ exhibitions, onExhibitionClick }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const nextSlide = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === exhibitions.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? exhibitions.length - 1 : prevIndex - 1
+    );
+  };
+
+  return (
+    <div className="relative">
+      {/* Carousel Container */}
+      <div className="relative overflow-hidden rounded-lg" style={{ height: '400px' }}>
+        <motion.div
+          className="flex transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {exhibitions.map((exhibition, index) => (
+            <div
+              key={index}
+              className="relative w-full flex-shrink-0 cursor-pointer"
+              style={{ height: '400px' }}
+              onClick={() => onExhibitionClick(exhibition)}
+            >
+              <img 
+                src={exhibition.imgSrc} 
+                alt={`${exhibition.name} - ${exhibition.title}`} 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.backgroundColor = '#f3f4f6';
+                  e.target.style.display = 'flex';
+                  e.target.style.alignItems = 'center';
+                  e.target.style.justifyContent = 'center';
+                  e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+              
+              <div className="absolute bottom-6 left-6 text-white">
+                <h3 className="text-xl font-custom-bold mb-2">{exhibition.name}</h3>
+                <p className="text-base font-custom opacity-90">{exhibition.title}</p>
+              </div>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* Navigation Buttons */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110"
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+      
+      <button
+        onClick={nextSlide}
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110"
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+
+      {/* Dots Indicator */}
+      <div className="flex justify-center mt-4 space-x-2">
+        {exhibitions.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
@@ -224,37 +312,32 @@ const LandingPage = () => {
   ];
 
   // Load exhibitions from admin system
-  const [exhibitions, setExhibitions] = useState([
+  const { exhibitions: apiExhibitions, loading: exhibitionsLoading } = useExhibitions({ 
+    autoLoad: true,
+    initialStatus: 'active'
+  });
+
+  // Fallback exhibitions data
+  const fallbackExhibitions = [
     { name: 'Traditional Weaving', title: 'ผ้าทอพื้นเมืองภาคเหนือ', imgSrc: gallery01 },
     { name: 'Ceramic Workshop', title: 'เครื่องปั้นดินเผาร่วมสมัย', imgSrc: gallery02 },
     { name: 'Wood Carving', title: 'งานแกะสลักไม้ดั้งเดิม', imgSrc: gallery03 },
     { name: 'Jewelry Making', title: 'เครื่องประดับจากวัสดุธรรมชาติ', imgSrc: gallery04 },
     { name: 'Local Handicrafts', title: 'หัตถกรรมพื้นถิ่นอาเซียน', imgSrc: gallery05 },
-  ]);
+  ];
 
-  // Load exhibitions from localStorage (admin system)
-  useEffect(() => {
-    const savedExhibitions = localStorage.getItem('sacit_exhibitions_v1');
-    if (savedExhibitions) {
-      const parsedExhibitions = JSON.parse(savedExhibitions);
-      const activeExhibitions = parsedExhibitions
-        .filter(e => e.status === 'active')
-        .slice(0, 5) // Show max 5 exhibitions
-        .map(e => ({
-          name: e.name,
-          title: e.title,
-          imgSrc: e.imageUrl || gallery01, // Use uploaded image or fallback
-          pdfUrl: e.pdfUrl,
-          pdfFileName: e.pdfFileName,
-          description: e.description
-        }));
-      
-      if (activeExhibitions.length > 0) {
-        setExhibitions(activeExhibitions);
-      }
-    }
-  }, []);
-  
+  // Transform API exhibitions to match the expected format
+  const exhibitions = apiExhibitions.length > 0 
+    ? apiExhibitions.slice(0, 5).map(exhibition => ({
+        name: exhibition.name,
+        title: 'ผู้เชี่ยวชาญด้านศิลปหัตถกรรม', // Default title
+        imgSrc: exhibition.image_url || gallery01, // Use API photo or fallback
+        pdfUrl: exhibition.pdf_url, // Add PDF URL
+        pdfFileName: exhibition.pdf_filename, // Add PDF filename
+        description: exhibition.description
+      }))
+    : fallbackExhibitions;
+
   const newsItems = [
     { title: 'ผาสาทแก้ว', description: 'ผ้าไหมทอลายโบราณ ผาสาทแก้ว', author: 'ครูณกรณ์ ตั้งหลัก', imgSrc: gallery01, type: 'ผลิตภัณฑ์', category: 'ผ้าทอพื้นเมือง' },
     { title: 'หัตถกรรมจักสาน', description: 'ตะกร้าไม้ไผ่ลวดลายประณีต', author: 'กลุ่มแม่บ้านสร้างสรรค์', imgSrc: gallery02, type: 'บทความ', category: 'งานจักสาน' },
@@ -693,54 +776,96 @@ const LandingPage = () => {
             </motion.h2>
           </div>
           
-          <div className="flex gap-0 mb-12 w-full">
-            {exhibitions.map((exhibition, index) => (
-              <motion.div 
-                key={index} 
-                className="relative group overflow-hidden flex-1"
-                style={{
-                  height: '356px',
-                  cursor: exhibition.pdfUrl ? 'pointer' : 'default'
-                }}
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                onClick={() => handleExhibitionClick(exhibition)}
-                title={exhibition.pdfUrl ? `คลิกเพื่อดู ${exhibition.pdfFileName || 'เอกสาร'}` : exhibition.description || exhibition.title}
-              >
-                <img 
-                  src={exhibition.imgSrc} 
-                  alt={`${exhibition.name} - ${exhibition.title}`} 
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                  onError={(e) => {
-                    e.target.style.backgroundColor = '#f3f4f6';
-                    e.target.style.display = 'flex';
-                    e.target.style.alignItems = 'center';
-                    e.target.style.justifyContent = 'center';
-                    e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                
-                {/* PDF Indicator */}
-                {exhibition.pdfUrl && (
-                  <div className="absolute top-4 right-4 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                    <FileText className="w-3 h-3" />
-                    PDF
-                  </div>
-                )}
-                
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-lg font-custom-bold mb-1">{exhibition.name}</h3>
-                  <p className="text-sm font-custom opacity-90">{exhibition.title}</p>
-                  {exhibition.pdfUrl && (
-                    <p className="text-xs text-green-300 mt-1">คลิกเพื่อดูเอกสาร</p>
-                  )}
+          {/* Loading State */}
+          {exhibitionsLoading && (
+            <>
+              {/* Desktop Loading */}
+              <div className="hidden md:flex gap-0 mb-12 w-full">
+                {[1, 2, 3, 4, 5].map((index) => (
+                  <motion.div 
+                    key={index} 
+                    className="relative overflow-hidden flex-1"
+                    style={{ height: '356px' }}
+                    initial={{ opacity: 0, x: 50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
+                    <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+                      <div className="text-gray-400">กำลังโหลด...</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              
+              {/* Mobile Loading */}
+              <div className="md:hidden mb-12">
+                <div className="w-full h-64 bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
+                  <div className="text-gray-400">กำลังโหลด...</div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+            </>
+          )}
+          
+          {/* Exhibitions Grid */}
+          {!exhibitionsLoading && (
+            <>
+              {/* Desktop View */}
+              <div className="hidden md:flex gap-0 mb-12 w-full">
+                {exhibitions.map((exhibition, index) => (
+                  <motion.div 
+                    key={index} 
+                    className="relative group overflow-hidden flex-1"
+                    style={{
+                      height: '356px',
+                      cursor: exhibition.pdfUrl ? 'pointer' : 'default'
+                    }}
+                    initial={{ opacity: 0, x: 50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    onClick={() => handleExhibitionClick(exhibition)}
+                    title={exhibition.pdfUrl ? `คลิกเพื่อดู ${exhibition.pdfFileName || 'เอกสาร'}` : exhibition.description || exhibition.title}
+                  >
+                    <img 
+                      src={exhibition.imgSrc} 
+                      alt={`${exhibition.name} - ${exhibition.title}`} 
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      onError={(e) => {
+                        e.target.style.backgroundColor = '#f3f4f6';
+                        e.target.style.display = 'flex';
+                        e.target.style.alignItems = 'center';
+                        e.target.style.justifyContent = 'center';
+                        e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    
+                    {/* PDF Indicator */}
+                    {exhibition.pdfUrl && (
+                      <div className="absolute top-4 right-4 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                        <FileText className="w-3 h-3" />
+                        PDF
+                      </div>
+                    )}
+                    
+                    <div className="absolute bottom-4 left-4 text-white">
+                      <h3 className="text-lg font-custom-bold mb-1">{exhibition.name}</h3>
+                      <p className="text-sm font-custom opacity-90">{exhibition.title}</p>
+                      {exhibition.pdfUrl && (
+                        <p className="text-xs text-green-300 mt-1">คลิกเพื่อดูเอกสาร</p>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              
+              {/* Mobile Carousel */}
+              <div className="md:hidden mb-12">
+                <MobileExhibitionCarousel exhibitions={exhibitions} onExhibitionClick={handleExhibitionClick} />
+              </div>
+            </>
+          )}
           
           <div className="text-center">
             <Button 
