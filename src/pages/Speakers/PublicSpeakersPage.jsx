@@ -10,7 +10,6 @@ import speaker02 from '@/assets/speker/02.jpg';
 import speaker03 from '@/assets/speker/03.jpg';
 import speaker04 from '@/assets/speker/04.jpg';
 import speaker05 from '@/assets/speker/05.jpg';
-import speaker06 from '@/assets/speker/06.jpg';
 
 const PublicSpeakersPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,7 +28,6 @@ const PublicSpeakersPage = () => {
     { name: 'ดร. สมชาย เชี่ยวชาญ', title: 'บทความ/ผลงานสร้างสรรค์', imgSrc: speaker03 },
     { name: 'คุณวนิดา สร้างสรรค์', title: 'บทความ/ผลงานสร้างสรรค์', imgSrc: speaker04 },
     { name: 'อาจารย์มานพ สืบสาน', title: 'บทความ/ผลงานสร้างสรรค์', imgSrc: speaker05 },
-    { name: 'คุณรัตนา ต่อยอด', title: 'บทความ/ผลงานสร้างสรรค์', imgSrc: speaker06 },
   ];
 
   // Transform API speakers to match the expected format
