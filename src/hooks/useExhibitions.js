@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { exhibitionsAPI } from '../services/api';
 import exhibitionService from '../services/exhibitionService';
 
@@ -15,6 +15,7 @@ const useExhibitions = (options = {}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastFetch, setLastFetch] = useState(null);
+  const hasLoaded = useRef(false);
 
   // Load exhibitions
   const loadExhibitions = useCallback(async (params = {}) => {
@@ -62,7 +63,7 @@ const useExhibitions = (options = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [initialStatus, onError]);
+  }, []); // Remove dependencies to prevent infinite loop
 
   // Get exhibition by ID
   const getExhibition = useCallback(async (id) => {
@@ -125,12 +126,13 @@ const useExhibitions = (options = {}) => {
     setError(null);
   }, []);
 
-  // Auto load on mount
+  // Auto load on mount (only once)
   useEffect(() => {
-    if (autoLoad) {
+    if (autoLoad && !hasLoaded.current) {
+      hasLoaded.current = true;
       loadExhibitions();
     }
-  }, [autoLoad, loadExhibitions]);
+  }, [autoLoad]); // Only depend on autoLoad
 
   return {
     exhibitions,
