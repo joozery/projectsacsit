@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import agenda071 from '/src/assets/agenda/saciteng.png';
-import agenda072 from '/src/assets/agenda/072.png';
 import agenda081 from '/src/assets/agenda/saciteng2.png';
-import agenda082 from '/src/assets/agenda/082.png';
-import agenda083 from '/src/assets/agenda/083.png';
-import agenda084 from '/src/assets/agenda/084.png';
 
 const Agenda = () => {
   const [activeTab, setActiveTab] = useState('day1');
@@ -163,14 +159,7 @@ const Agenda = () => {
                   <div className="w-full">
                     <img 
                       src={agenda071} 
-                      alt="Day 1 Agenda - Part 1"
-                      className="w-full h-auto rounded-lg shadow-lg"
-                    />
-                  </div>
-                  <div className="w-full">
-                    <img 
-                      src={agenda072} 
-                      alt="Day 1 Agenda - Part 2"
+                      alt="Day 1 Agenda"
                       className="w-full h-auto rounded-lg shadow-lg"
                     />
                   </div>
@@ -185,28 +174,7 @@ const Agenda = () => {
                   <div className="w-full">
                     <img 
                       src={agenda081} 
-                      alt="Day 2 Agenda - Part 1"
-                      className="w-full h-auto rounded-lg shadow-lg"
-                    />
-                  </div>
-                  <div className="w-full">
-                    <img 
-                      src={agenda082} 
-                      alt="Day 2 Agenda - Part 2"
-                      className="w-full h-auto rounded-lg shadow-lg"
-                    />
-                  </div>
-                  <div className="w-full">
-                    <img 
-                      src={agenda083} 
-                      alt="Day 2 Agenda - Part 3"
-                      className="w-full h-auto rounded-lg shadow-lg"
-                    />
-                  </div>
-                  <div className="w-full">
-                    <img 
-                      src={agenda084} 
-                      alt="Day 2 Agenda - Part 4"
+                      alt="Day 2 Agenda"
                       className="w-full h-auto rounded-lg shadow-lg"
                     />
                   </div>
