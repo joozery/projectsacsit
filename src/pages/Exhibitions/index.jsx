@@ -82,17 +82,43 @@ const ExhibitionsPage = () => {
   const loadExhibitions = async () => {
     try {
       setLoading(true);
-      const data = await exhibitionService.getExhibitions();
-      setExhibitions(data);
+      console.log('🔄 Loading exhibitions...');
+      const response = await exhibitionService.getExhibitions();
+      console.log('📥 Raw API response:', response);
+      
+      // ตรวจสอบ response format และจัดการข้อมูลให้ถูกต้อง
+      let exhibitionsData = [];
+      
+      if (response && response.success && response.data) {
+        // ถ้า response มี format { success: true, data: [...] }
+        exhibitionsData = response.data;
+        console.log('✅ Using response.data format');
+      } else if (Array.isArray(response)) {
+        // ถ้า response เป็น array โดยตรง
+        exhibitionsData = response;
+        console.log('✅ Using direct array format');
+      } else if (response && Array.isArray(response.data)) {
+        // กรณีอื่นๆ ที่อาจมี data เป็น array
+        exhibitionsData = response.data;
+        console.log('✅ Using response.data array format');
+      } else {
+        // fallback เป็น array ว่าง
+        console.warn('❌ Unexpected response format:', response);
+        exhibitionsData = [];
+      }
+      
+      console.log('📊 Processed exhibitions count:', exhibitionsData.length);
+      console.log('📋 Exhibitions data:', exhibitionsData);
+      setExhibitions(exhibitionsData);
     } catch (error) {
-      console.error('Error loading exhibitions:', error);
+      console.error('❌ Error loading exhibitions:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
         description: "ไม่สามารถโหลดข้อมูลนิทรรศการได้",
         variant: "destructive"
       });
-      // Fallback to initial data if API fails
-      setExhibitions(initialExhibitions);
+      // Fallback to empty array if API fails
+      setExhibitions([]);
     } finally {
       setLoading(false);
     }
@@ -111,12 +137,16 @@ const ExhibitionsPage = () => {
   const confirmDelete = async () => {
     if (deletingExhibition) {
       try {
+        console.log('🗑️ Deleting exhibition:', deletingExhibition.id, deletingExhibition.name);
         await exhibitionService.deleteExhibition(deletingExhibition.id);
+        console.log('✅ Delete API call successful');
         toast({ title: "ลบนิทรรศการสำเร็จ!" });
+        console.log('🔄 Refreshing exhibitions list...');
         await loadExhibitions(); // Refresh list
+        console.log('✅ Exhibitions list refreshed');
         setDeletingExhibition(null);
       } catch (error) {
-        console.error('Error deleting exhibition:', error);
+        console.error('❌ Error deleting exhibition:', error);
         toast({
           title: "เกิดข้อผิดพลาด",
           description: "ไม่สามารถลบนิทรรศการได้",
@@ -126,11 +156,14 @@ const ExhibitionsPage = () => {
     }
   };
   
-  const filteredExhibitions = exhibitions.filter(e =>
-    e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    e.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    e.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // ตรวจสอบว่า exhibitions เป็น array ก่อนใช้ filter
+  const filteredExhibitions = Array.isArray(exhibitions) 
+    ? exhibitions.filter(e =>
+        e.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        e.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        e.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   return (
     <>
