@@ -25,6 +25,7 @@ import Login from '@/pages/Login';
 import AgendaPage from '@/pages/Agenda/index';
 import AdminAgenda from '@/pages/Agenda/AdminAgenda';
 import SpeakersPage from '@/pages/Speakers/index';
+import PublicSpeakersPage from '@/pages/Speakers/PublicSpeakersPage';
 import AttendeesPage from '@/pages/Attendees/index';
 import CheckInPage from '@/pages/CheckIn/index';
 import Account from '@/pages/Account';
@@ -106,6 +107,8 @@ const AppWithNavbar = () => {
         <Route path="/sacit-symposium-en" element={<SacitSymposiumEN />} />
         <Route path="/sacit-symposium-th" element={<SacitSymposiumTH />} />
         <Route path="/agenda" element={<AgendaPage />} />
+        <Route path="/speakers" element={<PublicSpeakersPage />} />
+        <Route path="/speakers-admin" element={<SpeakersPage />} />
         <Route path="/news" element={<CreativeWorks />} />
         <Route path="/news-old" element={<News />} />
         <Route path="/exhibition" element={<Exhibition />} />
