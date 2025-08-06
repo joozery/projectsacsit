@@ -38,6 +38,274 @@ import gallery07 from '@/assets/gallery/07.jpg';
 import gallery08 from '@/assets/gallery/08.jpg';
 import gallery09 from '@/assets/gallery/09.jpg';
 
+// Live Exhibition Slideshow Component for Home - 6 Cards at a time
+const LiveExhibitionSlideshowHome = ({ exhibitions, onExhibitionClick }) => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentMobileSlide, setCurrentMobileSlide] = useState(0); // Separate state for mobile
+  const [isPlaying, setIsPlaying] = useState(false); // Disable auto-play by default
+  const [autoPlayInterval, setAutoPlayInterval] = useState(null);
+  
+  const cardsPerSlide = 6;
+  const cardsPerSlideMobile = 2;
+  const totalSlides = Math.ceil(exhibitions.length / cardsPerSlide);
+  const totalSlidesMobile = Math.ceil(exhibitions.length / cardsPerSlideMobile);
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (isPlaying) {
+      const interval = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % totalSlides);
+      }, 8000); // Change slide every 8 seconds (slower)
+      setAutoPlayInterval(interval);
+    } else {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        setAutoPlayInterval(null);
+      }
+    }
+
+    return () => {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+      }
+    };
+  }, [isPlaying, totalSlides]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+  };
+
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+  };
+
+  // Mobile navigation functions
+  const nextMobileSlide = () => {
+    setCurrentMobileSlide((prev) => (prev + 1) % exhibitions.length);
+  };
+
+  const prevMobileSlide = () => {
+    setCurrentMobileSlide((prev) => (prev - 1 + exhibitions.length) % exhibitions.length);
+  };
+
+  const goToMobileSlide = (index) => {
+    setCurrentMobileSlide(index);
+  };
+
+  const toggleAutoPlay = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  // Get current cards to display
+  const getCurrentCards = () => {
+    const startIndex = currentSlide * cardsPerSlide;
+    return exhibitions.slice(startIndex, startIndex + cardsPerSlide);
+  };
+
+  // Get current cards for mobile
+  const getCurrentCardsMobile = () => {
+    const startIndex = currentSlide * cardsPerSlideMobile;
+    return exhibitions.slice(startIndex, startIndex + cardsPerSlideMobile);
+  };
+
+  return (
+    <div className="relative w-full">
+      {/* Desktop Slideshow Container */}
+      <div className="hidden md:block relative overflow-hidden" style={{ height: '356px' }}>
+        <motion.div
+          key={currentSlide}
+          initial={{ opacity: 0, x: 20 }} // Reduced movement
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }} // Reduced movement
+          transition={{ duration: 0.3 }} // Faster transition
+          className="absolute inset-0"
+        >
+          {/* Flex layout like Speaker cards */}
+          <div className="flex gap-0 w-full h-full">
+            {getCurrentCards().map((exhibition, index) => (
+              <motion.div
+                key={index}
+                className="relative group overflow-hidden flex-1 cursor-pointer"
+                style={{ height: '356px' }}
+                initial={{ opacity: 0, y: 10 }} // Reduced movement
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: index * 0.05 }} // Faster and less delay
+                onClick={() => onExhibitionClick(exhibition)}
+                title={exhibition.pdfUrl ? `คลิกเพื่อดู ${exhibition.pdfFileName || 'เอกสาร'}` : `ข้อมูลศิลปิน: ${exhibition.name}`}
+              >
+                <img 
+                  src={exhibition.imgSrc} 
+                  alt={`${exhibition.name} - ${exhibition.title}`} 
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  onError={(e) => {
+                    e.target.style.backgroundColor = '#f3f4f6';
+                    e.target.style.display = 'flex';
+                    e.target.style.alignItems = 'center';
+                    e.target.style.justifyContent = 'center';
+                    e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                
+                {/* PDF Indicator */}
+                {exhibition.pdfUrl && (
+                  <div className="absolute top-4 right-4 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                    <FileText className="w-3 h-3" />
+                    PDF
+                  </div>
+                )}
+                
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h3 className="text-lg font-custom-bold mb-1">{exhibition.name}</h3>
+                  <p className="text-sm font-custom opacity-90">{exhibition.title}</p>
+                  {exhibition.position && (
+                    <p className="text-xs text-gray-300 mt-1">{exhibition.position}</p>
+                  )}
+                  {exhibition.pdfUrl && (
+                    <p className="text-xs text-green-300 mt-1">คลิกเพื่อดูเอกสาร</p>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Mobile Slideshow Container */}
+      <div className="md:hidden relative">
+        {/* Carousel Container */}
+        <div className="relative overflow-hidden rounded-lg" style={{ height: '400px' }}>
+          <motion.div
+            className="flex transition-transform duration-300 ease-in-out"
+            style={{ transform: `translateX(-${currentMobileSlide * 100}%)` }}
+          >
+            {exhibitions.map((exhibition, index) => (
+              <div
+                key={index}
+                className="relative w-full flex-shrink-0 cursor-pointer"
+                style={{ height: '400px' }}
+                onClick={() => onExhibitionClick(exhibition)}
+                title={exhibition.pdfUrl ? `คลิกเพื่อดู ${exhibition.pdfFileName || 'เอกสาร'}` : `ข้อมูลศิลปิน: ${exhibition.name}`}
+              >
+                <img 
+                  src={exhibition.imgSrc} 
+                  alt={`${exhibition.name} - ${exhibition.title}`} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.backgroundColor = '#f3f4f6';
+                    e.target.style.display = 'flex';
+                    e.target.style.alignItems = 'center';
+                    e.target.style.justifyContent = 'center';
+                    e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                
+                {/* PDF Indicator */}
+                {exhibition.pdfUrl && (
+                  <div className="absolute top-4 right-4 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                    <FileText className="w-3 h-3" />
+                    PDF
+                  </div>
+                )}
+                
+                <div className="absolute bottom-6 left-6 text-white">
+                  <h3 className="text-xl font-custom-bold mb-2">{exhibition.name}</h3>
+                  <p className="text-base font-custom opacity-90">{exhibition.title}</p>
+                  {exhibition.position && (
+                    <p className="text-sm text-gray-300 mt-1">{exhibition.position}</p>
+                  )}
+                  {exhibition.pdfUrl && (
+                    <p className="text-sm text-green-300 mt-1">คลิกเพื่อดูเอกสาร</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Navigation Buttons */}
+        <button
+          onClick={prevMobileSlide}
+          className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        
+        <button
+          onClick={nextMobileSlide}
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+
+        {/* Dots Indicator */}
+        <div className="flex justify-center mt-4 space-x-2">
+          {exhibitions.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToMobileSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                index === currentMobileSlide 
+                  ? 'bg-[#533193] scale-125' 
+                  : 'bg-gray-300 hover:bg-gray-400'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Navigation Controls - Desktop Only */}
+      <div className="hidden md:block absolute top-1/2 left-4 transform -translate-y-1/2">
+        <button
+          onClick={prevSlide}
+          className="p-3 bg-white bg-opacity-80 rounded-full shadow-lg hover:bg-opacity-100 transition-all"
+        >
+          <ChevronLeft className="w-6 h-6 text-purple-600" />
+        </button>
+      </div>
+
+      <div className="hidden md:block absolute top-1/2 right-4 transform -translate-y-1/2">
+        <button
+          onClick={nextSlide}
+          className="p-3 bg-white bg-opacity-80 rounded-full shadow-lg hover:bg-opacity-100 transition-all"
+        >
+          <ChevronRight className="w-6 h-6 text-purple-600" />
+        </button>
+      </div>
+
+      {/* Slide Indicators - Desktop Only */}
+      <div className="hidden md:block absolute bottom-4 left-1/2 transform -translate-x-1/2">
+        <div className="flex gap-2">
+          {Array.from({ length: totalSlides }, (_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all ${
+                index === currentSlide
+                  ? 'bg-purple-600'
+                  : 'bg-gray-300 hover:bg-gray-400'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Slide Counter - Desktop Only */}
+      <div className="hidden md:block absolute bottom-4 right-4">
+        <span className="px-3 py-1 bg-white bg-opacity-80 rounded-full text-sm font-custom-bold">
+          {currentSlide + 1} / {totalSlides}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 // Mobile Speaker Carousel Component
 const MobileSpeakerCarousel = ({ speakers, onSpeakerClick }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -185,7 +453,7 @@ const MobileExhibitionCarousel = ({ exhibitions, onExhibitionClick }) => {
                   <p className="text-sm text-gray-300 mb-1">{exhibition.position}</p>
                 )}
                 {exhibition.pdfUrl && (
-                  <p className="text-xs text-green-300">คลิกเพื่อดูเอกสาร</p>
+                  <p className="text-sm text-green-300">คลิกเพื่อดูเอกสาร</p>
                 )}
               </div>
             </div>
@@ -343,27 +611,48 @@ const LandingPage = () => {
     initialStatus: 'active'
   });
 
-  // Fallback exhibitions data
+  // Fallback exhibitions data - 12 items for slideshow
   const fallbackExhibitions = [
-    { name: 'Traditional Weaving', title: 'ผ้าทอพื้นเมืองภาคเหนือ', position: 'ห้องแสดงผลงาน A', imgSrc: gallery01 },
-    { name: 'Ceramic Workshop', title: 'เครื่องปั้นดินเผาร่วมสมัย', position: 'ห้องแสดงผลงาน B', imgSrc: gallery02 },
-    { name: 'Wood Carving', title: 'งานแกะสลักไม้ดั้งเดิม', position: 'ห้องแสดงผลงาน C', imgSrc: gallery03 },
-    { name: 'Jewelry Making', title: 'เครื่องประดับจากวัสดุธรรมชาติ', position: 'ห้องแสดงผลงาน D', imgSrc: gallery04 },
-    { name: 'Local Handicrafts', title: 'หัตถกรรมพื้นถิ่นอาเซียน', position: 'ห้องแสดงผลงาน E', imgSrc: gallery05 },
+    { name: 'Rafie Syazawan Arpandi', title: 'ผู้ก่อตั้ง Sukaseni, Malaysia', position: 'ศิลปินจากมาเลเซีย', imgSrc: gallery01 },
+    { name: 'Fanzura Banu', title: 'ผู้แทนจาก National Heritage Board (NHB)', position: 'ผู้แทนจากสิงคโปร์', imgSrc: gallery02 },
+    { name: 'Lee Jeongeun', title: 'ผู้แทนจากศูนย์วัฒนธรรมแห่งเอเชีย National Asian Culture Center (ACC)', position: 'ผู้แทนจากเกาหลีใต้', imgSrc: gallery03 },
+    { name: 'Tiao David Somsanith', title: 'ศิลปินและผู้เชี่ยวชาญด้านการสื่อสารวัฒนธรรมของ สปป.ลาว', position: 'ศิลปินจากลาว', imgSrc: gallery04 },
+    { name: 'Maung Maung', title: 'ประธานสมาคมเครื่องรักเมียนมา และช่างฝีมือเครื่องรัก พม่า', position: 'ศิลปินจากเมียนมา', imgSrc: gallery05 },
+    { name: 'Ahmad Fauzi', title: 'ศิลปินเครื่องปั้นดินเผา, Indonesia', position: 'ศิลปินจากอินโดนีเซีย', imgSrc: gallery06 },
+    { name: 'Nguyen Van Minh', title: 'ช่างฝีมือเครื่องเขิน, Vietnam', position: 'ศิลปินจากเวียดนาม', imgSrc: gallery07 },
+    { name: 'Sok Dara', title: 'ศิลปินผ้าทอ, Cambodia', position: 'ศิลปินจากกัมพูชา', imgSrc: gallery08 },
+    { name: 'Maria Santos', title: 'ผู้เชี่ยวชาญงานหัตถกรรม, Philippines', position: 'ศิลปินจากฟิลิปปินส์', imgSrc: gallery09 },
+    { name: 'Abdul Rahman', title: 'ศิลปินเครื่องเงิน, Brunei', position: 'ศิลปินจากบรูไน', imgSrc: gallery01 },
+    { name: 'Siti Aminah', title: 'ช่างฝีมือเครื่องจักสาน, Malaysia', position: 'ศิลปินจากมาเลเซีย', imgSrc: gallery02 },
+    { name: 'Khin Zaw', title: 'ศิลปินเครื่องรัก, Myanmar', position: 'ศิลปินจากเมียนมา', imgSrc: gallery03 },
   ];
 
-  // Transform API exhibitions to match the expected format
+  // Transform API exhibitions to match the expected format, filter out specific category, and show up to 12 items
   const exhibitions = apiExhibitions.length > 0 
-    ? apiExhibitions.slice(0, 5).map(exhibition => ({
+    ? apiExhibitions
+        .filter(exhibition => !exhibition.title?.includes('ช่างสิบหมู่ งานลงรักประดับมุก'))
+        .slice(0, 12) // Show up to 12 items
+        .map((exhibition, index) => ({
+          id: index + 1,
+          name: exhibition.name,
+          title: exhibition.title, // Use actual title from API
+          position: exhibition.position, // Add position information
+          imgSrc: exhibition.image_url || gallery01, // Use API photo or fallback
+          pdfUrl: exhibition.pdf_url, // Add PDF URL
+          pdfFileName: exhibition.pdf_filename, // Add PDF filename
+          description: exhibition.description
+        }))
+        .sort((a, b) => a.id - b.id) // Sort by ID to maintain order
+    : fallbackExhibitions.slice(0, 12).map((exhibition, index) => ({
+        id: index + 1,
         name: exhibition.name,
-        title: exhibition.title, // Use actual title from API
-        position: exhibition.position, // Add position information
-        imgSrc: exhibition.image_url || gallery01, // Use API photo or fallback
-        pdfUrl: exhibition.pdf_url, // Add PDF URL
-        pdfFileName: exhibition.pdf_filename, // Add PDF filename
-        description: exhibition.description
-      }))
-    : fallbackExhibitions;
+        title: exhibition.title,
+        position: exhibition.position,
+        imgSrc: exhibition.imgSrc,
+        pdfUrl: null,
+        pdfFileName: null,
+        description: null
+      })); // Show up to 12 fallback items
 
   const newsItems = [
     { title: 'ผาสาทแก้ว', description: 'ผ้าไหมทอลายโบราณ ผาสาทแก้ว', author: 'ครูณกรณ์ ตั้งหลัก', imgSrc: gallery01, type: 'ผลิตภัณฑ์', category: 'ผ้าทอพื้นเมือง' },
@@ -766,96 +1055,53 @@ const LandingPage = () => {
           {exhibitionsLoading && (
             <>
               {/* Desktop Loading */}
-              <div className="hidden md:flex gap-0 mb-12 w-full">
-                {[1, 2, 3, 4, 5].map((index) => (
-                  <motion.div 
-                    key={index} 
-                    className="relative overflow-hidden flex-1"
-                    style={{ height: '356px' }}
-                    initial={{ opacity: 0, x: 50 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                  >
-                    <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
-                      <div className="text-gray-400">กำลังโหลด...</div>
-                    </div>
-                  </motion.div>
-                ))}
+              <div className="hidden md:block mb-12">
+                <div className="flex gap-0 w-full" style={{ height: '356px' }}>
+                  {[1, 2, 3, 4, 5, 6].map((index) => (
+                    <motion.div 
+                      key={index} 
+                      className="relative overflow-hidden flex-1"
+                      initial={{ opacity: 0, x: 50 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+                        <div className="text-gray-400">กำลังโหลด...</div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
               
               {/* Mobile Loading */}
               <div className="md:hidden mb-12">
-                <div className="w-full h-64 bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
-                  <div className="text-gray-400">กำลังโหลด...</div>
+                <div className="flex gap-0 w-full" style={{ height: '280px' }}>
+                  {[1, 2].map((index) => (
+                    <motion.div 
+                      key={index} 
+                      className="relative overflow-hidden flex-1"
+                      initial={{ opacity: 0, x: 50 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+                        <div className="text-gray-400">กำลังโหลด...</div>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
             </>
           )}
           
-          {/* Exhibitions Grid */}
-          {!exhibitionsLoading && (
-            <>
-              {/* Desktop View */}
-              <div className="hidden md:flex gap-0 mb-12 w-full">
-                {exhibitions.map((exhibition, index) => (
-                  <motion.div 
-                    key={index} 
-                    className="relative group overflow-hidden flex-1"
-                    style={{
-                      height: '356px',
-                      cursor: exhibition.pdfUrl ? 'pointer' : 'default'
-                    }}
-                    initial={{ opacity: 0, x: 50 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    onClick={() => handleExhibitionClick(exhibition)}
-                    title={exhibition.pdfUrl ? `คลิกเพื่อดู ${exhibition.pdfFileName || 'เอกสาร'}` : exhibition.description || exhibition.title}
-                  >
-                    <img 
-                      src={exhibition.imgSrc} 
-                      alt={`${exhibition.name} - ${exhibition.title}`} 
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      onError={(e) => {
-                        e.target.style.backgroundColor = '#f3f4f6';
-                        e.target.style.display = 'flex';
-                        e.target.style.alignItems = 'center';
-                        e.target.style.justifyContent = 'center';
-                        e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                    
-                    {/* PDF Indicator */}
-                    {exhibition.pdfUrl && (
-                      <div className="absolute top-4 right-4 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                        <FileText className="w-3 h-3" />
-                        PDF
-                      </div>
-                    )}
-                    
-                    <div className="absolute bottom-4 left-4 text-white">
-                      <h3 className="text-lg font-custom-bold mb-1">{exhibition.name}</h3>
-                      <p className="text-sm font-custom opacity-90">{exhibition.title}</p>
-                      {exhibition.position && (
-                        <p className="text-xs text-gray-300 mt-1">{exhibition.position}</p>
-                      )}
-                      {exhibition.pdfUrl && (
-                        <p className="text-xs text-green-300 mt-1">คลิกเพื่อดูเอกสาร</p>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-              
-              {/* Mobile Carousel */}
-              <div className="md:hidden mb-12">
-                <MobileExhibitionCarousel exhibitions={exhibitions} onExhibitionClick={handleExhibitionClick} />
-              </div>
-            </>
+          {/* Live Exhibition Slideshow - 6 Cards */}
+          {!exhibitionsLoading && exhibitions.length > 0 && (
+            <div className="mb-12">
+              <LiveExhibitionSlideshowHome exhibitions={exhibitions} onExhibitionClick={handleExhibitionClick} />
+            </div>
           )}
-          
         </section>
         
         {/* News Section */}

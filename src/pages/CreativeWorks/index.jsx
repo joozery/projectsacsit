@@ -127,6 +127,24 @@ const CreativeWorks = () => {
                   fontFamily: 'Prompt'
                 }}>ผลงานสร้างสรรค์</span>
               </Link>
+              <Link to="/creative-works/lacquer-legacy" className="cursor-pointer">
+                <span style={{
+                  background: 'var(--gra-1, linear-gradient(90deg, #BFB4EE 0%, #B3FFD1 100%))',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  fontFamily: 'Prompt'
+                }}>Main Exhibition</span>
+              </Link>
+              <Link to="/creative-works/works" className="cursor-pointer">
+                <span style={{
+                  background: 'var(--gra-1, linear-gradient(90deg, #BFB4EE 0%, #B3FFD1 100%))',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  fontFamily: 'Prompt'
+                }}>ผลงาน</span>
+              </Link>
               <Link to="/images" className="cursor-pointer">
                 <span style={{
                   background: 'var(--gra-1, linear-gradient(90deg, #BFB4EE 0%, #B3FFD1 100%))',
@@ -166,6 +184,36 @@ const CreativeWorks = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12">
+        {/* Sub Menu */}
+        <div className="mb-8">
+          <div className="flex justify-center items-center gap-8 mb-6">
+            <Link to="/creative-works/lacquer-legacy" className="cursor-pointer">
+              <span style={{
+                color: '#533193',
+                fontFamily: 'Prompt',
+                fontSize: '18px',
+                fontWeight: '600',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                background: 'linear-gradient(90deg, #BFB4EE 0%, #B3FFD1 100%)',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}>✦ Main Exhibition</span>
+            </Link>
+            <Link to="/creative-works/works" className="cursor-pointer">
+              <span style={{
+                color: '#533193',
+                fontFamily: 'Prompt',
+                fontSize: '18px',
+                fontWeight: '600',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                background: 'linear-gradient(90deg, #BFB4EE 0%, #B3FFD1 100%)',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}>ผลงาน</span>
+            </Link>
+          </div>
+        </div>
+
         {/* Creative Works Grid */}
         <div className="mb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 justify-items-center">

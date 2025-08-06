@@ -33,9 +33,9 @@ const Footer = () => (
           <div className="mt-6">
             <div className="font-bold mb-3 text-white">เนื้อหากิจกรรม</div>
             <ul className="space-y-1 text-xs opacity-90">
-              <li><Link to="/creative-works/lacquerware" className="hover:underline">Main Exhibition: Lacquer Legacy</Link></li>
+              <li><Link to="/creative-works/lacquer-legacy" className="hover:underline">Main Exhibition: Lacquer Legacy</Link></li>
               <li><Link to="/creative-works/partners" className="hover:underline">Creative Works Exhibition (Collaborative Partners)</Link></li>
-              <li><Link to="/creative-works" className="hover:underline">Live Exhibition (Demonstrative Area)</Link></li>
+              <li><Link to="/creative-works/live-exhibition" className="hover:underline">Live Exhibition (Demonstrative Area)</Link></li>
             </ul>
           </div>
         </div>

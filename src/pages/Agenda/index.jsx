@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import agenda071 from '/src/assets/agenda/071.png';
+import agenda071 from '/src/assets/agenda/saciteng.png';
 import agenda072 from '/src/assets/agenda/072.png';
-import agenda081 from '/src/assets/agenda/081.png';
+import agenda081 from '/src/assets/agenda/saciteng2.png';
 import agenda082 from '/src/assets/agenda/082.png';
 import agenda083 from '/src/assets/agenda/083.png';
 import agenda084 from '/src/assets/agenda/084.png';

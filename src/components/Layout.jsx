@@ -89,6 +89,7 @@ const Layout = ({ children }) => {
     { icon: Home, label: 'หน้าหลัก', path: '/admin/dashboard', description: 'ภาพรวมและสถิติ' },
     { icon: CalendarDays, label: 'Agenda', path: '/admin/agenda', description: 'จัดการกำหนดการ' },
     { icon: Mic, label: 'ผู้บรรยาย', path: '/admin/speakers', description: 'จัดการข้อมูลผู้บรรยาย' },
+    { icon: Palette, label: 'ผลงานสร้างสรรค์', path: '/admin/works', description: 'จัดการผลงานสร้างสรรค์' },
     { icon: Eye, label: 'นิทรรศการ', path: '/admin/exhibitions', description: 'จัดการ Live Exhibition และพื้นที่สาธิต' },
     { icon: UserCheck, label: 'รายชื่อผู้เข้าร่วม', path: '/admin/attendees', description: 'เช็ครายชื่อผู้เข้าร่วมงาน' },
     { icon: TrendingUp, label: 'Google Analytics', path: '/admin/google-analytics', description: 'สถิติการเข้าชมเว็บ' },
