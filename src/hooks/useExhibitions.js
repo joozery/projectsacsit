@@ -29,9 +29,11 @@ const useExhibitions = (options = {}) => {
       
       console.log('🔄 Loading exhibitions with params:', defaultParams);
       const result = await exhibitionService.getExhibitions(defaultParams);
+      console.log('📥 Raw API result:', result);
       
       const exhibitionsData = result.data || result || [];
       console.log('📊 Setting exhibitions data:', exhibitionsData);
+      console.log('📊 Exhibitions count:', exhibitionsData.length);
       
       setExhibitions(exhibitionsData);
       setLastFetch(new Date());
@@ -39,7 +41,7 @@ const useExhibitions = (options = {}) => {
       
       return exhibitionsData;
     } catch (err) {
-      console.error('Error loading exhibitions:', err);
+      console.error('❌ Error loading exhibitions:', err);
       let errorMessage = 'เกิดข้อผิดพลาดในการโหลดข้อมูลนิทรรศการ';
       
       if (err.code === 'ECONNABORTED') {
