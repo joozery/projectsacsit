@@ -40,6 +40,7 @@ import LacquerwarePage from '@/pages/CreativeWorks/LacquerwarePage';
 import HandicraftsPage from '@/pages/CreativeWorks/HandicraftsPage';
 import AppliedHandicraftsPage from '@/pages/CreativeWorks/AppliedHandicraftsPage';
 import LocalHandicraftsPage from '@/pages/CreativeWorks/LocalHandicraftsPage';
+import CollaborativePartners from '@/pages/CreativeWorks/CollaborativePartners';
 import Images from '@/pages/News/Images';
 import Videos from '@/pages/News/Videos';
 import Proceeding from '@/pages/News/Proceeding';
@@ -113,6 +114,7 @@ const AppWithNavbar = () => {
         <Route path="/creative-works/handicrafts" element={<HandicraftsPage />} />
         <Route path="/creative-works/applied" element={<AppliedHandicraftsPage />} />
         <Route path="/creative-works/local" element={<LocalHandicraftsPage />} />
+        <Route path="/creative-works/partners" element={<CollaborativePartners />} />
         <Route path="/images" element={<Images />} />
         <Route path="/videos" element={<Videos />} />
         <Route path="/proceeding" element={<Proceeding />} />

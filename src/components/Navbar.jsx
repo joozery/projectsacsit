@@ -362,7 +362,9 @@ const Navbar = ({
 
         <h4 className="text-lg font-semibold mt-6">เนื้อหานิทรรศการ</h4>
         <div className="cursor-pointer hover:text-[#B3FFD1] transition">Main Exhibition: Lacquer Legacy</div>
-        <div className="cursor-pointer hover:text-[#B3FFD1] transition">Creative Works Exhibition (Collaborative Partners)</div>
+        <Link to="/creative-works/partners" onClick={() => setMenuOpen(false)}>
+          <div className="cursor-pointer hover:text-[#B3FFD1] transition">Creative Works Exhibition (Collaborative Partners)</div>
+        </Link>
         <div className="cursor-pointer hover:text-[#B3FFD1] transition">Live Exhibition (Demonstrative Area)</div>
       </div>
 

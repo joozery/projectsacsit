@@ -61,6 +61,15 @@ const CreativeWorks = () => {
       image: cover5,
       count: 20,
       path: '/creative-works/local'
+    },
+    {
+      id: 'partners',
+      title: '05 Collaborative Partners',
+      subtitle: 'พันธมิตรทางวิชาการ',
+      description: 'มหาวิทยาลัยและสถาบันการศึกษาที่ร่วมกันจัดนิทรรศการผลงานสร้างสรรค์',
+      image: cover5,
+      count: 3,
+      path: '/creative-works/partners'
     }
   ];
 

@@ -11,13 +11,14 @@ import Lightbox from '@/components/Lightbox';
 import authService from '@/services/authService';
 import ReactPlayer from 'react-player';
 import CookieConsent from '@/components/CookieConsent';
+import useSpeakers from '@/hooks/useSpeakers';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
 import kvSymposium from '@/assets/KV Symposium.svg';
 import heroslideImage from '@/assets/heroslide/heroslide.jpg';
 
-// Speaker images
+// Speaker images (fallback)
 import speaker01 from '@/assets/speker/01.jpg';
 import speaker02 from '@/assets/speker/02.jpg';
 import speaker03 from '@/assets/speker/03.jpg';
@@ -37,98 +38,82 @@ import gallery09 from '@/assets/gallery/09.jpg';
 import bghero from '@/assets/bghero.mp4';
 
 const LandingPage = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [lightboxImage, setLightboxImage] = useState(null);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  
-  const galleryImagesArray = [gallery01, gallery02, gallery03, gallery04, gallery05, gallery06, gallery07, gallery08, gallery09];
-  
-  const handleFeatureClick = () => {
-    // In a real app, this would trigger a toast notification.
-    // For this example, it does nothing as Toaster is part of Admin layout.
-    console.log("Feature not implemented yet.");
-  };
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [currentImage, setCurrentImage] = useState(null);
 
-  const handleExhibitionClick = (exhibition) => {
-    if (exhibition.pdfUrl) {
-      // เปิด PDF ในแท็บใหม่
-      const link = document.createElement('a');
-      link.href = exhibition.pdfUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.download = exhibition.pdfFileName || `${exhibition.name}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      // ถ้าไม่มี PDF ให้แสดง alert หรือ modal ข้อมูล
-      console.log("Exhibition details:", exhibition);
-      // สามารถเพิ่มฟังก์ชันแสดง modal รายละเอียดได้ที่นี่
-    }
-  };
+  // Use speakers API
+  const { speakers: apiSpeakers, loading: speakersLoading } = useSpeakers({ 
+    autoLoad: true,
+    initialStatus: 'active'
+  });
 
-
-
-  // Close mobile menu when clicking outside
-  const handleOutsideClick = (e) => {
-    if (mobileMenuOpen && !e.target.closest('.mobile-menu-container')) {
-      setMobileMenuOpen(false);
-    }
-  };
-
-  React.useEffect(() => {
-    document.addEventListener('click', handleOutsideClick);
-    return () => document.removeEventListener('click', handleOutsideClick);
-  }, [mobileMenuOpen]);
-
-  const openLightbox = (image, index) => {
-    setLightboxImage(image);
-    setLightboxIndex(index);
-  };
-
-  const closeLightbox = () => {
-    setLightboxImage(null);
-  };
-
-  const nextImage = () => {
-    console.log('Next image clicked, current index:', lightboxIndex);
-    const nextIndex = (lightboxIndex + 1) % galleryImagesArray.length;
-    console.log('Next index:', nextIndex);
-    setLightboxIndex(nextIndex);
-    setLightboxImage(galleryImagesArray[nextIndex]);
-  };
-
-  const prevImage = () => {
-    console.log('Prev image clicked, current index:', lightboxIndex);
-    const prevIndex = lightboxIndex === 0 ? galleryImagesArray.length - 1 : lightboxIndex - 1;
-    console.log('Prev index:', prevIndex);
-    setLightboxIndex(prevIndex);
-    setLightboxImage(galleryImagesArray[prevIndex]);
-  };
-
-  const agenda = {
-    day1: [
-      { time: '8.30 a.m.', description: 'Breakfast and register' },
-      { time: '10.00 a.m.', description: 'General sessions' },
-      { time: '12.00 a.m.', description: 'Lunch' },
-      { time: '1.30 p.m.', description: 'General sessions' },
-    ],
-    day2: [
-      { time: '9.00 a.m.', description: 'Workshops' },
-      { time: '11.00 a.m.', description: 'Keynote speaker' },
-      { time: '1.00 p.m.', description: 'Networking lunch' },
-      { time: '2.30 p.m.', description: 'Closing remarks' },
-    ]
-  };
-
-  const speakers = [
+  // Fallback speakers data
+  const fallbackSpeakers = [
     { name: 'ดร. สมชาย เชี่ยวชาญ', title: 'นักวิจัยด้านนวัตกรรมผ้าไทย', imgSrc: speaker01 },
     { name: 'คุณวนิดา สร้างสรรค์', title: 'ศิลปินเครื่องปั้นดินเผา', imgSrc: speaker02 },
     { name: 'อาจารย์มานพ สืบสาน', title: 'ผู้เชี่ยวชาญงานไม้แกะสลัก', imgSrc: speaker03 },
     { name: 'คุณรัตนา ต่อยอด', title: 'นักออกแบบเครื่องประดับร่วมสมัย', imgSrc: speaker04 },
     { name: 'คุณวิชัย พัฒนา', title: 'ผู้ประกอบการ OTOP ระดับประเทศ', imgSrc: speaker05 },
+  ];
+
+  // Transform API speakers to match the expected format
+  const speakers = apiSpeakers.length > 0 
+    ? apiSpeakers.slice(0, 5).map(speaker => ({
+        name: speaker.name,
+        title: 'ผู้เชี่ยวชาญด้านศิลปหัตถกรรม', // Default title
+        imgSrc: speaker.photo_url || speaker01 // Use API photo or fallback
+      }))
+    : fallbackSpeakers;
+
+  const handleFeatureClick = () => {
+    navigate('/speakers');
+  };
+
+  const handleExhibitionClick = (exhibition) => {
+    // Handle exhibition click
+    console.log('Exhibition clicked:', exhibition);
+  };
+
+  const handleOutsideClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setIsMenuOpen(false);
+    }
+  };
+
+  const openLightbox = (image, index) => {
+    setCurrentImage(image);
+    setCurrentImageIndex(index);
+    setIsLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setIsLightboxOpen(false);
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prevIndex) => 
+      prevIndex === galleryImages.length - 1 ? 0 : prevIndex + 1
+    );
+    setCurrentImage(galleryImages[currentImageIndex + 1]);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prevIndex) => 
+      prevIndex === 0 ? galleryImages.length - 1 : prevIndex - 1
+    );
+    setCurrentImage(galleryImages[currentImageIndex - 1]);
+  };
+
+  const agendaItems = [
+    { time: '9.00 a.m.', description: 'Registration and welcome' },
+    { time: '9.30 a.m.', description: 'Opening ceremony' },
+    { time: '10.00 a.m.', description: 'Panel discussion' },
+    { time: '11.00 a.m.', description: 'Keynote speaker' },
+    { time: '1.00 p.m.', description: 'Networking lunch' },
+    { time: '2.30 p.m.', description: 'Closing remarks' },
   ];
 
   // Load exhibitions from admin system
@@ -492,39 +477,63 @@ const LandingPage = () => {
             </motion.h2>
           </div>
           
-          <div className="flex gap-0 mb-12 w-full">
-            {speakers.map((speaker, index) => (
-              <motion.div 
-                key={index} 
-                className="relative group overflow-hidden flex-1"
-                style={{
-                  height: '356px'
-                }}
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <img 
-                  src={speaker.imgSrc} 
-                  alt={`${speaker.name} - ${speaker.title}`} 
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                  onError={(e) => {
-                    e.target.style.backgroundColor = '#f3f4f6';
-                    e.target.style.display = 'flex';
-                    e.target.style.alignItems = 'center';
-                    e.target.style.justifyContent = 'center';
-                    e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
+          {/* Loading State */}
+          {speakersLoading && (
+            <div className="flex gap-0 mb-12 w-full">
+              {[1, 2, 3, 4, 5].map((index) => (
+                <motion.div 
+                  key={index} 
+                  className="relative overflow-hidden flex-1"
+                  style={{ height: '356px' }}
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+                    <div className="text-gray-400">กำลังโหลด...</div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+          
+          {/* Speakers Grid */}
+          {!speakersLoading && (
+            <div className="flex gap-0 mb-12 w-full">
+              {speakers.map((speaker, index) => (
+                <motion.div 
+                  key={index} 
+                  className="relative group overflow-hidden flex-1"
+                  style={{
+                    height: '356px'
                   }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-lg font-custom-bold mb-1">Name</h3>
-                  <p className="text-sm font-custom opacity-90">{speaker.title}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <img 
+                    src={speaker.imgSrc} 
+                    alt={`${speaker.name} - ${speaker.title}`} 
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    onError={(e) => {
+                      e.target.style.backgroundColor = '#f3f4f6';
+                      e.target.style.display = 'flex';
+                      e.target.style.alignItems = 'center';
+                      e.target.style.justifyContent = 'center';
+                      e.target.innerHTML = '<span style="color: #6b7280;">Image not found</span>';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <h3 className="text-lg font-custom-bold mb-1">{speaker.name}</h3>
+                    <p className="text-sm font-custom opacity-90">{speaker.title}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
           
           <div className="text-center">
             <Button 
@@ -825,16 +834,16 @@ const LandingPage = () => {
       </div>
       
       {/* Lightbox */}
-      {lightboxImage && (
+      {isLightboxOpen && (
         <Lightbox
-          imageUrl={lightboxImage}
+          imageUrl={currentImage}
           onClose={closeLightbox}
           onNext={nextImage}
           onPrev={prevImage}
           hasNext={true}
           hasPrev={true}
-          currentIndex={lightboxIndex}
-          totalImages={galleryImagesArray.length}
+          currentIndex={currentImageIndex}
+          totalImages={galleryImages.length}
         />
       )}
       

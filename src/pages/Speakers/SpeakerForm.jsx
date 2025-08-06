@@ -5,21 +5,33 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Upload } from 'lucide-react';
+import { User, Upload, FileText, X, Loader2 } from 'lucide-react';
 import { DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { speakersAPI } from '@/services/api';
 
 const SpeakerForm = ({ speaker, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ name: '', title: '', company: '', bio: '', photoUrl: '' });
+  const [formData, setFormData] = useState({ name: '' });
+  const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [pdfFile, setPdfFile] = useState(null);
+  const [pdfFileName, setPdfFileName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (speaker) {
-      setFormData(speaker);
-      setPhotoPreview(speaker.photoUrl);
+      setFormData({ name: speaker.name || '' });
+      setPhotoPreview(speaker.photo_url || null);
+      setPdfFileName(speaker.pdf_filename || '');
     } else {
-      setFormData({ name: '', title: '', company: '', bio: '', photoUrl: '' });
+      setFormData({ name: '' });
       setPhotoPreview(null);
+      setPhotoFile(null);
+      setPdfFile(null);
+      setPdfFileName('');
     }
+    setError('');
   }, [speaker]);
 
   const handleChange = (e) => {
@@ -30,60 +42,211 @@ const SpeakerForm = ({ speaker, onSubmit, onCancel }) => {
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result);
-        setFormData(prev => ({...prev, photoUrl: reader.result}));
-      };
-      reader.readAsDataURL(file);
+      try {
+        // Validate image file
+        speakersAPI.validateImageFile(file);
+        
+        setPhotoFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPhotoPreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+        setError('');
+      } catch (err) {
+        setError(err.message);
+        setPhotoFile(null);
+        setPhotoPreview(speaker?.photo_url || null);
+      }
     }
   };
 
-  const handleSubmit = (e) => {
+  const handlePdfChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        // Validate PDF file
+        speakersAPI.validatePdfFile(file);
+        
+        setPdfFile(file);
+        setPdfFileName(file.name);
+        setError('');
+      } catch (err) {
+        setError(err.message);
+        setPdfFile(null);
+        setPdfFileName(speaker?.pdf_filename || '');
+      }
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview(speaker?.photo_url || null);
+  };
+
+  const handleRemovePdf = () => {
+    setPdfFile(null);
+    setPdfFileName(speaker?.pdf_filename || '');
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    if (!formData.name.trim()) {
+      setError('กรุณาระบุชื่อผู้บรรยาย');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const submitData = {
+        name: formData.name.trim(),
+        photoFile: photoFile,
+        pdfFile: pdfFile
+      };
+
+      await onSubmit(submitData);
+    } catch (err) {
+      setError(err.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex items-center space-x-4">
-        <Avatar className="h-20 w-20">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Photo Upload Section */}
+      <div className="flex items-start space-x-4">
+        <Avatar className="h-24 w-24">
           <AvatarImage src={photoPreview} />
-          <AvatarFallback className="bg-gray-200"><User className="h-10 w-10 text-gray-400" /></AvatarFallback>
+          <AvatarFallback className="bg-gray-200">
+            <User className="h-12 w-12 text-gray-400" />
+          </AvatarFallback>
         </Avatar>
-        <div>
+        <div className="flex-1">
           <Label htmlFor="photo">รูปภาพผู้บรรยาย</Label>
-          <div className="relative mt-1">
-             <Button type="button" variant="outline" size="sm">
+          <div className="mt-2 space-y-2">
+            <div className="relative">
+              <Button type="button" variant="outline" size="sm" className="relative">
                 <Upload className="w-4 h-4 mr-2" />
-                อัปโหลดรูป
-             </Button>
-             <Input id="photo" type="file" accept="image/*" onChange={handlePhotoChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                {photoFile ? 'เปลี่ยนรูป' : 'อัปโหลดรูป'}
+              </Button>
+              <Input 
+                id="photo" 
+                type="file" 
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" 
+                onChange={handlePhotoChange} 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+              />
+            </div>
+            {(photoFile || photoPreview) && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">
+                  {photoFile ? `ไฟล์ใหม่: ${photoFile.name}` : 'รูปปัจจุบัน'}
+                </span>
+                {photoFile && (
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleRemovePhoto}
+                    className="h-6 w-6 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            )}
+            <p className="text-xs text-gray-500">
+              รองรับไฟล์: JPEG, PNG, GIF, WebP (สูงสุด 10MB)
+            </p>
           </div>
         </div>
       </div>
+
+      {/* Name Input */}
       <div>
-        <Label htmlFor="name">ชื่อ-นามสกุล</Label>
-        <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+        <Label htmlFor="name">ชื่อ-นามสกุล *</Label>
+        <Input 
+          id="name" 
+          name="name" 
+          value={formData.name} 
+          onChange={handleChange} 
+          placeholder="กรอกชื่อ-นามสกุลผู้บรรยาย"
+          required 
+        />
       </div>
+
+      {/* PDF Upload Section */}
       <div>
-        <Label htmlFor="title">ตำแหน่ง</Label>
-        <Input id="title" name="title" value={formData.title} onChange={handleChange} required />
+        <Label htmlFor="pdf">เอกสารประกอบ (PDF)</Label>
+        <div className="mt-2 space-y-2">
+          <div className="relative">
+            <Button type="button" variant="outline" size="sm">
+              <FileText className="w-4 h-4 mr-2" />
+              {pdfFile ? 'เปลี่ยนไฟล์ PDF' : 'อัปโหลด PDF'}
+            </Button>
+            <Input 
+              id="pdf" 
+              type="file" 
+              accept="application/pdf" 
+              onChange={handlePdfChange} 
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+            />
+          </div>
+          {(pdfFile || pdfFileName) && (
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-600">
+                {pdfFile ? `ไฟล์ใหม่: ${pdfFile.name}` : pdfFileName}
+              </span>
+              {pdfFile && (
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleRemovePdf}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
+          <p className="text-xs text-gray-500">
+            รองรับไฟล์ PDF เท่านั้น (สูงสุด 10MB)
+          </p>
+        </div>
       </div>
-      <div>
-        <Label htmlFor="company">บริษัท / องค์กร</Label>
-        <Input id="company" name="company" value={formData.company} onChange={handleChange} />
-      </div>
-      <div>
-        <Label htmlFor="bio">ประวัติโดยย่อ</Label>
-        <Textarea id="bio" name="bio" value={formData.bio} onChange={handleChange} rows={4} />
-      </div>
+
       <DialogFooter>
         <DialogClose asChild>
-          <Button type="button" variant="outline" onClick={onCancel}>ยกเลิก</Button>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
+            ยกเลิก
+          </Button>
         </DialogClose>
-        <Button type="submit" className="bg-violet-600 hover:bg-violet-700 text-white">
-          {speaker ? 'บันทึก' : 'เพิ่มผู้บรรยาย'}
+        <Button 
+          type="submit" 
+          className="bg-violet-600 hover:bg-violet-700 text-white"
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              กำลังบันทึก...
+            </>
+          ) : (
+            speaker ? 'บันทึกการแก้ไข' : 'เพิ่มผู้บรรยาย'
+          )}
         </Button>
       </DialogFooter>
     </form>
