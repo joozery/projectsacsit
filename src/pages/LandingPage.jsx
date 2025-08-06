@@ -18,6 +18,7 @@ import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
 import kvSymposium from '@/assets/KV Symposium.svg';
 import heroslideImage from '@/assets/heroslide/heroslide.jpg';
+import bghero from '@/assets/bghero.mp4';
 
 // Speaker images (fallback)
 import speaker01 from '@/assets/speker/01.jpg';
@@ -36,7 +37,6 @@ import gallery06 from '@/assets/gallery/06.jpg';
 import gallery07 from '@/assets/gallery/07.jpg';
 import gallery08 from '@/assets/gallery/08.jpg';
 import gallery09 from '@/assets/gallery/09.jpg';
-import bghero from '@/assets/bghero.mp4';
 
 // Mobile Speaker Carousel Component
 const MobileSpeakerCarousel = ({ speakers, onSpeakerClick }) => {
@@ -170,9 +170,23 @@ const MobileExhibitionCarousel = ({ exhibitions, onExhibitionClick }) => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
               
+              {/* PDF Indicator */}
+              {exhibition.pdfUrl && (
+                <div className="absolute top-4 right-4 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                  <FileText className="w-3 h-3" />
+                  PDF
+                </div>
+              )}
+              
               <div className="absolute bottom-6 left-6 text-white">
                 <h3 className="text-xl font-custom-bold mb-2">{exhibition.name}</h3>
-                <p className="text-base font-custom opacity-90">{exhibition.title}</p>
+                <p className="text-base font-custom opacity-90 mb-1">{exhibition.title}</p>
+                {exhibition.position && (
+                  <p className="text-sm text-gray-300 mb-1">{exhibition.position}</p>
+                )}
+                {exhibition.pdfUrl && (
+                  <p className="text-xs text-green-300">คลิกเพื่อดูเอกสาร</p>
+                )}
               </div>
             </div>
           ))}
@@ -268,8 +282,20 @@ const LandingPage = () => {
   };
 
   const handleExhibitionClick = (exhibition) => {
-    // Handle exhibition click
-    console.log('Exhibition clicked:', exhibition);
+    if (exhibition.pdfUrl) {
+      // เปิด PDF ในแท็บใหม่
+      const link = document.createElement('a');
+      link.href = exhibition.pdfUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.download = exhibition.pdfFileName || `${exhibition.name}_document.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // ถ้าไม่มี PDF ให้แสดงข้อมูลนิทรรศการ
+      console.log('Exhibition clicked:', exhibition);
+    }
   };
 
   const handleOutsideClick = (e) => {
@@ -319,18 +345,19 @@ const LandingPage = () => {
 
   // Fallback exhibitions data
   const fallbackExhibitions = [
-    { name: 'Traditional Weaving', title: 'ผ้าทอพื้นเมืองภาคเหนือ', imgSrc: gallery01 },
-    { name: 'Ceramic Workshop', title: 'เครื่องปั้นดินเผาร่วมสมัย', imgSrc: gallery02 },
-    { name: 'Wood Carving', title: 'งานแกะสลักไม้ดั้งเดิม', imgSrc: gallery03 },
-    { name: 'Jewelry Making', title: 'เครื่องประดับจากวัสดุธรรมชาติ', imgSrc: gallery04 },
-    { name: 'Local Handicrafts', title: 'หัตถกรรมพื้นถิ่นอาเซียน', imgSrc: gallery05 },
+    { name: 'Traditional Weaving', title: 'ผ้าทอพื้นเมืองภาคเหนือ', position: 'ห้องแสดงผลงาน A', imgSrc: gallery01 },
+    { name: 'Ceramic Workshop', title: 'เครื่องปั้นดินเผาร่วมสมัย', position: 'ห้องแสดงผลงาน B', imgSrc: gallery02 },
+    { name: 'Wood Carving', title: 'งานแกะสลักไม้ดั้งเดิม', position: 'ห้องแสดงผลงาน C', imgSrc: gallery03 },
+    { name: 'Jewelry Making', title: 'เครื่องประดับจากวัสดุธรรมชาติ', position: 'ห้องแสดงผลงาน D', imgSrc: gallery04 },
+    { name: 'Local Handicrafts', title: 'หัตถกรรมพื้นถิ่นอาเซียน', position: 'ห้องแสดงผลงาน E', imgSrc: gallery05 },
   ];
 
   // Transform API exhibitions to match the expected format
   const exhibitions = apiExhibitions.length > 0 
     ? apiExhibitions.slice(0, 5).map(exhibition => ({
         name: exhibition.name,
-        title: 'ผู้เชี่ยวชาญด้านศิลปหัตถกรรม', // Default title
+        title: exhibition.title, // Use actual title from API
+        position: exhibition.position, // Add position information
         imgSrc: exhibition.image_url || gallery01, // Use API photo or fallback
         pdfUrl: exhibition.pdf_url, // Add PDF URL
         pdfFileName: exhibition.pdf_filename, // Add PDF filename
@@ -387,48 +414,7 @@ const LandingPage = () => {
               zIndex: 1
             }}
           />
-          {/* Overlay */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '80vh',
-            background: 'rgba(0,0,0,0.4)',
-            zIndex: 2
-          }} />
-          {/* Centered Content */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '80vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 3,
-            color: '#fff'
-          }}>
-            <h1
-              style={{
-                fontFamily: 'AWConqueror Std Didot',
-                fontWeight: 700,
-                fontStyle: 'bold',
-                fontSize: '64px',
-                lineHeight: '100%',
-                letterSpacing: 0,
-                textAlign: 'center',
-                verticalAlign: 'middle',
-                marginBottom: '1rem',
-                color: '#fff'
-              }}
-            >
-              Welcome To SACIT Symposium
-            </h1>
-              </div>
-              </div>
+        </div>
 
         {/* About Section */}
         <section className="py-16 sm:py-24 bg-transparent relative overflow-hidden" style={{marginTop: 0, paddingTop: '2rem'}}>
@@ -852,6 +838,9 @@ const LandingPage = () => {
                     <div className="absolute bottom-4 left-4 text-white">
                       <h3 className="text-lg font-custom-bold mb-1">{exhibition.name}</h3>
                       <p className="text-sm font-custom opacity-90">{exhibition.title}</p>
+                      {exhibition.position && (
+                        <p className="text-xs text-gray-300 mt-1">{exhibition.position}</p>
+                      )}
                       {exhibition.pdfUrl && (
                         <p className="text-xs text-green-300 mt-1">คลิกเพื่อดูเอกสาร</p>
                       )}
@@ -867,15 +856,6 @@ const LandingPage = () => {
             </>
           )}
           
-          <div className="text-center">
-            <Button 
-              variant="outline" 
-              className="border-[#533193] text-[#533193] hover:bg-[#533193] hover:text-white transition-colors px-8 py-3 rounded-full text-lg font-custom-bold"
-              onClick={handleFeatureClick}
-            >
-              explore exhibitions
-            </Button>
-          </div>
         </section>
         
         {/* News Section */}
