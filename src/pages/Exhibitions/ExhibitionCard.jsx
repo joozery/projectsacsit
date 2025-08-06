@@ -6,13 +6,13 @@ import { Badge } from '@/components/ui/badge';
 
 const ExhibitionCard = ({ exhibition, onEdit, onDelete }) => {
   const handleViewPdf = () => {
-    if (exhibition.pdfUrl) {
+    if (exhibition.pdf_url) {
       // สร้าง URL สำหรับเปิดไฟล์ PDF ในแท็บใหม่
       const link = document.createElement('a');
-      link.href = exhibition.pdfUrl;
+      link.href = exhibition.pdf_url;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
-      link.download = exhibition.pdfFileName || `${exhibition.name}.pdf`;
+      link.download = exhibition.pdf_filename || `${exhibition.name}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -28,9 +28,9 @@ const ExhibitionCard = ({ exhibition, onEdit, onDelete }) => {
     >
       {/* รูปภาพหน้าปก */}
       <div className="relative h-48 bg-gray-200 overflow-hidden">
-        {exhibition.imageUrl ? (
+        {exhibition.image_url ? (
           <img 
-            src={exhibition.imageUrl} 
+            src={exhibition.image_url} 
             alt={exhibition.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -48,7 +48,7 @@ const ExhibitionCard = ({ exhibition, onEdit, onDelete }) => {
         </div>
 
         {/* PDF Indicator */}
-        {exhibition.pdfUrl && (
+        {exhibition.pdf_url && (
           <div className="absolute top-3 right-3">
             <Button
               size="sm"
@@ -79,9 +79,9 @@ const ExhibitionCard = ({ exhibition, onEdit, onDelete }) => {
 
         {/* ข้อมูลเพิ่มเติม */}
         <div className="mb-4 space-y-2">
-          {exhibition.createdAt && (
+          {exhibition.created_at && (
             <div className="flex items-center text-xs text-gray-400">
-              <span>สร้างเมื่อ: {new Date(exhibition.createdAt).toLocaleDateString('th-TH')}</span>
+              <span>สร้างเมื่อ: {new Date(exhibition.created_at).toLocaleDateString('th-TH')}</span>
             </div>
           )}
           
@@ -89,11 +89,11 @@ const ExhibitionCard = ({ exhibition, onEdit, onDelete }) => {
             <div className="flex items-center space-x-4">
               <span className="flex items-center">
                 <ImageIcon className="w-3 h-3 mr-1" />
-                {exhibition.imageUrl ? 'มีรูปภาพ' : 'ไม่มีรูปภาพ'}
+                {exhibition.image_url ? 'มีรูปภาพ' : 'ไม่มีรูปภาพ'}
               </span>
               <span className="flex items-center">
                 <FileText className="w-3 h-3 mr-1" />
-                {exhibition.pdfUrl ? 'มี PDF' : 'ไม่มี PDF'}
+                {exhibition.pdf_url ? 'มี PDF' : 'ไม่มี PDF'}
               </span>
             </div>
           </div>
@@ -123,7 +123,7 @@ const ExhibitionCard = ({ exhibition, onEdit, onDelete }) => {
         </div>
 
         {/* Quick Actions */}
-        {exhibition.pdfUrl && (
+        {exhibition.pdf_url && (
           <div className="mt-3 pt-3 border-t border-gray-100">
             <Button
               size="sm"
@@ -132,7 +132,7 @@ const ExhibitionCard = ({ exhibition, onEdit, onDelete }) => {
               className="w-full text-gray-600 hover:text-gray-900 justify-center"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
-              เปิดดู PDF ({exhibition.pdfFileName || 'เอกสาร.pdf'})
+              เปิดดู PDF ({exhibition.pdf_filename || 'เอกสาร.pdf'})
             </Button>
           </div>
         )}
