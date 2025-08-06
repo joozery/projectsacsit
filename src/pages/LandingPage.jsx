@@ -64,12 +64,32 @@ const LandingPage = () => {
     ? apiSpeakers.slice(0, 5).map(speaker => ({
         name: speaker.name,
         title: 'ผู้เชี่ยวชาญด้านศิลปหัตถกรรม', // Default title
-        imgSrc: speaker.photo_url || speaker01 // Use API photo or fallback
+        imgSrc: speaker.photo_url || speaker01, // Use API photo or fallback
+        pdfUrl: speaker.pdf_url, // Add PDF URL
+        pdfFileName: speaker.pdf_filename // Add PDF filename
       }))
     : fallbackSpeakers;
 
   const handleFeatureClick = () => {
     navigate('/speakers');
+  };
+
+  const handleSpeakerClick = (speaker) => {
+    if (speaker.pdfUrl) {
+      // เปิด PDF ในแท็บใหม่
+      const link = document.createElement('a');
+      link.href = speaker.pdfUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.download = speaker.pdfFileName || `${speaker.name}_document.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // ถ้าไม่มี PDF ให้แสดง alert หรือ modal ข้อมูล
+      console.log("Speaker details:", speaker);
+      alert(`ข้อมูลผู้บรรยาย: ${speaker.name}\nตำแหน่ง: ${speaker.title}`);
+    }
   };
 
   const handleExhibitionClick = (exhibition) => {
@@ -504,7 +524,7 @@ const LandingPage = () => {
               {speakers.map((speaker, index) => (
                 <motion.div 
                   key={index} 
-                  className="relative group overflow-hidden flex-1"
+                  className="relative group overflow-hidden flex-1 cursor-pointer"
                   style={{
                     height: '356px'
                   }}
@@ -512,6 +532,8 @@ const LandingPage = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
+                  onClick={() => handleSpeakerClick(speaker)}
+                  title={speaker.pdfUrl ? `คลิกเพื่อดู ${speaker.pdfFileName || 'เอกสาร'}` : `ข้อมูลผู้บรรยาย: ${speaker.name}`}
                 >
                   <img 
                     src={speaker.imgSrc} 
@@ -526,6 +548,7 @@ const LandingPage = () => {
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                  
                   <div className="absolute bottom-4 left-4 text-white">
                     <h3 className="text-lg font-custom-bold mb-1">{speaker.name}</h3>
                     <p className="text-sm font-custom opacity-90">{speaker.title}</p>
