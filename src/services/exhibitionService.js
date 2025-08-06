@@ -1,5 +1,5 @@
 // Exhibition Service for API communication
-import { exhibitionsAPI } from './api';
+import { exhibitionsAPI, api } from './api';
 
 class ExhibitionService {
   // Get all exhibitions
@@ -134,35 +134,43 @@ class ExhibitionService {
   // Helper: Create exhibition with file uploads
   async createExhibitionWithFiles(exhibitionData, imageFile = null, pdfFile = null) {
     try {
-      let imageUrl = '', imageFilename = '';
-      let pdfUrl = '', pdfFilename = '';
+      console.log('📤 Creating exhibition with files:', {
+        hasImage: !!imageFile,
+        hasPdf: !!pdfFile,
+        imageType: imageFile?.type,
+        pdfType: pdfFile?.type
+      });
 
-      // Upload image if provided
-      if (imageFile) {
-        const imageResult = await this.uploadFile(imageFile);
-        imageUrl = imageResult.fileUrl;
-        imageFilename = imageResult.fileName;
+      // Use direct exhibition creation with file uploads
+      const formData = new FormData();
+      
+      // Add exhibition data
+      formData.append('name', exhibitionData.name);
+      formData.append('title', exhibitionData.title || '');
+      formData.append('description', exhibitionData.description || '');
+      
+      // Add image file if provided
+      if (imageFile && imageFile instanceof File) {
+        formData.append('image', imageFile);
+        console.log('📸 Adding image to form data:', imageFile.name);
+      }
+      
+      // Add PDF file if provided
+      if (pdfFile && pdfFile instanceof File) {
+        formData.append('pdf', pdfFile);
+        console.log('📄 Adding PDF to form data:', pdfFile.name);
       }
 
-      // Upload PDF if provided
-      if (pdfFile) {
-        const pdfResult = await this.uploadFile(pdfFile);
-        pdfUrl = pdfResult.fileUrl;
-        pdfFilename = pdfResult.fileName;
-      }
+      const response = await api.post('/exhibitions', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      // Create exhibition with uploaded file URLs
-      const exhibitionPayload = {
-        ...exhibitionData,
-        image_url: imageUrl,
-        image_filename: imageFilename,
-        pdf_url: pdfUrl,
-        pdf_filename: pdfFilename,
-      };
-
-      return await this.createExhibition(exhibitionPayload);
+      console.log('✅ Exhibition created successfully:', response.data);
+      return response.data;
     } catch (error) {
-      console.error('Error creating exhibition with files:', error);
+      console.error('❌ Error creating exhibition with files:', error);
       throw error;
     }
   }
@@ -170,37 +178,44 @@ class ExhibitionService {
   // Helper: Update exhibition with file uploads
   async updateExhibitionWithFiles(id, exhibitionData, imageFile = null, pdfFile = null) {
     try {
-      let imageUrl = exhibitionData.image_url || '';
-      let imageFilename = exhibitionData.image_filename || '';
-      let pdfUrl = exhibitionData.pdf_url || '';
-      let pdfFilename = exhibitionData.pdf_filename || '';
+      console.log('📤 Updating exhibition with files:', {
+        id: id,
+        hasImage: !!imageFile,
+        hasPdf: !!pdfFile,
+        imageType: imageFile?.type,
+        pdfType: pdfFile?.type
+      });
 
-      // Upload new image if provided
-      if (imageFile) {
-        const imageResult = await this.uploadFile(imageFile);
-        imageUrl = imageResult.fileUrl;
-        imageFilename = imageResult.fileName;
+      // Use direct exhibition update with file uploads
+      const formData = new FormData();
+      
+      // Add exhibition data
+      formData.append('name', exhibitionData.name);
+      formData.append('title', exhibitionData.title || '');
+      formData.append('description', exhibitionData.description || '');
+      
+      // Add image file if provided
+      if (imageFile && imageFile instanceof File) {
+        formData.append('image', imageFile);
+        console.log('📸 Adding image to form data:', imageFile.name);
+      }
+      
+      // Add PDF file if provided
+      if (pdfFile && pdfFile instanceof File) {
+        formData.append('pdf', pdfFile);
+        console.log('📄 Adding PDF to form data:', pdfFile.name);
       }
 
-      // Upload new PDF if provided
-      if (pdfFile) {
-        const pdfResult = await this.uploadFile(pdfFile);
-        pdfUrl = pdfResult.fileUrl;
-        pdfFilename = pdfResult.fileName;
-      }
+      const response = await api.put(`/exhibitions/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      // Update exhibition with file URLs
-      const exhibitionPayload = {
-        ...exhibitionData,
-        image_url: imageUrl,
-        image_filename: imageFilename,
-        pdf_url: pdfUrl,
-        pdf_filename: pdfFilename,
-      };
-
-      return await this.updateExhibition(id, exhibitionPayload);
+      console.log('✅ Exhibition updated successfully:', response.data);
+      return response.data;
     } catch (error) {
-      console.error('Error updating exhibition with files:', error);
+      console.error('❌ Error updating exhibition with files:', error);
       throw error;
     }
   }
