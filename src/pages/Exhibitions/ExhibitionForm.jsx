@@ -10,8 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 const ExhibitionForm = ({ exhibition, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({ 
     name: '', 
-    title: '', 
-    description: '' 
+    position: '' 
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -24,13 +23,12 @@ const ExhibitionForm = ({ exhibition, onSubmit, onCancel }) => {
     if (exhibition) {
       setFormData({ 
         name: exhibition.name || '', 
-        title: exhibition.title || '', 
-        description: exhibition.description || '' 
+        position: exhibition.position || '' 
       });
       setImagePreview(exhibition.image_url || null);
       setPdfFileName(exhibition.pdf_filename || '');
     } else {
-      setFormData({ name: '', title: '', description: '' });
+      setFormData({ name: '', position: '' });
       setImagePreview(null);
       setImageFile(null);
       setPdfFile(null);
@@ -125,19 +123,13 @@ const ExhibitionForm = ({ exhibition, onSubmit, onCancel }) => {
       return;
     }
 
-    if (!formData.title.trim()) {
-      setError('กรุณาระบุหัวข้อนิทรรศการ');
-      return;
-    }
-
     setLoading(true);
     setError('');
 
     try {
       const submitData = {
         name: formData.name.trim(),
-        title: formData.title.trim(),
-        description: formData.description.trim(),
+        position: formData.position.trim(),
         imageFile: imageFile,
         pdfFile: pdfFile
       };
@@ -169,7 +161,7 @@ const ExhibitionForm = ({ exhibition, onSubmit, onCancel }) => {
           )}
         </div>
         <div className="flex-1">
-          <Label htmlFor="image">รูปภาพหน้าปก</Label>
+          <Label htmlFor="image">รูปภาพนิทรรศการ</Label>
           <div className="mt-2 space-y-2">
             <div className="relative">
               <Button type="button" variant="outline" size="sm" className="relative">
@@ -211,42 +203,30 @@ const ExhibitionForm = ({ exhibition, onSubmit, onCancel }) => {
 
       {/* Name Input */}
       <div>
-        <Label htmlFor="name">ชื่อนิทรรศการ (ภาษาอังกฤษ) *</Label>
+        <Label htmlFor="name">ชื่อ-นามสกุล *</Label>
         <Input 
           id="name" 
           name="name" 
           value={formData.name} 
           onChange={handleChange} 
-          placeholder="กรอกชื่อนิทรรศการเป็นภาษาอังกฤษ"
+          placeholder="กรอกชื่อ-นามสกุลผู้บรรยาย"
           required 
         />
       </div>
 
-      {/* Title Input */}
+      {/* Position Input */}
       <div>
-        <Label htmlFor="title">หัวข้อนิทรรศการ (ภาษาไทย) *</Label>
+        <Label htmlFor="position">ตำแหน่ง/วิชาชีพ</Label>
         <Input 
-          id="title" 
-          name="title" 
-          value={formData.title} 
+          id="position" 
+          name="position" 
+          value={formData.position} 
           onChange={handleChange} 
-          placeholder="กรอกหัวข้อนิทรรศการเป็นภาษาไทย"
-          required 
+          placeholder="เช่น อาจารย์ประจำคณะ, หัวหน้าภาควิชา, นักวิจัย"
         />
       </div>
 
-      {/* Description Input */}
-      <div>
-        <Label htmlFor="description">รายละเอียด</Label>
-        <Textarea 
-          id="description" 
-          name="description" 
-          value={formData.description} 
-          onChange={handleChange} 
-          placeholder="กรอกรายละเอียดของนิทรรศการ"
-          rows={4}
-        />
-      </div>
+
 
       {/* PDF Upload Section */}
       <div>
@@ -284,7 +264,7 @@ const ExhibitionForm = ({ exhibition, onSubmit, onCancel }) => {
             </div>
           )}
           <p className="text-xs text-gray-500">
-            รองรับไฟล์ PDF (สูงสุด 10MB)
+            รองรับไฟล์ PDF เท่านั้น (สูงสุด 10MB)
           </p>
         </div>
       </div>
@@ -295,9 +275,19 @@ const ExhibitionForm = ({ exhibition, onSubmit, onCancel }) => {
             ยกเลิก
           </Button>
         </DialogClose>
-        <Button type="submit" disabled={loading}>
-          {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          {exhibition ? 'แก้ไข' : 'เพิ่ม'}นิทรรศการ
+        <Button 
+          type="submit" 
+          className="bg-violet-600 hover:bg-violet-700 text-white"
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              กำลังบันทึก...
+            </>
+          ) : (
+            exhibition ? 'บันทึกการแก้ไข' : 'เพิ่มผู้บรรยาย'
+          )}
         </Button>
       </DialogFooter>
     </form>

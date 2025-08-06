@@ -155,7 +155,35 @@ export const exhibitionsAPI = {
   // Create new exhibition
   createExhibition: async (exhibitionData) => {
     try {
-      const response = await api.post('/exhibitions', exhibitionData);
+      const formData = new FormData();
+      
+      // Add exhibition name
+      if (exhibitionData.name) {
+        formData.append('name', exhibitionData.name.trim());
+      }
+      
+      // Add exhibition position
+      if (exhibitionData.position) {
+        formData.append('position', exhibitionData.position.trim());
+      }
+      
+
+      
+      // Add image file if exists
+      if (exhibitionData.imageFile && exhibitionData.imageFile instanceof File) {
+        formData.append('image', exhibitionData.imageFile);
+      }
+      
+      // Add PDF file if exists
+      if (exhibitionData.pdfFile && exhibitionData.pdfFile instanceof File) {
+        formData.append('pdf', exhibitionData.pdfFile);
+      }
+      
+      const response = await api.post('/exhibitions', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error('Error creating exhibition:', error);
@@ -166,7 +194,35 @@ export const exhibitionsAPI = {
   // Update exhibition
   updateExhibition: async (id, exhibitionData) => {
     try {
-      const response = await api.put(`/exhibitions/${id}`, exhibitionData);
+      const formData = new FormData();
+      
+      // Add exhibition name if provided
+      if (exhibitionData.name) {
+        formData.append('name', exhibitionData.name.trim());
+      }
+      
+      // Add exhibition position if provided
+      if (exhibitionData.position !== undefined) {
+        formData.append('position', exhibitionData.position.trim());
+      }
+      
+
+      
+      // Add new image file if provided
+      if (exhibitionData.imageFile && exhibitionData.imageFile instanceof File) {
+        formData.append('image', exhibitionData.imageFile);
+      }
+      
+      // Add new PDF file if provided
+      if (exhibitionData.pdfFile && exhibitionData.pdfFile instanceof File) {
+        formData.append('pdf', exhibitionData.pdfFile);
+      }
+      
+      const response = await api.put(`/exhibitions/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error('Error updating exhibition:', error);

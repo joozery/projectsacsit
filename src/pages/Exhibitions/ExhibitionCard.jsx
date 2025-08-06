@@ -1,18 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Edit2, Trash2, Eye, FileText, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { User, Edit, Trash2, Download } from 'lucide-react';
 
 const ExhibitionCard = ({ exhibition, onEdit, onDelete }) => {
-  const handleViewPdf = () => {
+  const handleDownloadPdf = () => {
     if (exhibition.pdf_url) {
-      // สร้าง URL สำหรับเปิดไฟล์ PDF ในแท็บใหม่
       const link = document.createElement('a');
       link.href = exhibition.pdf_url;
+      link.download = exhibition.pdf_filename || `${exhibition.name}_document.pdf`;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
-      link.download = exhibition.pdf_filename || `${exhibition.name}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -21,121 +19,92 @@ const ExhibitionCard = ({ exhibition, onEdit, onDelete }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col border border-gray-100"
     >
-      {/* รูปภาพหน้าปก */}
-      <div className="relative h-48 bg-gray-200 overflow-hidden">
+      {/* Full-width image header - increased height */}
+      <div className="relative h-64 bg-gradient-to-br from-amber-50 to-orange-100">
         {exhibition.image_url ? (
           <img 
             src={exhibition.image_url} 
-            alt={exhibition.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            alt={exhibition.name}
+            className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-            <ImageIcon className="w-16 h-16 text-gray-400" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-100 to-orange-200">
+            <User className="h-24 w-24 text-amber-600" />
           </div>
         )}
-        
-        {/* Status Badge */}
-        <div className="absolute top-3 left-3">
-          <Badge variant={exhibition.status === 'active' ? 'default' : 'secondary'}>
-            {exhibition.status === 'active' ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
-          </Badge>
+        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+      </div>
+
+      {/* Content Section */}
+      <div className="relative px-6 pb-6">
+        {/* Name and Position */}
+        <div className="text-center mb-4 mt-4">
+          <h3 className="text-2xl font-bold text-gray-800">{exhibition.name}</h3>
+          {exhibition.position && (
+            <p className="text-sm text-gray-600 mt-1">{exhibition.position}</p>
+          )}
         </div>
 
-        {/* PDF Indicator */}
+        {/* Title */}
+        {exhibition.title && (
+          <div className="text-center mb-4">
+            <p className="text-sm text-gray-700 font-medium">
+              {exhibition.title}
+            </p>
+          </div>
+        )}
+
+        {/* Description */}
+        {exhibition.description && (
+          <div className="text-center mb-4">
+            <p className="text-sm text-gray-600 leading-relaxed">
+              {exhibition.description}
+            </p>
+          </div>
+        )}
+
+        {/* PDF Download */}
         {exhibition.pdf_url && (
-          <div className="absolute top-3 right-3">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="bg-white/90 hover:bg-white text-gray-700 px-2 py-1"
-              onClick={handleViewPdf}
+          <div className="mb-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleDownloadPdf}
+              className="w-full text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 transition-colors"
             >
-              <FileText className="w-4 h-4 mr-1" />
-              PDF
+              <Download className="w-4 h-4 mr-2" />
+              ดาวน์โหลดเอกสาร
             </Button>
           </div>
         )}
-      </div>
 
-      {/* เนื้อหา */}
-      <div className="p-6">
-        <div className="mb-4">
-          <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">
-            {exhibition.name}
-          </h3>
-          <p className="text-gray-600 font-medium mb-2 line-clamp-1">
-            {exhibition.title}
-          </p>
-          <p className="text-gray-500 text-sm line-clamp-3 leading-relaxed">
-            {exhibition.description || 'ไม่มีรายละเอียด'}
-          </p>
-        </div>
-
-        {/* ข้อมูลเพิ่มเติม */}
-        <div className="mb-4 space-y-2">
-          {exhibition.created_at && (
-            <div className="flex items-center text-xs text-gray-400">
-              <span>สร้างเมื่อ: {new Date(exhibition.created_at).toLocaleDateString('th-TH')}</span>
-            </div>
-          )}
-          
-          <div className="flex items-center justify-between text-xs text-gray-400">
-            <div className="flex items-center space-x-4">
-              <span className="flex items-center">
-                <ImageIcon className="w-3 h-3 mr-1" />
-                {exhibition.image_url ? 'มีรูปภาพ' : 'ไม่มีรูปภาพ'}
-              </span>
-              <span className="flex items-center">
-                <FileText className="w-3 h-3 mr-1" />
-                {exhibition.pdf_url ? 'มี PDF' : 'ไม่มี PDF'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* ปุ่มจัดการ */}
-        <div className="flex space-x-2">
-          <Button
-            size="sm"
-            variant="outline"
+        {/* Action Buttons */}
+        <div className="flex items-center justify-center space-x-3 pt-4 border-t border-gray-100">
+          <Button 
+            variant="outline" 
+            size="sm" 
             onClick={onEdit}
-            className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+            className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 transition-colors"
           >
-            <Edit2 className="w-4 h-4 mr-1" />
+            <Edit className="w-4 h-4 mr-2" /> 
             แก้ไข
           </Button>
-          
-          <Button
-            size="sm"
-            variant="outline"
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex-1 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-colors" 
             onClick={onDelete}
-            className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
           >
-            <Trash2 className="w-4 h-4 mr-1" />
+            <Trash2 className="w-4 h-4 mr-2" /> 
             ลบ
           </Button>
         </div>
-
-        {/* Quick Actions */}
-        {exhibition.pdf_url && (
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleViewPdf}
-              className="w-full text-gray-600 hover:text-gray-900 justify-center"
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              เปิดดู PDF ({exhibition.pdf_filename || 'เอกสาร.pdf'})
-            </Button>
-          </div>
-        )}
       </div>
     </motion.div>
   );

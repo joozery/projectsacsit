@@ -238,7 +238,7 @@ const LandingPage = () => {
   const speakers = apiSpeakers.length > 0 
     ? apiSpeakers.slice(0, 5).map(speaker => ({
         name: speaker.name,
-        title: 'ผู้เชี่ยวชาญด้านศิลปหัตถกรรม', // Default title
+        title: speaker.position || 'ผู้เชี่ยวชาญด้านศิลปหัตถกรรม', // Use position from API or default title
         imgSrc: speaker.photo_url || speaker01, // Use API photo or fallback
         pdfUrl: speaker.pdf_url, // Add PDF URL
         pdfFileName: speaker.pdf_filename // Add PDF filename
