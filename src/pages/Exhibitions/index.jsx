@@ -1,169 +1,85 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet';
-import { Plus, Search, Image as ImageIcon, FileText, Loader2 } from 'lucide-react';
+import { Plus, Search, Image as ImageIcon, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import ExhibitionForm from './ExhibitionForm';
 import ExhibitionCard from './ExhibitionCard';
-import exhibitionService from '@/services/exhibitionService';
-
-const EXHIBITIONS_STORAGE_KEY = 'sacit_exhibitions_v1';
-
-const initialExhibitions = [
-  { 
-    id: 1, 
-    name: 'Traditional Weaving', 
-    title: 'ผ้าทอพื้นเมืองภาคเหนือ', 
-    description: 'การสาธิตการทอผ้าแบบดั้งเดิมจากภาคเหนือของไทย พร้อมเรียนรู้เทคนิคการใช้สีธรรมชาติ',
-    imageUrl: '', 
-    pdfUrl: '',
-    status: 'active',
-    createdAt: '2024-01-01'
-  },
-  { 
-    id: 2, 
-    name: 'Ceramic Workshop', 
-    title: 'เครื่องปั้นดินเผาร่วมสมัย', 
-    description: 'พื้นที่สาธิตการปั้นดินเผาที่ผสมผสานเทคนิคดั้งเดิมกับการออกแบบสมัยใหม่',
-    imageUrl: '', 
-    pdfUrl: '',
-    status: 'active',
-    createdAt: '2024-01-02'
-  },
-  { 
-    id: 3, 
-    name: 'Wood Carving', 
-    title: 'งานแกะสลักไม้ดั้งเดิม', 
-    description: 'การสาธิตงานแกะสลักไม้ที่ถ่ายทอดความเป็นไทยผ่านลวดลายต่างๆ',
-    imageUrl: '', 
-    pdfUrl: '',
-    status: 'active',
-    createdAt: '2024-01-03'
-  },
-  { 
-    id: 4, 
-    name: 'Jewelry Making', 
-    title: 'เครื่องประดับจากวัสดุธรรมชาติ', 
-    description: 'การสร้างสรรค์เครื่องประดับจากวัสดุธรรมชาติในท้องถิ่น เน้นความยั่งยืน',
-    imageUrl: '', 
-    pdfUrl: '',
-    status: 'active',
-    createdAt: '2024-01-04'
-  },
-  { 
-    id: 5, 
-    name: 'Local Handicrafts', 
-    title: 'หัตถกรรมพื้นถิ่นอาเซียน', 
-    description: 'นิทรรศการรวมผลงานหัตถกรรมจากประเทศต่างๆ ในอาเซียน แสดงความหลากหลายทางวัฒนธรรม',
-    imageUrl: '', 
-    pdfUrl: '',
-    status: 'active',
-    createdAt: '2024-01-05'
-  },
-];
+import useExhibitions from '@/hooks/useExhibitions';
 
 const ExhibitionsPage = () => {
   const { toast } = useToast();
-  const [exhibitions, setExhibitions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingExhibition, setEditingExhibition] = useState(null);
   const [deletingExhibition, setDeletingExhibition] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadExhibitions();
-  }, []);
-
-  const loadExhibitions = async () => {
-    try {
-      setLoading(true);
-      console.log('🔄 Loading exhibitions...');
-      const response = await exhibitionService.getExhibitions();
-      console.log('📥 Raw API response:', response);
-      
-      // ตรวจสอบ response format และจัดการข้อมูลให้ถูกต้อง
-      let exhibitionsData = [];
-      
-      if (response && response.success && response.data) {
-        // ถ้า response มี format { success: true, data: [...] }
-        exhibitionsData = response.data;
-        console.log('✅ Using response.data format');
-      } else if (Array.isArray(response)) {
-        // ถ้า response เป็น array โดยตรง
-        exhibitionsData = response;
-        console.log('✅ Using direct array format');
-      } else if (response && Array.isArray(response.data)) {
-        // กรณีอื่นๆ ที่อาจมี data เป็น array
-        exhibitionsData = response.data;
-        console.log('✅ Using response.data array format');
-      } else {
-        // fallback เป็น array ว่าง
-        console.warn('❌ Unexpected response format:', response);
-        exhibitionsData = [];
-      }
-      
-      console.log('📊 Processed exhibitions count:', exhibitionsData.length);
-      console.log('📋 Exhibitions data:', exhibitionsData);
-      setExhibitions(exhibitionsData);
-    } catch (error) {
-      console.error('❌ Error loading exhibitions:', error);
+  // Use the custom hook for API integration
+  const {
+    exhibitions,
+    loading,
+    error,
+    createExhibition,
+    updateExhibition,
+    deleteExhibition,
+    refresh,
+    clearError
+  } = useExhibitions({
+    onError: (err) => {
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถโหลดข้อมูลนิทรรศการได้",
+        description: err.message,
         variant: "destructive"
       });
-      // Fallback to empty array if API fails
-      setExhibitions([]);
-    } finally {
-      setLoading(false);
     }
-  };
+  });
 
-  // Remove localStorage functions since we're using API now
-
-  const handleFormSubmit = async () => {
-    // Form submission is now handled in ExhibitionForm component
-    // This function is called after successful submission to refresh the list
-    await loadExhibitions();
-    setIsFormOpen(false);
-    setEditingExhibition(null);
+  const handleFormSubmit = async (data) => {
+    try {
+      if (editingExhibition) {
+        await updateExhibition(editingExhibition.id, data);
+        toast({ title: "แก้ไขข้อมูลนิทรรศการสำเร็จ!" });
+      } else {
+        await createExhibition(data);
+        toast({ title: "เพิ่มนิทรรศการใหม่สำเร็จ!" });
+      }
+      setIsFormOpen(false);
+      setEditingExhibition(null);
+    } catch (error) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
   
   const confirmDelete = async () => {
     if (deletingExhibition) {
       try {
-        console.log('🗑️ Deleting exhibition:', deletingExhibition.id, deletingExhibition.name);
-        await exhibitionService.deleteExhibition(deletingExhibition.id);
-        console.log('✅ Delete API call successful');
+        await deleteExhibition(deletingExhibition.id);
         toast({ title: "ลบนิทรรศการสำเร็จ!" });
-        console.log('🔄 Refreshing exhibitions list...');
-        await loadExhibitions(); // Refresh list
-        console.log('✅ Exhibitions list refreshed');
         setDeletingExhibition(null);
       } catch (error) {
-        console.error('❌ Error deleting exhibition:', error);
         toast({
           title: "เกิดข้อผิดพลาด",
-          description: "ไม่สามารถลบนิทรรศการได้",
+          description: error.message,
           variant: "destructive"
         });
       }
     }
   };
   
-  // ตรวจสอบว่า exhibitions เป็น array ก่อนใช้ filter
-  const filteredExhibitions = Array.isArray(exhibitions) 
-    ? exhibitions.filter(e =>
-        e.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : [];
+  const filteredExhibitions = exhibitions.filter(e =>
+    e.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    e.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    e.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <>
@@ -174,21 +90,45 @@ const ExhibitionsPage = () => {
             <h1 className="text-3xl font-bold text-gray-800">Live Exhibition (Demonstrative Area)</h1>
             <p className="text-gray-600 mt-1">จัดการข้อมูลนิทรรศการและพื้นที่สาธิตสำหรับงาน Symposium</p>
           </div>
-          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-            <DialogTrigger asChild>
-              <Button className="add-button-gradient" onClick={() => setEditingExhibition(null)}>
-                <Plus className="w-5 h-5 mr-2" />เพิ่มนิทรรศการ
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingExhibition ? 'แก้ไขข้อมูลนิทรรศการ' : 'เพิ่มนิทรรศการใหม่'}</DialogTitle>
-                <DialogDescription>กรอกข้อมูลนิทรรศการให้ครบถ้วน สามารถอัปโหลดรูปภาพหน้าปกและไฟล์ PDF ได้</DialogDescription>
-              </DialogHeader>
-              <ExhibitionForm exhibition={editingExhibition} onSubmit={handleFormSubmit} onCancel={() => setIsFormOpen(false)} />
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={refresh}
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              รีเฟรช
+            </Button>
+            <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+              <DialogTrigger asChild>
+                <Button className="add-button-gradient" onClick={() => setEditingExhibition(null)}>
+                  <Plus className="w-5 h-5 mr-2" />เพิ่มนิทรรศการ
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>{editingExhibition ? 'แก้ไขข้อมูลนิทรรศการ' : 'เพิ่มนิทรรศการใหม่'}</DialogTitle>
+                  <DialogDescription>กรอกข้อมูลนิทรรศการให้ครบถ้วน สามารถอัปโหลดรูปภาพหน้าปกและไฟล์ PDF ได้</DialogDescription>
+                </DialogHeader>
+                <ExhibitionForm exhibition={editingExhibition} onSubmit={handleFormSubmit} onCancel={() => setIsFormOpen(false)} />
+              </DialogContent>
+            </Dialog>
+          </div>
         </motion.div>
+
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex justify-between items-center">
+              <span>{error}</span>
+              <Button variant="outline" size="sm" onClick={clearError}>
+                ปิด
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-6 rounded-xl shadow-lg">
           <div className="relative">
@@ -197,36 +137,41 @@ const ExhibitionsPage = () => {
           </div>
         </motion.div>
 
-        {loading ? (
+        {/* Loading State */}
+        {loading && (
           <div className="text-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto text-violet-600 mb-4" />
+            <RefreshCw className="w-8 h-8 animate-spin mx-auto text-violet-600 mb-4" />
             <p className="text-gray-600">กำลังโหลดข้อมูลนิทรรศการ...</p>
           </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              <AnimatePresence>
-                {filteredExhibitions.map(exhibition => (
-                  <ExhibitionCard 
-                    key={exhibition.id} 
-                    exhibition={exhibition} 
-                    onEdit={() => { setEditingExhibition(exhibition); setIsFormOpen(true); }}
-                    onDelete={() => setDeletingExhibition(exhibition)}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
-            
-            {filteredExhibitions.length === 0 && !loading && (
-              <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-xl shadow-lg">
-                <ImageIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                <p className="text-lg">ไม่พบข้อมูลนิทรรศการ</p>
-                <p className="text-sm mt-1">
-                  {searchTerm ? 'ลองค้นหาด้วยคำอื่น' : 'ลองเพิ่มข้อมูลนิทรรศการแรกของคุณ!'}
-                </p>
-              </div>
-            )}
-          </>
+        )}
+
+        {/* Exhibitions Grid */}
+        {!loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <AnimatePresence>
+              {filteredExhibitions.map(exhibition => (
+                <ExhibitionCard 
+                  key={exhibition.id} 
+                  exhibition={exhibition} 
+                  onEdit={() => { setEditingExhibition(exhibition); setIsFormOpen(true); }}
+                  onDelete={() => setDeletingExhibition(exhibition)}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && filteredExhibitions.length === 0 && !error && (
+          <div className="text-center py-12 text-gray-500 bg-white rounded-xl shadow-lg">
+            <ImageIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+            <p className="text-lg">
+              {searchTerm ? 'ไม่พบนิทรรศการที่ค้นหา' : 'ไม่มีข้อมูลนิทรรศการ'}
+            </p>
+            <p className="text-sm mt-1">
+              {searchTerm ? 'ลองค้นหาด้วยคำอื่น' : 'เพิ่มข้อมูลนิทรรศการแรกของคุณ!'}
+            </p>
+          </div>
         )}
       </div>
 
@@ -234,7 +179,7 @@ const ExhibitionsPage = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>ยืนยันการลบ</AlertDialogTitle>
-            <AlertDialogDescription>คุณแน่ใจหรือไม่ว่าต้องการลบนิทรรศการ "{deletingExhibition?.name}" ออกจากรายการ?</AlertDialogDescription>
+            <AlertDialogDescription>คุณแน่ใจหรือไม่ว่าต้องการลบ "{deletingExhibition?.name}" ออกจากรายการนิทรรศการ?</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeletingExhibition(null)}>ยกเลิก</AlertDialogCancel>
