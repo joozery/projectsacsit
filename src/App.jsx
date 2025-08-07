@@ -145,6 +145,7 @@ const AppWithNavbar = () => {
           <Route path="speakers" element={<SpeakersPage />} />
           <Route path="exhibitions" element={<ExhibitionsPage />} />
           <Route path="attendees" element={<AttendeesPage />} />
+          <Route path="checkin" element={<CheckInPage />} />
           <Route path="certificates" element={<CertificatesPage />} />
           <Route path="google-analytics" element={<GoogleAnalytics />} />
           <Route path="multimedia" element={<MultimediaPage />} />

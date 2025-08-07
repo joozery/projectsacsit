@@ -60,9 +60,11 @@ export const attendeesAPI = {
   },
 
   // Get attendees by type (general, research, creative)
-  getAttendeesByType: async (year, type) => {
+  getAttendeesByType: async (year, type, timestamp = null) => {
     try {
-      const response = await api.get(`/attendees/${type}`, { params: { year } });
+      const params = { year };
+      if (timestamp) params._t = timestamp; // Cache-busting parameter
+      const response = await api.get(`/attendees/${type}`, { params });
       return response.data; // Backend returns { success: true, data: [...], count: number }
     } catch (error) {
       console.error(`Error fetching ${type} attendees:`, error);
@@ -118,6 +120,30 @@ export const attendeesAPI = {
       return response.data;
     } catch (error) {
       console.error('Error searching attendees:', error);
+      throw error;
+    }
+  },
+
+  // Get registrations data (which includes check-in status)
+  getRegistrations: async (year, type = null) => {
+    try {
+      const params = { year };
+      if (type) params.type = type;
+      const response = await api.get('/registrations', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching registrations:', error);
+      throw error;
+    }
+  },
+
+  // Update check-in status
+  updateCheckInStatus: async (registrationId, checkInData) => {
+    try {
+      const response = await api.put(`/registrations/${registrationId}/checkin`, checkInData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating check-in status:', error);
       throw error;
     }
   }

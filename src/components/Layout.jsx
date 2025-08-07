@@ -92,6 +92,7 @@ const Layout = ({ children }) => {
     { icon: Palette, label: 'ผลงานสร้างสรรค์', path: '/admin/works', description: 'จัดการผลงานสร้างสรรค์' },
     { icon: Eye, label: 'นิทรรศการ', path: '/admin/exhibitions', description: 'จัดการ Live Exhibition และพื้นที่สาธิต' },
     { icon: UserCheck, label: 'รายชื่อผู้เข้าร่วม', path: '/admin/attendees', description: 'เช็ครายชื่อผู้เข้าร่วมงาน' },
+    { icon: LogIn, label: 'Check-In', path: '/admin/checkin', description: 'จัดการการเช็คอินผู้เข้าร่วมงาน' },
     { icon: TrendingUp, label: 'Google Analytics', path: '/admin/google-analytics', description: 'สถิติการเข้าชมเว็บ' },
     { icon: Award, label: 'ใบประกาศนียบัตร', path: '/admin/certificates', description: 'จัดการใบประกาศ' },
     { icon: Film, label: 'สื่อมัลติมีเดีย', path: '/admin/multimedia', description: 'จัดการวิดีโอและภาพถ่าย' },

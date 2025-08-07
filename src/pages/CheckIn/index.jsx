@@ -43,6 +43,15 @@ const CheckInPage = () => {
     
     try {
       console.log('🔍 Fetching attendees data for year:', year);
+      console.log('🌐 API Base URL:', import.meta.env.VITE_API_BASE_URL || 'https://backendsacit-42f532a9097c.herokuapp.com');
+      
+      // Test API connection first
+      try {
+        const testResponse = await api.get('/registrations', { params: { year, limit: 1 } });
+        console.log('✅ API connection test successful:', testResponse.status);
+      } catch (testError) {
+        console.error('❌ API connection test failed:', testError);
+      }
       
       // Use the same API endpoints as the attendees page
       const [generalResponse, researchResponse, creativeResponse] = await Promise.all([
@@ -60,21 +69,21 @@ const CheckInPage = () => {
       // Transform API data to match our format
       const transformAttendee = (attendee) => ({
         id: attendee.id,
-        name: attendee.name || `${attendee.title_prefix || ''} ${attendee.first_name || ''} ${attendee.last_name || ''}`.trim(),
+        name: attendee.name,
         email: attendee.email,
         phone: attendee.phone,
         organization: attendee.organization,
-        education: attendee.education || attendee.education_level || 'ไม่ระบุ',
-        registeredAt: attendee.registeredAt || attendee.created_at || attendee.registered_at,
+        education: attendee.education || 'ไม่ระบุ',
+        registeredAt: attendee.registeredAt,
         status: attendee.status || 'confirmed',
-        checkedIn: attendee.checkedIn || attendee.checked_in || false,
-        checkInTime: attendee.checkInTime || attendee.check_in_time,
-        checkInRequested: attendee.checkInRequested || attendee.check_in_requested || false,
-        checkInRequestTime: attendee.checkInRequestTime || attendee.check_in_request_time,
-        projectTitle: attendee.projectTitle || attendee.project_title,
+        checkedIn: attendee.checkInStatus === 'checked_in',
+        checkInTime: attendee.checkInTime,
+        checkInRequested: attendee.checkInStatus === 'pending_approval',
+        checkInRequestTime: attendee.checkInRequestTime,
+        projectTitle: attendee.projectTitle,
         category: attendee.category,
-        submissionStatus: attendee.submissionStatus || attendee.submission_status,
-        type: attendee.type || attendee.registration_type
+        submissionStatus: attendee.submissionStatus,
+        type: attendee.type
       });
 
       const generalAttendees = generalResponse.data.success ? generalResponse.data.data?.map(transformAttendee) || [] : [];
@@ -102,6 +111,12 @@ const CheckInPage = () => {
       
     } catch (error) {
       console.error('❌ Error fetching attendees data:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        config: error.config
+      });
       setError('ไม่สามารถดึงข้อมูลผู้เข้าร่วมงานได้');
       
       // Fallback to localStorage if available
@@ -188,13 +203,31 @@ const CheckInPage = () => {
     setIsLoading(true);
     
     try {
-      // Use the attendee.id directly as it's now the registration ID
-      const response = await api.put(`/registrations/${attendee.id}/checkin`, {
-        check_in_requested: true
-      });
+      console.log('🔧 Sending check-in request for attendee:', attendee.id, attendee.name);
+      console.log('📋 Attendee data:', attendee);
+      
+      // Prepare the request data exactly as backend expects
+      const requestData = {
+        check_in_requested: true,
+        check_in_request_time: new Date().toISOString()
+      };
+      
+      console.log('📤 Request data being sent:', requestData);
+      console.log('🌐 Request URL:', `/attendees/${attendee.id}/checkin`);
+      console.log('🔧 Attendee ID:', attendee.id);
+      console.log('🔧 Attendee name:', attendee.name);
+      console.log('🔧 Full attendee data:', attendee);
+      
+      // Use the attendee.id directly as it's the user ID
+      const response = await api.put(`/attendees/${attendee.id}/checkin`, requestData);
+
+      console.log('📡 API Response:', response.data);
+      console.log('📡 Response status:', response.status);
 
       if (response.data.success) {
         const requestTime = new Date().toISOString();
+        
+        console.log('✅ Check-in request successful, updating local data...');
         
         // Update attendee check-in request status in shared data
         updateAttendeeData(attendee.id, {
@@ -216,12 +249,41 @@ const CheckInPage = () => {
         setSearchResults(prev => 
           prev.map(a => a.id === attendee.id ? updatedAttendee : a)
         );
+        
+        console.log('✅ UI updated successfully');
+        
+        // Force refresh data from server
+        setTimeout(() => {
+          console.log('🔄 Refreshing data from server...');
+          fetchAttendeesData();
+        }, 1000);
+        
       } else {
+        console.error('❌ API returned error:', response.data.message);
         alert('เกิดข้อผิดพลาดในการส่งคำขอ: ' + response.data.message);
       }
     } catch (error) {
-      console.error('Error sending check-in request:', error);
-      alert('เกิดข้อผิดพลาดในการส่งคำขอ กรุณาลองใหม่อีกครั้ง');
+      console.error('❌ Error sending check-in request:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        config: error.config,
+        url: error.config?.url,
+        method: error.config?.method
+      });
+      
+      // Show more specific error message
+      let errorMessage = 'เกิดข้อผิดพลาดในการส่งคำขอ กรุณาลองใหม่อีกครั้ง';
+      if (error.response?.status === 404) {
+        errorMessage = 'ไม่พบข้อมูลผู้เข้าร่วมงาน กรุณาติดต่อเจ้าหน้าที่';
+      } else if (error.response?.status === 500) {
+        errorMessage = 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง';
+      } else if (error.code === 'NETWORK_ERROR') {
+        errorMessage = 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
+      }
+      
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }

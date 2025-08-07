@@ -94,30 +94,59 @@ const AttendeesPage = () => {
     setLoading(true);
     setError(null);
     try {
-      // ใช้ attendeesAPI เพื่อดึงข้อมูลทั้งหมดจาก attendees endpoint
+      console.log('🔍 Fetching attendees data for year:', year);
+      
+      // ใช้ attendees endpoint เพื่อดึงข้อมูลที่มี check-in status
+      // Add cache-busting parameter
+      const timestamp = Date.now();
       const [generalResponse, researchResponse, creativeResponse] = await Promise.all([
-        attendeesAPI.getAttendeesByType(year, 'general'),
-        attendeesAPI.getAttendeesByType(year, 'research'),
-        attendeesAPI.getAttendeesByType(year, 'creative')
+        attendeesAPI.getAttendeesByType(year, 'general', timestamp),
+        attendeesAPI.getAttendeesByType(year, 'research', timestamp),
+        attendeesAPI.getAttendeesByType(year, 'creative', timestamp)
       ]);
       
-      // Transform general attendees data
-      const generalAttendees = generalResponse.success ? generalResponse.data?.map(attendee => ({
-        id: attendee.id,
-        name: attendee.name,
-        email: attendee.email,
-        phone: attendee.phone,
-        organization: attendee.organization,
-        education: attendee.education || 'ไม่ระบุ',
-        registeredAt: attendee.registeredAt,
-        status: attendee.status || 'confirmed',
-        checkedIn: attendee.checkInStatus === 'checked_in',
-        checkInTime: attendee.checkInTime,
-        checkInRequested: attendee.checkInStatus === 'pending_approval',
-        checkInRequestTime: attendee.checkInRequestTime
-      })) || [] : [];
+      console.log('📊 API Responses:', {
+        general: generalResponse,
+        research: researchResponse,
+        creative: creativeResponse
+      });
+      
+      // Transform general attendees data from attendees API
+      const generalAttendees = generalResponse.success ? generalResponse.data?.map(attendee => {
+        const transformed = {
+          id: attendee.id,
+          name: attendee.name,
+          email: attendee.email,
+          phone: attendee.phone,
+          organization: attendee.organization,
+          education: attendee.education || 'ไม่ระบุ',
+          registeredAt: attendee.registeredAt,
+          status: attendee.status || 'confirmed',
+          checkedIn: attendee.checked_in === 1 || attendee.checkInStatus === 'checked_in',
+          checkInTime: attendee.checkInTime,
+          checkInRequested: attendee.check_in_requested === 1 || attendee.checkInStatus === 'pending_approval',
+          checkInRequestTime: attendee.checkInRequestTime
+        };
+        
+        // Debug: Log transformation for attendees with check-in status
+        if (attendee.check_in_requested === 1 || attendee.checked_in === 1) {
+          console.log(`🔄 Transforming ${attendee.name}:`, {
+            original: {
+              checked_in: attendee.checked_in,
+              check_in_requested: attendee.check_in_requested,
+              checkInStatus: attendee.checkInStatus
+            },
+            transformed: {
+              checkedIn: transformed.checkedIn,
+              checkInRequested: transformed.checkInRequested
+            }
+          });
+        }
+        
+        return transformed;
+      }) || [] : [];
 
-      // Transform research attendees data
+      // Transform research attendees data from attendees API
       const researchAttendees = researchResponse.success ? researchResponse.data?.map(attendee => ({
         id: attendee.id,
         name: attendee.name,
@@ -127,16 +156,16 @@ const AttendeesPage = () => {
         education: attendee.education || 'ไม่ระบุ',
         registeredAt: attendee.registeredAt,
         status: attendee.status || 'confirmed',
-        checkedIn: attendee.checkInStatus === 'checked_in',
+        checkedIn: attendee.checked_in === 1 || attendee.checkInStatus === 'checked_in',
         checkInTime: attendee.checkInTime,
-        checkInRequested: attendee.checkInStatus === 'pending_approval',
+        checkInRequested: attendee.check_in_requested === 1 || attendee.checkInStatus === 'pending_approval',
         checkInRequestTime: attendee.checkInRequestTime,
         projectTitle: attendee.projectTitle,
         category: attendee.category,
         submissionStatus: attendee.submissionStatus
       })) || [] : [];
 
-      // Transform creative attendees data
+      // Transform creative attendees data from attendees API
       const creativeAttendees = creativeResponse.success ? creativeResponse.data?.map(attendee => ({
         id: attendee.id,
         name: attendee.name,
@@ -146,14 +175,66 @@ const AttendeesPage = () => {
         education: attendee.education || 'ไม่ระบุ',
         registeredAt: attendee.registeredAt,
         status: attendee.status || 'confirmed',
-        checkedIn: attendee.checkInStatus === 'checked_in',
+        checkedIn: attendee.checked_in === 1 || attendee.checkInStatus === 'checked_in',
         checkInTime: attendee.checkInTime,
-        checkInRequested: attendee.checkInStatus === 'pending_approval',
+        checkInRequested: attendee.check_in_requested === 1 || attendee.checkInStatus === 'pending_approval',
         checkInRequestTime: attendee.checkInRequestTime,
         projectTitle: attendee.projectTitle,
         category: attendee.category,
         submissionStatus: attendee.submissionStatus
       })) || [] : [];
+
+      console.log('📋 Transformed data sample:', {
+        general: generalAttendees.slice(0, 2),
+        research: researchAttendees.slice(0, 2),
+        creative: creativeAttendees.slice(0, 2)
+      });
+
+      // Check for pending requests
+      const allAttendees = [...generalAttendees, ...researchAttendees, ...creativeAttendees];
+      const pendingRequests = allAttendees.filter(a => a.checkInRequested && !a.checkedIn);
+      console.log('🔍 Pending requests found:', pendingRequests.length);
+      pendingRequests.forEach(req => {
+        console.log('⏳ Pending:', req.name, req.email, 'checkInRequested:', req.checkInRequested, 'checkedIn:', req.checkedIn);
+      });
+
+      // Debug: Log all attendees with check-in status
+      console.log('🔍 All attendees check-in status:');
+      allAttendees.forEach(attendee => {
+        if (attendee.checkInRequested || attendee.checkedIn) {
+          console.log(`👤 ${attendee.name} (${attendee.email}):`, {
+            checkInRequested: attendee.checkInRequested,
+            checkedIn: attendee.checkedIn,
+            checkInTime: attendee.checkInTime,
+            checkInRequestTime: attendee.checkInRequestTime,
+            checkInStatus: attendee.checkInStatus
+          });
+        }
+      });
+      
+      // Debug: Log raw API response for first few attendees
+      console.log('🔍 Raw API response sample:');
+      if (generalResponse.success && generalResponse.data && generalResponse.data.length > 0) {
+        console.log('📊 First general attendee raw data:', generalResponse.data[0]);
+        console.log('📊 Check-in fields:', {
+          checked_in: generalResponse.data[0].checked_in,
+          check_in_requested: generalResponse.data[0].check_in_requested,
+          checkInStatus: generalResponse.data[0].checkInStatus
+        });
+        
+        // Debug: Check for pending requests in raw data
+        const pendingInRaw = generalResponse.data.filter(a => a.check_in_requested === 1 && a.checked_in === 0);
+        console.log('🔍 Pending requests in raw data:', pendingInRaw.length);
+        pendingInRaw.forEach(req => {
+          console.log('⏳ Raw pending:', req.name, req.email, 'check_in_requested:', req.check_in_requested, 'checked_in:', req.checked_in);
+        });
+      }
+      if (researchResponse.success && researchResponse.data && researchResponse.data.length > 0) {
+        console.log('📊 First research attendee raw data:', researchResponse.data[0]);
+      }
+      if (creativeResponse.success && creativeResponse.data && creativeResponse.data.length > 0) {
+        console.log('📊 First creative attendee raw data:', creativeResponse.data[0]);
+      }
 
       setAttendeesData(prev => ({
         ...prev,
@@ -177,15 +258,36 @@ const AttendeesPage = () => {
     fetchAttendeesData(selectedYear);
   }, [selectedYear]);
 
+  // Auto-refresh data every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('🔄 Auto-refreshing attendees data...');
+      fetchAttendeesData(selectedYear);
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [selectedYear]);
+
   // Listen for data updates from check-in page
   useEffect(() => {
     const handleDataUpdate = (event) => {
+      console.log('🔄 Received attendee data update event:', event.detail);
       setAttendeesData(event.detail);
     };
 
     window.addEventListener('attendeeDataUpdated', handleDataUpdate);
-    return () => window.removeEventListener('attendeeDataUpdated', handleDataUpdate);
-  }, []);
+    
+    // Also refresh data periodically to catch updates
+    const interval = setInterval(() => {
+      console.log('🔄 Periodic data refresh...');
+      fetchAttendeesData(selectedYear);
+    }, 30000); // Refresh every 30 seconds
+    
+    return () => {
+      window.removeEventListener('attendeeDataUpdated', handleDataUpdate);
+      clearInterval(interval);
+    };
+  }, [selectedYear]);
 
   // Save data to localStorage whenever it changes
   useEffect(() => {
@@ -407,18 +509,8 @@ const AttendeesPage = () => {
       });
 
       if (response.success) {
-        // Update local state
-        setAttendeesData(prev => ({
-          ...prev,
-          [selectedYear]: {
-            ...prev[selectedYear],
-            [type]: prev[selectedYear][type].map(attendee =>
-              attendee.id === attendeeId
-                ? { ...attendee, checkedIn: true, checkInTime: currentTime, checkInRequested: true, checkInRequestTime: currentTime }
-                : attendee
-            )
-          }
-        }));
+        // Refresh data to get latest status
+        await fetchAttendeesData(selectedYear);
         
         Swal.fire({
           icon: 'success',
@@ -463,7 +555,7 @@ const AttendeesPage = () => {
         return;
       }
 
-      // Call API to cancel check-in directly using attendee ID
+      // Call API to cancel check-in using attendee ID
       const response = await api.put(`/attendees/${attendeeId}/checkin`, {
         checked_in: false,
         check_in_time: null,
@@ -472,18 +564,8 @@ const AttendeesPage = () => {
       });
 
       if (response.data.success) {
-        // Update local state
-        setAttendeesData(prev => ({
-          ...prev,
-          [selectedYear]: {
-            ...prev[selectedYear],
-            [type]: prev[selectedYear][type].map(attendee =>
-              attendee.id === attendeeId
-                ? { ...attendee, checkedIn: false, checkInTime: null, checkInRequested: false, checkInRequestTime: null }
-                : attendee
-            )
-          }
-        }));
+        // Refresh data to get latest status
+        await fetchAttendeesData(selectedYear);
         
         // Show success message
         Swal.fire({
@@ -603,50 +685,19 @@ const AttendeesPage = () => {
       console.log('🔧 Approving check-in for attendee:', attendeeId, 'type:', type);
       const currentTime = new Date().toISOString();
       
-      // First, find the registration ID for this attendee
-      const registrationsResponse = await api.get('/registrations', {
-        params: { year: selectedYear, type }
-      });
+      // Use attendeeId directly as it's the registration ID
+      const registrationId = attendeeId;
+      console.log('✅ Using registration ID:', registrationId);
       
-      let registrationId = null;
-      if (registrationsResponse.data.success) {
-        // Find the registration that matches this attendee
-        const attendee = getCurrentYearData()[type].find(a => a.id === attendeeId);
-        if (attendee) {
-          const registration = registrationsResponse.data.data.find(r => 
-            r.email === attendee.email
-          );
-          if (registration) {
-            registrationId = registration.id;
-            console.log('✅ Found registration ID:', registrationId);
-          }
-        }
-      }
-      
-      if (!registrationId) {
-        alert('ไม่พบข้อมูลการลงทะเบียนสำหรับผู้ใช้นี้ กรุณาติดต่อเจ้าหน้าที่');
-        return;
-      }
-      
-      // Call API to approve check-in using the registration ID
-      const response = await api.put(`/registrations/${registrationId}/checkin`, {
+      // Call API to approve check-in using the attendee ID
+      const response = await api.put(`/attendees/${registrationId}/checkin`, {
         checked_in: true,
         check_in_requested: false
       });
 
       if (response.data.success) {
-        // Update local state
-        setAttendeesData(prev => ({
-          ...prev,
-          [selectedYear]: {
-            ...prev[selectedYear],
-            [type]: prev[selectedYear][type].map(attendee =>
-              attendee.id === attendeeId
-                ? { ...attendee, checkedIn: true, checkInTime: currentTime, checkInRequested: false }
-                : attendee
-            )
-          }
-        }));
+        // Refresh data to get latest status
+        await fetchAttendeesData(selectedYear);
         
         // Show success message
         Swal.fire({
@@ -682,49 +733,18 @@ const AttendeesPage = () => {
       setLoadingActions(prev => ({ ...prev, [`reject-${attendeeId}`]: true }));
       console.log('🔧 Rejecting check-in for attendee:', attendeeId, 'type:', type);
       
-      // First, find the registration ID for this attendee
-      const registrationsResponse = await api.get('/registrations', {
-        params: { year: selectedYear, type }
-      });
+      // Use attendeeId directly as it's the registration ID
+      const registrationId = attendeeId;
+      console.log('✅ Using registration ID:', registrationId);
       
-      let registrationId = null;
-      if (registrationsResponse.data.success) {
-        // Find the registration that matches this attendee
-        const attendee = getCurrentYearData()[type].find(a => a.id === attendeeId);
-        if (attendee) {
-          const registration = registrationsResponse.data.data.find(r => 
-            r.email === attendee.email
-          );
-          if (registration) {
-            registrationId = registration.id;
-            console.log('✅ Found registration ID:', registrationId);
-          }
-        }
-      }
-      
-      if (!registrationId) {
-        alert('ไม่พบข้อมูลการลงทะเบียนสำหรับผู้ใช้นี้ กรุณาติดต่อเจ้าหน้าที่');
-        return;
-      }
-      
-      // Call API to reject check-in request using the registration ID
-      const response = await api.put(`/registrations/${registrationId}/checkin`, {
+      // Call API to reject check-in request using the attendee ID
+      const response = await api.put(`/attendees/${registrationId}/checkin`, {
         check_in_requested: false
       });
 
       if (response.data.success) {
-        // Update local state
-        setAttendeesData(prev => ({
-          ...prev,
-          [selectedYear]: {
-            ...prev[selectedYear],
-            [type]: prev[selectedYear][type].map(attendee =>
-              attendee.id === attendeeId
-                ? { ...attendee, checkInRequested: false, checkInRequestTime: null }
-                : attendee
-            )
-          }
-        }));
+        // Refresh data to get latest status
+        await fetchAttendeesData(selectedYear);
         
         // Show success message
         Swal.fire({
@@ -851,6 +871,15 @@ const AttendeesPage = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <div className="flex items-center justify-end gap-2">
+
+                    {/* Debug: Log button display logic */}
+                    {console.log(`🔘 Button logic for ${attendee.name}:`, {
+                      checkInRequested: attendee.checkInRequested,
+                      checkedIn: attendee.checkedIn,
+                      shouldShowApproveReject: attendee.checkInRequested && !attendee.checkedIn,
+                      shouldShowCheckIn: !attendee.checkedIn && !attendee.checkInRequested,
+                      shouldShowCheckOut: attendee.checkedIn
+                    })}
                     {attendee.checkInRequested && !attendee.checkedIn ? (
                       <>
                         <Button
@@ -1086,7 +1115,10 @@ const AttendeesPage = () => {
           </Button>
           <Button 
             variant="outline" 
-            onClick={() => fetchAttendeesData(selectedYear)}
+            onClick={() => {
+              console.log('🔄 Manual refresh triggered');
+              fetchAttendeesData(selectedYear);
+            }}
             disabled={loading}
           >
             {loading ? (
