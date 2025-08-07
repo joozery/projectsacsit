@@ -42,36 +42,50 @@ const CheckInPage = () => {
     setError(null);
     
     try {
-      // Fetch registrations data directly from registrations API
+      console.log('🔍 Fetching attendees data for year:', year);
+      
+      // Use the same API endpoints as the attendees page
       const [generalResponse, researchResponse, creativeResponse] = await Promise.all([
-        api.get('/registrations', { params: { year, type: 'general' } }),
-        api.get('/registrations', { params: { year, type: 'research' } }),
-        api.get('/registrations', { params: { year, type: 'creative' } })
+        api.get('/attendees/general', { params: { year } }),
+        api.get('/attendees/research', { params: { year } }),
+        api.get('/attendees/creative', { params: { year } })
       ]);
+      
+      console.log('📊 API Responses:', {
+        general: generalResponse.data,
+        research: researchResponse.data,
+        creative: creativeResponse.data
+      });
       
       // Transform API data to match our format
       const transformAttendee = (attendee) => ({
         id: attendee.id,
-        name: `${attendee.title_prefix || ''} ${attendee.first_name} ${attendee.last_name}`.trim(),
+        name: attendee.name || `${attendee.title_prefix || ''} ${attendee.first_name || ''} ${attendee.last_name || ''}`.trim(),
         email: attendee.email,
         phone: attendee.phone,
         organization: attendee.organization,
-        education: attendee.education_level || 'ไม่ระบุ',
-        registeredAt: attendee.created_at || attendee.registered_at,
+        education: attendee.education || attendee.education_level || 'ไม่ระบุ',
+        registeredAt: attendee.registeredAt || attendee.created_at || attendee.registered_at,
         status: attendee.status || 'confirmed',
-        checkedIn: attendee.checked_in || false,
-        checkInTime: attendee.check_in_time,
-        checkInRequested: attendee.check_in_requested || false,
-        checkInRequestTime: attendee.check_in_request_time,
-        projectTitle: attendee.project_title,
+        checkedIn: attendee.checkedIn || attendee.checked_in || false,
+        checkInTime: attendee.checkInTime || attendee.check_in_time,
+        checkInRequested: attendee.checkInRequested || attendee.check_in_requested || false,
+        checkInRequestTime: attendee.checkInRequestTime || attendee.check_in_request_time,
+        projectTitle: attendee.projectTitle || attendee.project_title,
         category: attendee.category,
-        submissionStatus: attendee.submission_status,
-        type: attendee.registration_type
+        submissionStatus: attendee.submissionStatus || attendee.submission_status,
+        type: attendee.type || attendee.registration_type
       });
 
       const generalAttendees = generalResponse.data.success ? generalResponse.data.data?.map(transformAttendee) || [] : [];
       const researchAttendees = researchResponse.data.success ? researchResponse.data.data?.map(transformAttendee) || [] : [];
       const creativeAttendees = creativeResponse.data.success ? creativeResponse.data.data?.map(transformAttendee) || [] : [];
+
+      console.log('📋 Transformed data:', {
+        general: generalAttendees.length,
+        research: researchAttendees.length,
+        creative: creativeAttendees.length
+      });
 
       const newData = {
         [year]: {
@@ -84,13 +98,16 @@ const CheckInPage = () => {
       setAttendeesData(newData);
       localStorage.setItem('attendeesData', JSON.stringify(newData));
       
+      console.log('✅ Data loaded successfully');
+      
     } catch (error) {
-      console.error('Error fetching attendees data:', error);
+      console.error('❌ Error fetching attendees data:', error);
       setError('ไม่สามารถดึงข้อมูลผู้เข้าร่วมงานได้');
       
       // Fallback to localStorage if available
       const savedData = localStorage.getItem('attendeesData');
       if (savedData) {
+        console.log('🔄 Using fallback data from localStorage');
         setAttendeesData(JSON.parse(savedData));
       }
     } finally {
