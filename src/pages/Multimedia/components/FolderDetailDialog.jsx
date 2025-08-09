@@ -1,29 +1,142 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
-import { X, Eye, Download, Share2, Grid3X3, List } from 'lucide-react';
+import { X, Eye, Download, Share2, Grid3X3, List, Loader2, Upload, Trash2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import mediaService from '@/services/mediaService';
+import { formatThaiDateTime } from '@/lib/utils';
 
 const FolderDetailDialog = ({ isOpen, onOpenChange, folder, onImageClick }) => {
   const [viewMode, setViewMode] = useState('grid');
-  
-  const sampleImages = [
-    'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1516321497487-e288fb19713f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1531058020387-3be344556be6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-  ];
+  const [folderImages, setFolderImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef(null);
+  const { toast } = useToast();
 
-  const folderImages = sampleImages.slice(0, folder?.itemsCount || 12);
+  // Fetch folder images when dialog opens
+  useEffect(() => {
+    const fetchFolderImages = async () => {
+      if (!isOpen || !folder?.id) return;
+
+      setLoading(true);
+      setError(null);
+      
+      try {
+        console.log('🔍 Fetching images for folder:', folder.id);
+        const result = await mediaService.getFolderImages(folder.id);
+        
+        // Extract image URLs from the API response (UPDATED for folder_images table)
+        const imageUrls = result.images
+          .filter(img => img.image_url) // folder_images table uses image_url field
+          .map(img => ({
+            id: img.id,
+            url: img.image_url, // Use image_url from folder_images table
+            name: img.name,
+            date: img.upload_date || img.date,
+            subtitle: img.subtitle,
+            description: img.description
+          }));
+        
+        setFolderImages(imageUrls);
+        console.log('✅ Loaded folder images:', imageUrls.length);
+      } catch (err) {
+        console.error('❌ Failed to fetch folder images:', err);
+        setError(err.message);
+        // Fallback to empty array
+        setFolderImages([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFolderImages();
+  }, [isOpen, folder?.id]);
+
+  // Handle file upload to folder
+  const handleFileUpload = async (files) => {
+    if (!files || files.length === 0 || !folder?.id) return;
+
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      console.log('📁 Uploading files to folder:', folder.id);
+      
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + 10, 90));
+      }, 500);
+
+      const result = await mediaService.uploadFilesToFolder(folder.id, Array.from(files));
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      console.log('✅ Upload successful:', result.summary);
+      
+      toast({
+        title: "อัปโหลดสำเร็จ",
+        description: `อัปโหลด ${result.summary.totalUploaded} ไฟล์ บันทึก ${result.summary.totalSaved} ไฟล์ลง database`,
+      });
+
+      // Refresh folder images
+      const refreshResult = await mediaService.getFolderImages(folder.id);
+      const imageUrls = refreshResult.images
+        .filter(img => img.image_url)
+        .map(img => ({
+          id: img.id,
+          url: img.image_url,
+          name: img.name,
+          date: img.upload_date || img.date,
+          subtitle: img.subtitle,
+          description: img.description
+        }));
+      setFolderImages(imageUrls);
+
+    } catch (error) {
+      console.error('❌ Upload failed:', error);
+      toast({
+        title: "อัปโหลดไม่สำเร็จ",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  // Handle delete image from folder
+  const handleDeleteImage = async (imageId) => {
+    if (!folder?.id || !imageId) return;
+
+    try {
+      console.log('🗑️ Deleting image from folder:', { folderId: folder.id, imageId });
+      
+      await mediaService.deleteImageFromFolder(folder.id, imageId);
+      
+      toast({
+        title: "ลบรูปภาพสำเร็จ",
+        description: "รูปภาพถูกลบออกจากโฟลเดอร์แล้ว",
+      });
+
+      // Remove image from local state
+      setFolderImages(prev => prev.filter(img => img.id !== imageId));
+
+    } catch (error) {
+      console.error('❌ Delete failed:', error);
+      toast({
+        title: "ลบรูปภาพไม่สำเร็จ",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
 
   if (!folder) return null;
 
@@ -39,6 +152,27 @@ const FolderDetailDialog = ({ isOpen, onOpenChange, folder, onImageClick }) => {
               </DialogDescription>
             </div>
             <div className="flex items-center gap-2">
+              {/* Upload Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    {uploadProgress}%
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    อัปโหลด
+                  </>
+                )}
+              </Button>
+              
+              {/* View Mode Buttons */}
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
                 size="sm"
@@ -54,32 +188,82 @@ const FolderDetailDialog = ({ isOpen, onOpenChange, folder, onImageClick }) => {
                 <List className="w-4 h-4" />
               </Button>
             </div>
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,video/*"
+              onChange={(e) => handleFileUpload(e.target.files)}
+              className="hidden"
+            />
           </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto py-4">
-          {viewMode === 'grid' ? (
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
+              <span className="ml-2 text-gray-600">กำลังโหลดรูปภาพ...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-600 mb-4">❌ เกิดข้อผิดพลาด: {error}</p>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setError(null);
+                  // Re-trigger the useEffect by toggling loading
+                  setLoading(true);
+                  setTimeout(() => setLoading(false), 100);
+                }}
+              >
+                ลองใหม่
+              </Button>
+            </div>
+          ) : folderImages.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">ไม่พบรูปภาพในโฟลเดอร์นี้</p>
+            </div>
+          ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
               <AnimatePresence>
-                {folderImages.map((imageUrl, index) => (
+                {folderImages.map((image, index) => (
                   <motion.div
-                    key={index}
+                    key={image.id}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     className="relative aspect-square group cursor-pointer rounded-lg overflow-hidden bg-gray-100"
-                    onClick={() => onImageClick(imageUrl, folderImages, index)}
+                    onClick={() => onImageClick(image.url, folderImages.map(img => img.url), index)}
                   >
-                    <img-replace 
-                      src={imageUrl} 
-                      alt={`${folder.name} - รูปที่ ${index + 1}`}
+                    <img 
+                      src={image.url} 
+                      alt={image.name || `${folder.name} - รูปที่ ${index + 1}`}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400"><span>🖼️</span></div>';
+                      }}
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
                       <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
-                    <div className="absolute bottom-1 right-1 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">
+                    
+                    {/* Delete button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteImage(image.id);
+                      }}
+                      className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                    
+                    <div className="absolute bottom-1 left-1 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">
                       {index + 1}
                     </div>
                   </motion.div>
@@ -88,27 +272,29 @@ const FolderDetailDialog = ({ isOpen, onOpenChange, folder, onImageClick }) => {
             </div>
           ) : (
             <div className="space-y-3">
-              {folderImages.map((imageUrl, index) => (
+              {folderImages.map((image, index) => (
                 <motion.div
-                  key={index}
+                  key={image.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.02 }}
                   className="flex items-center gap-4 p-3 rounded-lg border border-gray-200 hover:border-violet-300 hover:bg-violet-50/50 transition-all duration-200 cursor-pointer group"
-                  onClick={() => onImageClick(imageUrl, folderImages, index)}
+                  onClick={() => onImageClick(image.url, folderImages.map(img => img.url), index)}
                 >
                   <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                    <img-replace 
-                      src={imageUrl} 
-                      alt={`${folder.name} - รูปที่ ${index + 1}`}
+                    <img 
+                      src={image.url} 
+                      alt={image.name || `${folder.name} - รูปที่ ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <div className="flex-1">
                     <h4 className="font-medium text-gray-800 group-hover:text-violet-700 transition-colors">
-                      รูปภาพที่ {index + 1}
+                      {image.name || `รูปภาพที่ ${index + 1}`}
                     </h4>
-                    <p className="text-sm text-gray-500">จาก {folder.event}</p>
+                    <p className="text-sm text-gray-500">
+                      {image.subtitle || `จาก ${folder.event}`} • {image.date ? formatThaiDateTime(image.date) : ''}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -117,8 +303,16 @@ const FolderDetailDialog = ({ isOpen, onOpenChange, folder, onImageClick }) => {
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <Download className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Share2 className="w-4 h-4" />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteImage(image.id);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </motion.div>

@@ -100,7 +100,7 @@ const CertificateForm = ({ certificate, onSubmit, onCancel }) => {
         <div className="mt-1 flex items-center space-x-4">
           <div className="flex-shrink-0 w-32 h-20 rounded-md border border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50">
             {previewImage ? (
-              <img-replace src={previewImage} alt="Preview" className="h-full w-full object-cover" />
+              <img src={previewImage} alt="Preview" className="h-full w-full object-cover" />
             ) : (
               <UploadCloud className="w-8 h-8 text-gray-400" />
             )}

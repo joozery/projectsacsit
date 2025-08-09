@@ -14,7 +14,8 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { UploadCloud, X, Palette, Image as ImageIcon, Check } from 'lucide-react';
+import { UploadCloud, X, Palette, Image as ImageIcon, Check, Loader2 } from 'lucide-react';
+import { useMediaForm, useMediaFilters } from '@/hooks/useMedia';
 
 const defaultColors = [
   { name: 'ม่วงอ่อน', value: '#A855F7' },
@@ -28,6 +29,20 @@ const defaultColors = [
 ];
 
 const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
+  // API hooks
+  const { 
+    loading, 
+    error, 
+    uploadProgress,
+    createMedia, 
+    updateMedia, 
+    uploadFile, 
+    uploadMultipleFiles,
+    setError 
+  } = useMediaForm();
+  
+  const { events, keywords: popularKeywords } = useMediaFilters();
+
   const [formData, setFormData] = useState({
     name: '',
     subtitle: '',
@@ -47,6 +62,8 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
   const [keywordInput, setKeywordInput] = useState('');
   const [coverPreview, setCoverPreview] = useState(null);
   const [additionalMediaPreviews, setAdditionalMediaPreviews] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedFolderId, setSelectedFolderId] = useState(''); // NEW: For folder upload
 
   useEffect(() => {
     if (mediaItem) {
@@ -58,16 +75,16 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
         event: mediaItem.event || '',
         date: mediaItem.date || '',
         coverImage: null,
-        coverImageUrl: mediaItem.coverImageUrl || mediaItem.thumbnailUrl || '', // Use thumbnailUrl if coverImageUrl is not present
-        themeColor: mediaItem.themeColor || defaultColors[0].value,
+        coverImageUrl: mediaItem.cover_image_url || mediaItem.thumbnail_url || mediaItem.coverImageUrl || mediaItem.thumbnailUrl || '',
+        themeColor: mediaItem.theme_color || mediaItem.themeColor || defaultColors[0].value,
         keywords: mediaItem.keywords || [],
         additionalMedia: [], 
         status: mediaItem.status || 'draft',
-        itemsCount: mediaItem.type === 'folder' ? (mediaItem.itemsCount || 0) : undefined,
+        itemsCount: mediaItem.type === 'folder' ? (mediaItem.items_count || mediaItem.itemsCount || 0) : undefined,
       });
-      setCoverPreview(mediaItem.coverImageUrl || mediaItem.thumbnailUrl || null);
-      // Assuming additionalMedia in mediaItem are URLs
-      setAdditionalMediaPreviews(mediaItem.additionalMediaUrls || []);
+      setCoverPreview(mediaItem.cover_image_url || mediaItem.thumbnail_url || mediaItem.coverImageUrl || mediaItem.thumbnailUrl || null);
+      // Handle both API response formats
+      setAdditionalMediaPreviews(mediaItem.additional_media_urls || mediaItem.additionalMediaUrls || []);
     } else {
       // Reset form for new item
       setFormData({
@@ -107,12 +124,25 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
   const handleCoverImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+        return;
+      }
+      
+      // Validate file size (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setError('ขนาดไฟล์ต้องไม่เกิน 10MB');
+        return;
+      }
+      
       setFormData((prev) => ({ ...prev, coverImage: file, coverImageUrl: '' }));
       const reader = new FileReader();
       reader.onloadend = () => {
         setCoverPreview(reader.result);
       };
       reader.readAsDataURL(file);
+      setError(null);
     }
   };
   
@@ -145,32 +175,153 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
     setFormData((prev) => ({ ...prev, keywords: prev.keywords.filter(kw => kw !== keywordToRemove) }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const dataToSubmit = { ...formData };
-    if (formData.coverImage) {
-      dataToSubmit.coverImageUrl = coverPreview; 
-    }
-    // For additionalMedia, we'd typically upload them and store URLs.
-    // For localStorage, we'll store the base64 previews for simplicity.
-    dataToSubmit.additionalMediaUrls = additionalMediaPreviews;
+    setIsSubmitting(true);
+    setError(null);
 
-    delete dataToSubmit.coverImage;
-    delete dataToSubmit.additionalMedia;
-    onSubmit(dataToSubmit);
+    try {
+      let coverImageUrl = formData.coverImageUrl;
+      let additionalMediaUrls = [];
+
+      // Upload cover image if new file is selected
+      if (formData.coverImage) {
+        console.log('📤 Uploading cover image...');
+        const uploadResult = await uploadFile(formData.coverImage);
+        console.log('📤 Upload result:', uploadResult);
+        
+        if (!uploadResult || !uploadResult.fileUrl) {
+          throw new Error('Upload failed: Invalid response from server');
+        }
+        
+        coverImageUrl = uploadResult.fileUrl;
+      }
+
+      // Upload additional media files
+      if (formData.additionalMedia && formData.additionalMedia.length > 0) {
+        console.log('📤 Uploading additional media files...');
+        const uploadResults = await uploadMultipleFiles(formData.additionalMedia);
+        console.log('📤 Multiple upload results:', uploadResults);
+        
+        if (!uploadResults || !Array.isArray(uploadResults)) {
+          throw new Error('Multiple upload failed: Invalid response from server');
+        }
+        
+        additionalMediaUrls = uploadResults.map((result, index) => {
+          if (!result || !result.fileUrl) {
+            throw new Error(`Upload failed for file ${index + 1}: Invalid response`);
+          }
+          return result.fileUrl;
+        });
+      }
+
+      // Prepare data for API
+      const mediaData = {
+        name: formData.name,
+        subtitle: formData.subtitle,
+        content: formData.content,
+        type: formData.type,
+        event: formData.event,
+        date: formData.date,
+        cover_image_url: coverImageUrl,
+        theme_color: formData.themeColor,
+        keywords: formData.keywords,
+        additional_media_urls: additionalMediaUrls,
+        status: formData.status,
+        items_count: formData.type === 'folder' ? parseInt(formData.itemsCount) || 0 : null,
+      };
+
+      let result;
+      if (mediaItem) {
+        // Update existing media
+        result = await updateMedia(mediaItem.id, mediaData);
+        console.log('✅ Media updated successfully:', result.name);
+      } else {
+        // Create new media
+        result = await createMedia(mediaData);
+        console.log('✅ Media created successfully:', result.name);
+      }
+
+      // Call parent onSubmit with result
+      if (onSubmit) {
+        onSubmit(result);
+      }
+
+    } catch (err) {
+      console.error('❌ Error submitting media form:', err);
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 py-2 max-h-[75vh] overflow-y-auto pr-2">
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-3">
+          <p className="text-red-600 text-sm">❌ {error}</p>
+        </div>
+      )}
+      
+      {/* Upload Progress */}
+      {uploadProgress > 0 && uploadProgress < 100 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+          <p className="text-blue-600 text-sm mb-2">📤 กำลังอัปโหลดไฟล์... {uploadProgress}%</p>
+          <div className="w-full bg-blue-200 rounded-full h-2">
+            <div 
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+          </div>
+        </div>
+      )}
+      
+      {/* Upload Success */}
+      {uploadProgress === 100 && (
+        <div className="bg-green-50 border border-green-200 rounded-md p-3">
+          <div className="flex items-center">
+            <div className="animate-bounce mr-2">✅</div>
+            <p className="text-green-600 text-sm">อัปโหลดสำเร็จ! กำลังบันทึกข้อมูล...</p>
+          </div>
+        </div>
+      )}
       <div>
         <Label htmlFor="coverImage" className="text-gray-700 font-medium">หน้าปก</Label>
         <div className="mt-2 flex justify-center items-center w-full h-48 rounded-lg border-2 border-dashed border-gray-300 hover:border-violet-500 transition-colors bg-gray-50 relative group">
           {coverPreview ? (
-            <img-replace src={coverPreview} alt="Preview" className="h-full w-full object-contain rounded-md" />
+            <div className="relative h-full w-full">
+              <img 
+                src={coverPreview} 
+                alt="Preview" 
+                className="h-full w-full object-cover rounded-md" 
+              />
+              {/* Upload Progress Overlay */}
+              {(isSubmitting || loading) && uploadProgress > 0 && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-md">
+                  <div className="text-center text-white">
+                    <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
+                    <p className="text-sm">อัปโหลด {uploadProgress}%</p>
+                  </div>
+                </div>
+              )}
+              {/* Remove Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData(prev => ({ ...prev, coverImage: null, coverImageUrl: '' }));
+                  setCoverPreview(null);
+                }}
+                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           ) : (
             <div className="text-center">
               <UploadCloud className="mx-auto h-10 w-10 text-gray-400 group-hover:text-violet-500" />
-              <p className="mt-1 text-sm text-gray-600 group-hover:text-violet-600">คลิกเพื่ออัปโหลด</p>
+              <p className="mt-1 text-sm text-gray-600 group-hover:text-violet-600">คลิกเพื่ออัปโหลดรูปภาพ</p>
+              <p className="text-xs text-gray-500">PNG, JPG, GIF ขนาดไม่เกิน 10MB</p>
             </div>
           )}
           <Input 
@@ -182,6 +333,19 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
         </div>
+        {/* File Info */}
+        {formData.coverImage && (
+          <div className="mt-2 p-2 bg-gray-50 rounded-md">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-700">📁 {formData.coverImage.name}</span>
+              <span className="text-gray-500">{(formData.coverImage.size / 1024 / 1024).toFixed(2)} MB</span>
+            </div>
+            <div className="flex items-center mt-1">
+              <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+              <span className="text-xs text-green-600">พร้อมอัปโหลด</span>
+            </div>
+          </div>
+        )}
         {formData.coverImageUrl && !formData.coverImage && (
            <p className="text-xs text-gray-500 mt-1">ใช้ภาพเดิม: {formData.coverImageUrl.substring(0,40)}...</p>
         )}
@@ -271,7 +435,20 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
               {additionalMediaPreviews.map((previewUrl, index) => (
                 <div key={index} className="relative aspect-square group/item">
-                  <img-replace src={previewUrl} alt={`Preview ${index + 1}`} className="h-full w-full object-cover rounded-md" />
+                  <img 
+                    src={previewUrl} 
+                    alt={`Preview ${index + 1}`} 
+                    className="h-full w-full object-cover rounded-md border border-gray-200" 
+                  />
+                  {/* Upload Progress for Individual Files */}
+                  {(isSubmitting || loading) && uploadProgress > 0 && (
+                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-md">
+                      <div className="text-center text-white">
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mx-auto mb-1"></div>
+                        <p className="text-xs">อัปโหลด...</p>
+                      </div>
+                    </div>
+                  )}
                   <Button
                     type="button"
                     variant="destructive"
@@ -283,6 +460,13 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
                   </Button>
                 </div>
               ))}
+              {/* Add More Button */}
+              <div className="aspect-square flex items-center justify-center border-2 border-dashed border-gray-300 rounded-md hover:border-violet-500 transition-colors cursor-pointer">
+                <div className="text-center">
+                  <UploadCloud className="mx-auto h-6 w-6 text-gray-400" />
+                  <p className="text-xs text-gray-500 mt-1">เพิ่ม</p>
+                </div>
+              </div>
             </div>
           )}
           <Input 
@@ -343,8 +527,19 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
         <DialogClose asChild>
           <Button type="button" variant="outline" onClick={onCancel}>ยกเลิก</Button>
         </DialogClose>
-        <Button type="submit" className="bg-violet-600 hover:bg-violet-700 text-white">
-          {mediaItem ? 'บันทึกการเปลี่ยนแปลง' : (formData.status === 'draft' ? 'บันทึกแบบร่าง' : 'เผยแพร่ภาพและวิดีโอ')}
+        <Button 
+          type="submit" 
+          disabled={isSubmitting || loading}
+          className="bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50"
+        >
+          {isSubmitting || loading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              {uploadProgress > 0 ? `อัปโหลด ${uploadProgress}%` : 'กำลังบันทึก...'}
+            </>
+          ) : (
+            mediaItem ? 'บันทึกการเปลี่ยนแปลง' : (formData.status === 'draft' ? 'บันทึกแบบร่าง' : 'เผยแพร่ภาพและวิดีโอ')
+          )}
         </Button>
       </DialogFooter>
     </form>

@@ -2,8 +2,13 @@ import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const Lightbox = ({ imageUrl, onClose, onNext, onPrev, hasPrev, hasNext, currentIndex, totalImages }) => {
-  if (!imageUrl) return null;
+const Lightbox = ({ imageUrl, onClose, onNext, onPrev, hasPrev, hasNext, currentIndex, totalImages, imageTitle, imageDescription }) => {
+  console.log('🖼️ Lightbox render:', { imageUrl, currentIndex, totalImages, imageTitle });
+  
+  if (!imageUrl) {
+    console.warn('⚠️ Lightbox: No imageUrl provided');
+    return null;
+  }
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -39,10 +44,22 @@ const Lightbox = ({ imageUrl, onClose, onNext, onPrev, hasPrev, hasNext, current
         >
           <img src={imageUrl} alt="Lightbox preview" className="rounded-lg shadow-2xl object-contain max-w-full max-h-full" />
           
-          {/* Image counter */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm border border-white/20">
-            Image {(currentIndex || 0) + 1} of {totalImages || 9}
+          {/* Image counter - moved to top left */}
+          <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm border border-white/20 backdrop-blur-sm">
+            {(currentIndex || 0) + 1} / {totalImages || 1}
           </div>
+
+          {/* Image info at bottom */}
+          {(imageTitle || imageDescription) && (
+            <div className="absolute bottom-4 left-4 right-4 bg-black/70 text-white p-4 rounded-lg border border-white/20 backdrop-blur-sm">
+              {imageTitle && (
+                <h3 className="text-lg font-semibold mb-1">{imageTitle}</h3>
+              )}
+              {imageDescription && (
+                <p className="text-sm text-gray-200">{imageDescription}</p>
+              )}
+            </div>
+          )}
         </motion.div>
 
         <button

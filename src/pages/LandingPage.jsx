@@ -13,6 +13,7 @@ import ReactPlayer from 'react-player';
 import CookieConsent from '@/components/CookieConsent';
 import useSpeakers from '@/hooks/useSpeakers';
 import useExhibitions from '@/hooks/useExhibitions';
+import useGallery from '@/hooks/useGallery';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
@@ -507,6 +508,9 @@ const LandingPage = () => {
     initialStatus: 'active'
   });
 
+  // Use gallery API
+  const { galleryImages, loading: galleryLoading, error: galleryError } = useGallery(10);
+
   // Fallback speakers data
   const fallbackSpeakers = [
     { name: 'ดร. สมชาย เชี่ยวชาญ', title: 'นักวิจัยด้านนวัตกรรมผ้าไทย', imgSrc: speaker01 },
@@ -515,6 +519,31 @@ const LandingPage = () => {
     { name: 'คุณรัตนา ต่อยอด', title: 'นักออกแบบเครื่องประดับร่วมสมัย', imgSrc: speaker04 },
     { name: 'คุณวิชัย พัฒนา', title: 'ผู้ประกอบการ OTOP ระดับประเทศ', imgSrc: speaker05 },
   ];
+
+  // Fallback gallery data
+  const fallbackGalleryImages = [
+    { id: 1, url: gallery01, name: 'SACIT Symposium Gallery 1' },
+    { id: 2, url: gallery02, name: 'SACIT Symposium Gallery 2' },
+    { id: 3, url: gallery03, name: 'SACIT Symposium Gallery 3' },
+    { id: 4, url: gallery04, name: 'SACIT Symposium Gallery 4' },
+    { id: 5, url: gallery05, name: 'SACIT Symposium Gallery 5' },
+    { id: 6, url: gallery06, name: 'SACIT Symposium Gallery 6' },
+    { id: 7, url: gallery07, name: 'SACIT Symposium Gallery 7' },
+    { id: 8, url: gallery08, name: 'SACIT Symposium Gallery 8' },
+    { id: 9, url: gallery09, name: 'SACIT Symposium Gallery 9' },
+    { id: 10, url: gallery01, name: 'SACIT Symposium Gallery 10' }, // ใช้รูปแรกซ้ำ
+  ];
+
+  // Select gallery images (API first, then fallback)
+  const displayGalleryImages = galleryImages.length > 0 ? galleryImages : fallbackGalleryImages;
+  
+  // Debug logging
+  console.log('🖼️ Gallery Debug:', {
+    apiImages: galleryImages.length,
+    fallbackImages: fallbackGalleryImages.length,
+    displayImages: displayGalleryImages.length,
+    loading: galleryLoading
+  });
 
   // Transform API speakers to match the expected format
   const speakers = apiSpeakers.length > 0 
@@ -529,6 +558,10 @@ const LandingPage = () => {
 
   const handleFeatureClick = () => {
     navigate('/speakers');
+  };
+
+  const handleGalleryClick = () => {
+    navigate('/images');
   };
 
   const handleSpeakerClick = (speaker) => {
@@ -573,6 +606,7 @@ const LandingPage = () => {
   };
 
   const openLightbox = (image, index) => {
+    console.log('🔍 Opening lightbox:', { image, index, totalImages: displayGalleryImages.length });
     setCurrentImage(image);
     setCurrentImageIndex(index);
     setIsLightboxOpen(true);
@@ -583,17 +617,17 @@ const LandingPage = () => {
   };
 
   const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === galleryImages.length - 1 ? 0 : prevIndex + 1
-    );
-    setCurrentImage(galleryImages[currentImageIndex + 1]);
+    const nextIndex = currentImageIndex === displayGalleryImages.length - 1 ? 0 : currentImageIndex + 1;
+    setCurrentImageIndex(nextIndex);
+    setCurrentImage(displayGalleryImages[nextIndex]?.url);
+    console.log('📸 Next image:', { nextIndex, url: displayGalleryImages[nextIndex]?.url, name: displayGalleryImages[nextIndex]?.name });
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === 0 ? galleryImages.length - 1 : prevIndex - 1
-    );
-    setCurrentImage(galleryImages[currentImageIndex - 1]);
+    const prevIndex = currentImageIndex === 0 ? displayGalleryImages.length - 1 : currentImageIndex - 1;
+    setCurrentImageIndex(prevIndex);
+    setCurrentImage(displayGalleryImages[prevIndex]?.url);
+    console.log('📸 Previous image:', { prevIndex, url: displayGalleryImages[prevIndex]?.url, name: displayGalleryImages[prevIndex]?.name });
   };
 
   const agendaItems = [
@@ -661,7 +695,7 @@ const LandingPage = () => {
     { title: 'เครื่องปั้นดินเผาลายคราม', description: 'ศิลปะเครื่องปั้นดินเผาแบบดั้งเดิม ลวดลายสีคราม', author: 'อาจารย์สมศรี วิจิตรศิลป์', imgSrc: gallery04, type: 'บทความ', category: 'เครื่องปั้นดินเผา' },
   ];
 
-  const galleryImages = [
+  const lightboxImageData = [
     { alt: 'People at a conference registration desk', description: 'Attendees registering for SACIT event' },
     { alt: 'Speaker presenting on stage', description: 'Expert sharing insights at SACIT conference' },
     { alt: 'Handicrafts displayed at an exhibition', description: 'Beautiful Thai handicrafts on display' },
@@ -1241,69 +1275,84 @@ const LandingPage = () => {
           
           {/* Gallery Grid */}
           <div className="w-full">
-            {/* Top Row - 5 images (เลื่อนจากขวาไปซ้าย) */}
-            <div className="grid grid-cols-5 gap-0">
-              {[gallery01, gallery02, gallery03, gallery04, gallery05].map((image, index) => (
-                <motion.div 
-                  key={index} 
-                  className="aspect-[4/3] bg-gray-200 overflow-hidden hover:opacity-80 transition-opacity duration-300 cursor-pointer"
-                  initial={{ opacity: 0, x: 100 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
-                  onClick={() => openLightbox(image, index)}
-                >
-                  <img 
-                    src={image} 
-                    alt={`Gallery ${index + 1}`}
-                    className="w-full h-full object-cover" 
-                  />
-                </motion.div>
-              ))}
-            </div>
-            
-            {/* Bottom Row - 5 images (เลื่อนจากซ้ายไปขวา) */}
-            <div className="grid grid-cols-5 gap-0">
-              {[gallery06, gallery07, gallery08, gallery09].map((image, index) => (
-                <motion.div 
-                  key={index + 5} 
-                  className="aspect-[4/3] bg-gray-200 overflow-hidden hover:opacity-80 transition-opacity duration-300 cursor-pointer"
-                  initial={{ opacity: 0, x: -100 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
-                  onClick={() => openLightbox(image, index + 5)}
-                >
-                  <img 
-                    src={image} 
-                    alt={`Gallery ${index + 6}`}
-                    className="w-full h-full object-cover" 
-                  />
-                </motion.div>
-              ))}
-              {/* รูปที่ 10 - ใช้ gallery01 อีกครั้ง */}
-              <motion.div 
-                className="aspect-[4/3] bg-gray-200 overflow-hidden hover:opacity-80 transition-opacity duration-300 cursor-pointer"
-                initial={{ opacity: 0, x: -100 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 4 * 0.1, ease: "easeOut" }}
-                onClick={() => openLightbox(gallery01, 0)}
-              >
-                <img 
-                  src={gallery01} 
-                  alt="Gallery 10"
-                  className="w-full h-full object-cover" 
-                />
-              </motion.div>
-            </div>
+            {galleryLoading ? (
+              <div className="flex flex-col items-center justify-center py-16">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#533193] mb-4"></div>
+                <span className="text-lg text-gray-600 font-medium">กำลังโหลดภาพจากโฟลเดอร์...</span>
+                <span className="text-sm text-gray-500 mt-2">กรุณารอสักครู่</span>
+              </div>
+            ) : displayGalleryImages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16">
+                <div className="text-6xl mb-4">📁</div>
+                <span className="text-lg text-gray-600 font-medium">ไม่พบภาพในแกลเลอรี่</span>
+                <span className="text-sm text-gray-500 mt-2">กรุณาเพิ่มภาพในระบบจัดการสื่อมัลติมีเดีย</span>
+              </div>
+            ) : (
+              <>
+                {console.log('🎯 Rendering gallery with:', displayGalleryImages.slice(0, 5).length, 'top images and', displayGalleryImages.slice(5, 10).length, 'bottom images')}
+                
+                {/* Top Row - 5 images (เลื่อนจากขวาไปซ้าย) */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-0">
+                  {displayGalleryImages.slice(0, 5).map((image, index) => (
+                    <motion.div 
+                      key={image.id || index} 
+                      className="aspect-[4/3] bg-gray-200 overflow-hidden hover:opacity-80 transition-opacity duration-300 cursor-pointer"
+                      initial={{ opacity: 0, x: 100 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
+                      onClick={() => openLightbox(image.url, index)}
+                    >
+                      <img 
+                        src={image.url} 
+                        alt={image.name || `Gallery ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = fallbackGalleryImages[index % fallbackGalleryImages.length].url;
+                        }}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+                
+                {/* Bottom Row - 5 images (เลื่อนจากซ้ายไปขวา) */}
+                {console.log('🔍 Bottom row check:', { 
+                  totalImages: displayGalleryImages.length, 
+                  hasMoreThan5: displayGalleryImages.length > 5,
+                  bottomRowImages: displayGalleryImages.slice(5, 10).length 
+                })}
+                {/* ลบเงื่อนไขชั่วคราวเพื่อทดสอบ */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-0">
+                    {displayGalleryImages.slice(5, 10).map((image, index) => (
+                    <motion.div 
+                      key={image.id || (index + 5)} 
+                      className="aspect-[4/3] bg-gray-200 overflow-hidden hover:opacity-80 transition-opacity duration-300 cursor-pointer"
+                      initial={{ opacity: 0, x: -100 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
+                      onClick={() => openLightbox(image.url, index + 5)}
+                    >
+                      <img 
+                        src={image.url} 
+                        alt={image.name || `Gallery ${index + 6}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = fallbackGalleryImages[(index + 5) % fallbackGalleryImages.length].url;
+                        }}
+                      />
+                    </motion.div>
+                    ))}
+                </div>
+              </>
+            )}
           </div>
           
           <div className="text-center mt-12">
             <Button 
               variant="outline" 
               className="border-[#533193] text-[#533193] hover:bg-[#533193] hover:text-white transition-colors px-8 py-3 rounded-full text-lg font-custom-bold"
-              onClick={handleFeatureClick}
+              onClick={handleGalleryClick}
             >
               all photos and video
             </Button>
@@ -1322,7 +1371,9 @@ const LandingPage = () => {
           hasNext={true}
           hasPrev={true}
           currentIndex={currentImageIndex}
-          totalImages={galleryImages.length}
+          totalImages={displayGalleryImages.length}
+          imageTitle={displayGalleryImages[currentImageIndex]?.name || displayGalleryImages[currentImageIndex]?.folderName}
+          imageDescription={displayGalleryImages[currentImageIndex]?.subtitle || `จากงาน ${displayGalleryImages[currentImageIndex]?.event || 'SACIT Symposium'}`}
         />
       )}
       

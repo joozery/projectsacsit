@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { 
@@ -11,6 +11,91 @@ import {
   FolderOpen, 
   CalendarDays 
 } from 'lucide-react';
+import mediaService from '@/services/mediaService';
+import { formatThaiDate } from '@/lib/utils';
+
+// Component สำหรับแสดงภาพพรีวิวโฟลเดอร์
+const FolderPreview = ({ folder }) => {
+  const [previewImages, setPreviewImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchPreviewImages = async () => {
+      if (folder.type !== 'folder' || !folder.id) return;
+      
+      setLoading(true);
+      try {
+        const result = await mediaService.getFolderImages(folder.id);
+        // เอาแค่ 4 รูปแรกมาแสดง
+        const previewUrls = result.images
+          .slice(0, 4)
+          .map(img => img.image_url)
+          .filter(url => url);
+        setPreviewImages(previewUrls);
+      } catch (error) {
+        console.error('Error fetching folder preview:', error);
+        setPreviewImages([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPreviewImages();
+  }, [folder.id, folder.type]);
+
+  if (loading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
+  if (previewImages.length === 0) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        <FolderOpen className="w-16 h-16 text-white opacity-80" />
+        <p className="mt-2 text-white font-semibold">{folder.items_count || folder.itemsCount || 0} รายการ</p>
+      </div>
+    );
+  }
+
+  if (previewImages.length === 1) {
+    return (
+      <div className="relative w-full h-full">
+        <img 
+          src={previewImages[0]} 
+          alt="Preview" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/20 flex flex-col items-center justify-center">
+          <FolderOpen className="w-8 h-8 text-white opacity-90" />
+          <p className="mt-1 text-white font-semibold text-sm">{folder.items_count || folder.itemsCount || 0} รายการ</p>
+        </div>
+      </div>
+    );
+  }
+
+  // แสดงแบบ grid สำหรับหลายรูป
+  return (
+    <div className="relative w-full h-full">
+      <div className={`grid w-full h-full ${previewImages.length === 2 ? 'grid-cols-2' : 'grid-cols-2 grid-rows-2'}`}>
+        {previewImages.map((url, index) => (
+          <img 
+            key={index}
+            src={url} 
+            alt={`Preview ${index + 1}`} 
+            className="w-full h-full object-cover border border-white/20"
+          />
+        ))}
+      </div>
+      <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center">
+        <FolderOpen className="w-6 h-6 text-white opacity-90" />
+        <p className="mt-1 text-white font-bold text-sm">{folder.items_count || folder.itemsCount || 0} รายการ</p>
+      </div>
+    </div>
+  );
+};
 
 const MediaGrid = ({ mediaItems, onEdit, onDelete, onPreview }) => {
 
@@ -47,12 +132,17 @@ const MediaGrid = ({ mediaItems, onEdit, onDelete, onPreview }) => {
               style={{ backgroundColor: item.themeColor || '#E5E7EB' }}
             >
               {item.type === 'folder' ? (
-                <div className="w-full h-full flex flex-col items-center justify-center">
-                  <FolderOpen className="w-16 h-16 text-white opacity-80" />
-                  <p className="mt-2 text-white font-semibold">{item.itemsCount || 0} รายการ</p>
-                </div>
-              ) : item.coverImageUrl || item.thumbnailUrl ? (
-                <img-replace src={item.coverImageUrl || item.thumbnailUrl} alt={item.name} className="w-full h-full object-cover" />
+                <FolderPreview folder={item} />
+              ) : item.cover_image_url || item.thumbnail_url || item.coverImageUrl || item.thumbnailUrl ? (
+                <img 
+                  src={item.cover_image_url || item.thumbnail_url || item.coverImageUrl || item.thumbnailUrl} 
+                  alt={item.name} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center"><div class="w-12 h-12 text-gray-400">🖼️</div></div>';
+                  }}
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   {item.type === 'image' ? <ImageIcon className="w-12 h-12 text-gray-400" /> : <Video className="w-12 h-12 text-gray-400" />}
@@ -75,8 +165,14 @@ const MediaGrid = ({ mediaItems, onEdit, onDelete, onPreview }) => {
               <div>
                 <p className="text-xs text-gray-500 mt-1 flex items-center">
                   <CalendarDays className="w-3 h-3 mr-1.5 text-gray-400"/>
-                  {item.event} - {item.date}
+                  {item.event} - {formatThaiDate(item.date)}
                 </p>
+                {item.type === 'folder' && (
+                  <p className="text-xs text-blue-600 font-medium mt-1 flex items-center">
+                    <FolderOpen className="w-3 h-3 mr-1.5"/>
+                    {item.items_count || item.itemsCount || 0} รายการในโฟลเดอร์
+                  </p>
+                )}
                 <div className="mt-2 mb-3">{getStatusBadge(item.status)}</div>
                 {item.keywords && item.keywords.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">

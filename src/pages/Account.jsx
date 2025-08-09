@@ -56,6 +56,7 @@ const Account = () => {
   // Certificate data state
   const [certificateData, setCertificateData] = useState(null);
   const [certificateLoading, setCertificateLoading] = useState(false);
+  const [userCertificates, setUserCertificates] = useState([]);
   
   // Results data state
   const [resultsData, setResultsData] = useState([]);
@@ -105,6 +106,12 @@ const Account = () => {
       
       // Load initial data based on active menu
       loadPageData();
+      
+      // Load user certificates from localStorage
+      const savedCertificates = localStorage.getItem('user_certificates');
+      if (savedCertificates) {
+        setUserCertificates(JSON.parse(savedCertificates));
+      }
       
       // Log current user data for debugging
       console.log('🔍 Current user from localStorage:', user);
@@ -709,57 +716,83 @@ const Account = () => {
                         <div className="w-8 h-8 border-2 border-[#533193] border-t-transparent rounded-full animate-spin mx-auto"></div>
                         <p className="text-gray-500 mt-2">กำลังโหลดใบประกาศนียบัตร...</p>
                       </div>
-                    ) : certificateData ? (
+                    ) : userCertificates.length > 0 ? (
                       <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: 0.2 }}
-                        className="max-w-md"
+                        className="space-y-6"
                       >
-                        {/* Certificate Preview */}
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.5, delay: 0.3 }}
-                          className="bg-gray-200 rounded-lg p-8 mb-6 aspect-[4/3] flex flex-col items-center justify-center relative"
-                        >
-                          <div className="text-center">
-                            <div className="w-16 h-16 bg-gradient-to-br from-[#533193] to-[#8B7DC3] rounded-full flex items-center justify-center mb-4 mx-auto">
-                              <FileText className="w-8 h-8 text-white" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-800 mb-2">ใบประกาศนียบัตรผู้เข้าร่วมงาน</h3>
-                            <p className="text-sm text-gray-600">SACIT Symposium 2025</p>
-                            {certificateData.registrationNumber && (
-                              <p className="text-xs text-gray-500 mt-1">เลขที่: {certificateData.registrationNumber}</p>
-                            )}
-                          </div>
-                        </motion.div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {userCertificates.map((certificate, index) => (
+                            <motion.div
+                              key={certificate.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3, delay: 0.1 * index }}
+                              className="bg-white rounded-lg shadow-lg overflow-hidden"
+                            >
+                              {/* Certificate Preview */}
+                              <div className="relative h-48 bg-gradient-to-br from-[#533193] to-[#8B7DC3] flex items-center justify-center">
+                                {certificate.imageData ? (
+                                  <img
+                                    src={certificate.imageData}
+                                    alt={certificate.recipientName}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="text-center text-white">
+                                    <FileText className="w-12 h-12 mx-auto mb-2" />
+                                    <h3 className="text-lg font-semibold">{certificate.eventName}</h3>
+                                    <p className="text-sm opacity-75">{certificate.recipientName}</p>
+                                  </div>
+                                )}
+                              </div>
 
-                        {/* Action Buttons */}
-                        <motion.div 
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.4, delay: 0.5 }}
-                          className="flex gap-3"
-                        >
-                          <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={downloadCertificate}
-                            className="flex items-center gap-2 bg-[#BFB4EE] text-[#533193] px-4 py-2.5 rounded-lg font-medium hover:bg-[#B3A7E8] transition-all shadow-sm"
-                          >
-                            <Download className="w-4 h-4" />
-                            ดาวน์โหลด pdf
-                          </motion.button>
+                              {/* Certificate Info */}
+                              <div className="p-4">
+                                <h3 className="font-semibold text-gray-800 mb-2">{certificate.eventName}</h3>
+                                <p className="text-sm text-gray-600 mb-1">สำหรับ: {certificate.recipientName}</p>
+                                <p className="text-xs text-gray-500 mb-3">วันที่: {certificate.date}</p>
+                                
+                                {/* Action Buttons */}
+                                <div className="flex gap-2">
+                                  <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => {
+                                      if (certificate.imageData) {
+                                        const link = document.createElement('a');
+                                        link.download = `certificate-${certificate.recipientName.replace(/\s+/g, '-')}.png`;
+                                        link.href = certificate.imageData;
+                                        link.click();
+                                      }
+                                    }}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-[#BFB4EE] text-[#533193] px-3 py-2 rounded-lg font-medium hover:bg-[#B3A7E8] transition-all text-sm"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                    ดาวน์โหลด
+                                  </motion.button>
 
-                          <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="flex items-center gap-2 bg-[#8B7DC3] text-white px-4 py-2.5 rounded-lg font-medium hover:bg-[#7B6DB8] transition-all shadow-sm"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </motion.button>
-                        </motion.div>
+                                  <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => {
+                                      // View certificate in full screen
+                                      if (certificate.imageData) {
+                                        window.open(certificate.imageData, '_blank');
+                                      }
+                                    }}
+                                    className="flex items-center justify-center gap-2 bg-[#8B7DC3] text-white px-3 py-2 rounded-lg font-medium hover:bg-[#7B6DB8] transition-all text-sm"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                    ดู
+                                  </motion.button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
                       </motion.div>
                     ) : (
                       <motion.div 
@@ -790,10 +823,23 @@ const Account = () => {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.4, delay: 0.6 }}
-                          className="text-gray-600"
+                          className="text-gray-600 mb-6"
                         >
                           ใบประกาศนียบัตรจะพร้อมใช้งานหลังจากเข้าร่วมงานเสร็จสิ้น
                         </motion.p>
+
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            // Navigate to templates page
+                            window.location.href = '/templates';
+                          }}
+                          className="flex items-center gap-2 bg-[#533193] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#4A2D7A] transition-all shadow-sm mx-auto"
+                        >
+                          <FileText className="w-4 h-4" />
+                          ไปที่เทมเพลตใบประกาศ
+                        </motion.button>
                       </motion.div>
                     )}
                   </>

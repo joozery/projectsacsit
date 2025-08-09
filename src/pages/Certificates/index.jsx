@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Palette, Eye, Download, Edit3, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/select";
 import CertificateForm from './CertificateForm';
 import CertificateTable from './CertificateTable';
+import CertificateDesignerModal from './CertificateDesignerModal';
+import CertificatePreviewModal from './CertificatePreviewModal';
 
 const initialCertificates = [
   {
@@ -40,7 +42,82 @@ const initialCertificates = [
     eventDate: '2025-08-08',
     status: 'published',
     qrLink: 'https://example.com/qr1',
-    backgroundUrl: 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80'
+    backgroundUrl: 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
+    width: 800,
+    height: 600,
+    backgroundColor: '#FFFFFF',
+    elements: [
+      {
+        id: 'title',
+        type: 'text',
+        content: 'ใบประกาศนียบัตร',
+        x: 400,
+        y: 100,
+        fontSize: 48,
+        fontFamily: 'PromptP-Bold',
+        color: '#533193',
+        alignment: 'center',
+        fontWeight: 'bold',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 1
+      },
+      {
+        id: 'recipientName',
+        type: 'placeholder',
+        content: '{{recipientName}}',
+        x: 400,
+        y: 250,
+        fontSize: 36,
+        fontFamily: 'PromptP-Regular',
+        color: '#2D3748',
+        alignment: 'center',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 2,
+        placeholder: 'ชื่อผู้รับ'
+      },
+      {
+        id: 'eventName',
+        type: 'text',
+        content: 'SACIT Symposium 2025',
+        x: 400,
+        y: 350,
+        fontSize: 24,
+        fontFamily: 'PromptP-Regular',
+        color: '#4A5568',
+        alignment: 'center',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 3
+      },
+      {
+        id: 'date',
+        type: 'placeholder',
+        content: '{{date}}',
+        x: 400,
+        y: 400,
+        fontSize: 18,
+        fontFamily: 'PromptP-Regular',
+        color: '#718096',
+        alignment: 'center',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 4,
+        placeholder: 'วันที่'
+      }
+    ]
   },
   {
     id: 2,
@@ -49,7 +126,82 @@ const initialCertificates = [
     eventDate: '2025-07-15',
     status: 'published',
     qrLink: 'https://example.com/qr2',
-    backgroundUrl: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80'
+    backgroundUrl: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
+    width: 800,
+    height: 600,
+    backgroundColor: '#FFFFFF',
+    elements: [
+      {
+        id: 'title',
+        type: 'text',
+        content: 'ใบประกาศนียบัตร',
+        x: 400,
+        y: 100,
+        fontSize: 48,
+        fontFamily: 'PromptP-Bold',
+        color: '#533193',
+        alignment: 'center',
+        fontWeight: 'bold',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 1
+      },
+      {
+        id: 'recipientName',
+        type: 'placeholder',
+        content: '{{recipientName}}',
+        x: 400,
+        y: 250,
+        fontSize: 36,
+        fontFamily: 'PromptP-Regular',
+        color: '#2D3748',
+        alignment: 'center',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 2,
+        placeholder: 'ชื่อผู้รับ'
+      },
+      {
+        id: 'eventName',
+        type: 'text',
+        content: 'SACIT Workshop Series',
+        x: 400,
+        y: 350,
+        fontSize: 24,
+        fontFamily: 'PromptP-Regular',
+        color: '#4A5568',
+        alignment: 'center',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 3
+      },
+      {
+        id: 'date',
+        type: 'placeholder',
+        content: '{{date}}',
+        x: 400,
+        y: 400,
+        fontSize: 18,
+        fontFamily: 'PromptP-Regular',
+        color: '#718096',
+        alignment: 'center',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 4,
+        placeholder: 'วันที่'
+      }
+    ]
   },
   {
     id: 3,
@@ -58,11 +210,86 @@ const initialCertificates = [
     eventDate: '2025-09-20',
     status: 'draft',
     qrLink: 'https://example.com/qr3',
-    backgroundUrl: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80'
+    backgroundUrl: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
+    width: 800,
+    height: 600,
+    backgroundColor: '#FFFFFF',
+    elements: [
+      {
+        id: 'title',
+        type: 'text',
+        content: 'ใบประกาศนียบัตร',
+        x: 400,
+        y: 100,
+        fontSize: 48,
+        fontFamily: 'PromptP-Bold',
+        color: '#533193',
+        alignment: 'center',
+        fontWeight: 'bold',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 1
+      },
+      {
+        id: 'recipientName',
+        type: 'placeholder',
+        content: '{{recipientName}}',
+        x: 400,
+        y: 250,
+        fontSize: 36,
+        fontFamily: 'PromptP-Regular',
+        color: '#2D3748',
+        alignment: 'center',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 2,
+        placeholder: 'ชื่อผู้รับ'
+      },
+      {
+        id: 'eventName',
+        type: 'text',
+        content: 'Annual SACIT Conference',
+        x: 400,
+        y: 350,
+        fontSize: 24,
+        fontFamily: 'PromptP-Regular',
+        color: '#4A5568',
+        alignment: 'center',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 3
+      },
+      {
+        id: 'date',
+        type: 'placeholder',
+        content: '{{date}}',
+        x: 400,
+        y: 400,
+        fontSize: 18,
+        fontFamily: 'PromptP-Regular',
+        color: '#718096',
+        alignment: 'center',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        opacity: 1,
+        rotation: 0,
+        zIndex: 4,
+        placeholder: 'วันที่'
+      }
+    ]
   }
 ];
 
-const CERTIFICATES_STORAGE_KEY = 'certificates_v6'; // Updated key for new structure
+const CERTIFICATES_STORAGE_KEY = 'certificates_v7'; // Updated key for new structure
 
 const CertificatesPage = () => {
   const { toast } = useToast();
@@ -70,7 +297,11 @@ const CertificatesPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [certificates, setCertificates] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDesignerOpen, setIsDesignerOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [editingCertificate, setEditingCertificate] = useState(null);
+  const [designingCertificate, setDesigningCertificate] = useState(null);
+  const [previewCertificate, setPreviewCertificate] = useState(null);
   const [deletingCertificate, setDeletingCertificate] = useState(null);
 
   useEffect(() => {
@@ -98,6 +329,16 @@ const CertificatesPage = () => {
     setIsFormOpen(true);
   };
 
+  const handleDesignCertificate = (certificate) => {
+    setDesigningCertificate(certificate);
+    setIsDesignerOpen(true);
+  };
+
+  const handlePreviewCertificate = (certificate) => {
+    setPreviewCertificate(certificate);
+    setIsPreviewOpen(true);
+  };
+
   const handleDeleteCertificate = (certificate) => {
     setDeletingCertificate(certificate);
   };
@@ -122,13 +363,103 @@ const CertificatesPage = () => {
       const newCertificate = { 
         ...formData, 
         id: Date.now(), 
-        qrLink: `https://example.com/qr${Date.now()}` 
+        qrLink: `https://example.com/qr${Date.now()}`,
+        width: 800,
+        height: 600,
+        backgroundColor: '#FFFFFF',
+        elements: [
+          {
+            id: 'title',
+            type: 'text',
+            content: 'ใบประกาศนียบัตร',
+            x: 400,
+            y: 100,
+            fontSize: 48,
+            fontFamily: 'PromptP-Bold',
+            color: '#533193',
+            alignment: 'center',
+            fontWeight: 'bold',
+            fontStyle: 'normal',
+            textDecoration: 'none',
+            opacity: 1,
+            rotation: 0,
+            zIndex: 1
+          },
+          {
+            id: 'recipientName',
+            type: 'placeholder',
+            content: '{{recipientName}}',
+            x: 400,
+            y: 250,
+            fontSize: 36,
+            fontFamily: 'PromptP-Regular',
+            color: '#2D3748',
+            alignment: 'center',
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            textDecoration: 'none',
+            opacity: 1,
+            rotation: 0,
+            zIndex: 2,
+            placeholder: 'ชื่อผู้รับ'
+          },
+          {
+            id: 'eventName',
+            type: 'text',
+            content: formData.name || 'ชื่อกิจกรรม',
+            x: 400,
+            y: 350,
+            fontSize: 24,
+            fontFamily: 'PromptP-Regular',
+            color: '#4A5568',
+            alignment: 'center',
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            textDecoration: 'none',
+            opacity: 1,
+            rotation: 0,
+            zIndex: 3
+          },
+          {
+            id: 'date',
+            type: 'placeholder',
+            content: '{{date}}',
+            x: 400,
+            y: 400,
+            fontSize: 18,
+            fontFamily: 'PromptP-Regular',
+            color: '#718096',
+            alignment: 'center',
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            textDecoration: 'none',
+            opacity: 1,
+            rotation: 0,
+            zIndex: 4,
+            placeholder: 'วันที่'
+          }
+        ]
       };
       saveCertificates([...certificates, newCertificate]);
       toast({ title: "เพิ่มสำเร็จ!", description: `ใบประกาศ "${newCertificate.name}" ถูกเพิ่มแล้ว` });
     }
     setIsFormOpen(false);
     setEditingCertificate(null);
+  };
+
+  const handleDesignerSave = (designData) => {
+    const updatedCertificates = certificates.map(c => 
+      c.id === designingCertificate.id ? { ...c, ...designData } : c
+    );
+    saveCertificates(updatedCertificates);
+    toast({ title: "บันทึกการออกแบบสำเร็จ!", description: `ใบประกาศ "${designData.name}" ได้รับการอัปเดตแล้ว` });
+    setIsDesignerOpen(false);
+    setDesigningCertificate(null);
+  };
+
+  const handleDesignerPreview = (previewData) => {
+    setPreviewCertificate(previewData);
+    setIsPreviewOpen(true);
   };
 
   const handleFeatureClick = (feature, idOrName, certificateNameIfOpenForm = '') => {
@@ -169,33 +500,35 @@ const CertificatesPage = () => {
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">ใบประกาศนียบัตร</h1>
-        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              className="add-button-gradient w-full sm:w-auto"
-              onClick={handleAddCertificate}
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              เพิ่มใบประกาศนียบัตร
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[525px]">
-            <DialogHeader>
-              <DialogTitle className="text-xl">{editingCertificate ? 'แก้ไขใบประกาศนียบัตร' : 'เพิ่มใบประกาศนียบัตรใหม่'}</DialogTitle>
-              <DialogDescription>
-                {editingCertificate ? 'แก้ไขรายละเอียดใบประกาศนียบัตรด้านล่าง' : 'กรอกรายละเอียดเพื่อสร้างใบประกาศนียบัตรใหม่'}
-              </DialogDescription>
-            </DialogHeader>
-            <CertificateForm 
-              certificate={editingCertificate} 
-              onSubmit={handleFormSubmit}
-              onCancel={() => {
-                setIsFormOpen(false);
-                setEditingCertificate(null);
-              }}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                className="add-button-gradient w-full sm:w-auto"
+                onClick={handleAddCertificate}
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                เพิ่มใบประกาศนียบัตร
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[525px]">
+              <DialogHeader>
+                <DialogTitle className="text-xl">{editingCertificate ? 'แก้ไขใบประกาศนียบัตร' : 'เพิ่มใบประกาศนียบัตรใหม่'}</DialogTitle>
+                <DialogDescription>
+                  {editingCertificate ? 'แก้ไขรายละเอียดใบประกาศนียบัตรด้านล่าง' : 'กรอกรายละเอียดเพื่อสร้างใบประกาศนียบัตรใหม่'}
+                </DialogDescription>
+              </DialogHeader>
+              <CertificateForm 
+                certificate={editingCertificate} 
+                onSubmit={handleFormSubmit}
+                onCancel={() => {
+                  setIsFormOpen(false);
+                  setEditingCertificate(null);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </motion.div>
 
       <motion.div
@@ -261,6 +594,8 @@ const CertificatesPage = () => {
             certificates={filteredCertificates}
             onEdit={handleEditCertificate}
             onDelete={handleDeleteCertificate}
+            onDesign={handleDesignCertificate}
+            onPreview={handlePreviewCertificate}
             onFeatureClick={handleFeatureClick}
           />
         
@@ -294,6 +629,28 @@ const CertificatesPage = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Certificate Designer Modal */}
+      <CertificateDesignerModal
+        certificate={designingCertificate}
+        isOpen={isDesignerOpen}
+        onClose={() => {
+          setIsDesignerOpen(false);
+          setDesigningCertificate(null);
+        }}
+        onSave={handleDesignerSave}
+        onPreview={handleDesignerPreview}
+      />
+
+      {/* Certificate Preview Modal */}
+      <CertificatePreviewModal
+        certificate={previewCertificate}
+        isOpen={isPreviewOpen}
+        onClose={() => {
+          setIsPreviewOpen(false);
+          setPreviewCertificate(null);
+        }}
+      />
     </div>
   );
 };

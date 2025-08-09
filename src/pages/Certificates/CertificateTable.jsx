@@ -9,7 +9,8 @@ import {
   Download,
   Image as ImageIcon,
   FileText as FileTextIcon,
-  Send
+  Send,
+  Palette
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -18,6 +19,8 @@ const CertificateTable = ({
   certificates, 
   onEdit, 
   onDelete, 
+  onDesign,
+  onPreview,
   onFeatureClick 
 }) => {
 
@@ -85,7 +88,7 @@ const CertificateTable = ({
                 <td className="table-cell-custom">
                   <div className="w-16 h-12 sm:w-24 sm:h-16 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
                     {certificate.backgroundUrl ? (
-                      <img-replace 
+                      <img 
                         src={certificate.backgroundUrl} 
                         alt={`ภาพพื้นหลัง ${certificate.name}`} 
                         className="w-full h-full object-cover" 
@@ -138,10 +141,19 @@ const CertificateTable = ({
                       variant="ghost"
                       size="icon"
                       className="icon-button icon-button-preview action-button w-7 h-7 sm:w-8 sm:h-8"
-                      onClick={() => onFeatureClick('view', certificate.name)}
+                      onClick={() => onPreview(certificate)}
                       title="ดูตัวอย่าง"
                     >
                       <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="icon-button icon-button-design action-button w-7 h-7 sm:w-8 sm:h-8"
+                      onClick={() => onDesign(certificate)}
+                      title="ออกแบบ"
+                    >
+                      <Palette className="w-4 h-4" />
                     </Button>
                     <Button
                       variant="ghost"
