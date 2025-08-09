@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import mediaService from '@/services/mediaService';
 import { formatThaiDate } from '@/lib/utils';
 import gallery01 from '/src/assets/gallery/01.jpg';
@@ -7,6 +7,8 @@ import gallery02 from '/src/assets/gallery/02.jpg';
 import gallery03 from '/src/assets/gallery/03.jpg';
 
 const Images = () => {
+  const navigate = useNavigate();
+  
   // Add CSS animation
   React.useEffect(() => {
     const style = document.createElement('style');
@@ -33,6 +35,12 @@ const Images = () => {
   const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Handle folder click to navigate to detail page
+  const handleFolderClick = (folder) => {
+    console.log('📁 Navigating to folder detail:', folder);
+    navigate(`/folder/${folder.id}`);
+  };
   
   // ดึงโฟลเดอร์จาก API
   useEffect(() => {
@@ -65,14 +73,7 @@ const Images = () => {
     fetchFolders();
   }, []);
 
-  // ฟังก์ชันจัดการคลิกโฟลเดอร์
-  const handleFolderClick = (folder) => {
-    if (folder.isFolder) {
-      console.log('📁 Opening folder:', folder.title, 'ID:', folder.id);
-      // สามารถเพิ่มการนำทางไปหน้าโฟลเดอร์ หรือเปิด modal ได้
-      alert(`เปิดโฟลเดอร์: ${folder.title}\nจำนวนรูป: ${folder.itemsCount} รูป`);
-    }
-  };
+
 
   const categories = [
     { id: 'all', name: 'ทั้งหมด' },

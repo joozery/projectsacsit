@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Folder API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Folder API</h1>
+        
+        <div>
+            <button onclick="testFolderAPI(22)">Test Folder ID 22</button>
+            <button onclick="testFolderAPI(1)">Test Folder ID 1</button>
+            <button onclick="testDirectAPI()">Test Direct API</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://backendsacit-42f532a9097c.herokuapp.com/api';
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(div);
+            console.log(message);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testFolderAPI(folderId) {
+            log(`🔍 Testing Folder API for ID: ${folderId}`);
+            
+            try {
+                const url = `${API_BASE_URL}/folders/${folderId}/images`;
+                log(`📡 Fetching: ${url}`);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                log(`📊 Response Status: ${response.status} ${response.statusText}`);
+                log(`📊 Response Headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log(`❌ Error Response: ${errorText}`, 'error');
+                    return;
+                }
+                
+                const data = await response.json();
+                log(`✅ Success Response:`, 'success');
+                log(`📁 Data Structure: ${JSON.stringify({
+                    success: data.success,
+                    hasData: 'data' in data,
+                    hasFolder: data.data && 'folder' in data.data,
+                    hasImages: data.data && 'images' in data.data,
+                    folderName: data.data?.folder?.name,
+                    imagesCount: data.data?.images?.length
+                }, null, 2)}`, 'success');
+                
+                if (data.data?.images?.length > 0) {
+                    log(`🖼️ First 3 images: ${JSON.stringify(data.data.images.slice(0, 3).map(img => ({
+                        id: img.id,
+                        name: img.name,
+                        hasImageUrl: !!img.image_url
+                    })), null, 2)}`, 'success');
+                }
+                
+            } catch (error) {
+                log(`❌ JavaScript Error: ${error.message}`, 'error');
+                log(`❌ Error Stack: ${error.stack}`, 'error');
+            }
+        }
+        
+        async function testDirectAPI() {
+            log(`🔍 Testing Direct API Call`);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/folders/22/images`);
+                const data = await response.json();
+                
+                log(`📊 Direct API Result: ${JSON.stringify({
+                    success: data.success,
+                    dataType: typeof data.data,
+                    folderExists: !!data.data?.folder,
+                    imagesCount: data.data?.images?.length
+                }, null, 2)}`, 'success');
+                
+            } catch (error) {
+                log(`❌ Direct API Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-test on page load
+        window.onload = () => {
+            log('🚀 Page loaded, ready for testing');
+            testFolderAPI(22);
+        };
+    </script>
+</body>
+</html>

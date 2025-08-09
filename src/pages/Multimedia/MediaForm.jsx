@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { UploadCloud, X, Palette, Image as ImageIcon, Check, Loader2 } from 'lucide-react';
 import { useMediaForm, useMediaFilters } from '@/hooks/useMedia';
+import mediaService from '@/services/mediaService';
 
 const defaultColors = [
   { name: 'ม่วงอ่อน', value: '#A855F7' },
@@ -64,48 +65,104 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
   const [additionalMediaPreviews, setAdditionalMediaPreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFolderId, setSelectedFolderId] = useState(''); // NEW: For folder upload
+  const [folderImages, setFolderImages] = useState([]); // Store actual folder images with IDs for deletion
 
   useEffect(() => {
-    if (mediaItem) {
-      setFormData({
-        name: mediaItem.name || '',
-        subtitle: mediaItem.subtitle || '',
-        content: mediaItem.content || '',
-        type: mediaItem.type || 'image',
-        event: mediaItem.event || '',
-        date: mediaItem.date || '',
-        coverImage: null,
-        coverImageUrl: mediaItem.cover_image_url || mediaItem.thumbnail_url || mediaItem.coverImageUrl || mediaItem.thumbnailUrl || '',
-        themeColor: mediaItem.theme_color || mediaItem.themeColor || defaultColors[0].value,
-        keywords: mediaItem.keywords || [],
-        additionalMedia: [], 
-        status: mediaItem.status || 'draft',
-        itemsCount: mediaItem.type === 'folder' ? (mediaItem.items_count || mediaItem.itemsCount || 0) : undefined,
-      });
-      setCoverPreview(mediaItem.cover_image_url || mediaItem.thumbnail_url || mediaItem.coverImageUrl || mediaItem.thumbnailUrl || null);
-      // Handle both API response formats
-      setAdditionalMediaPreviews(mediaItem.additional_media_urls || mediaItem.additionalMediaUrls || []);
-    } else {
-      // Reset form for new item
-      setFormData({
-        name: '',
-        subtitle: '',
-        content: '',
-        type: 'image',
-        event: '',
-        date: '',
-        coverImage: null,
-        coverImageUrl: '',
-        themeColor: defaultColors[0].value,
-        keywords: [],
-        additionalMedia: [],
-        status: 'draft',
-        itemsCount: undefined,
-      });
-      setCoverPreview(null);
-      setKeywordInput('');
-      setAdditionalMediaPreviews([]);
-    }
+    const loadMediaItem = async () => {
+      if (mediaItem) {
+        console.log('🔄 MediaForm received mediaItem:', mediaItem);
+        console.log('🔄 mediaItem.type:', mediaItem.type);
+        console.log('🔄 mediaItem.id:', mediaItem.id);
+        
+        setFormData({
+          name: mediaItem.name || '',
+          subtitle: mediaItem.subtitle || '',
+          content: mediaItem.content || '',
+          type: mediaItem.type || 'image',
+          event: mediaItem.event || '',
+          date: mediaItem.date || '',
+          coverImage: null,
+          coverImageUrl: mediaItem.cover_image_url || mediaItem.thumbnail_url || mediaItem.coverImageUrl || mediaItem.thumbnailUrl || '',
+          themeColor: mediaItem.theme_color || mediaItem.themeColor || defaultColors[0].value,
+          keywords: mediaItem.keywords || [],
+          additionalMedia: [], 
+          status: mediaItem.status || 'draft',
+          itemsCount: mediaItem.type === 'folder' ? (mediaItem.items_count || mediaItem.itemsCount || 0) : undefined,
+        });
+        setCoverPreview(mediaItem.cover_image_url || mediaItem.thumbnail_url || mediaItem.coverImageUrl || mediaItem.thumbnailUrl || null);
+        
+        // For folders, load images from folder_images table
+        if (mediaItem.type === 'folder' && mediaItem.id) {
+          try {
+            console.log('📁 Loading folder images for editing:', mediaItem.id);
+            const folderResponse = await mediaService.getFolderImages(mediaItem.id);
+            console.log('📁 Folder response:', folderResponse);
+            console.log('📁 Response type:', typeof folderResponse);
+            console.log('📁 Response keys:', Object.keys(folderResponse || {}));
+            
+            // Extract images array from the response
+            const folderImagesData = folderResponse?.images || [];
+            
+            console.log('📁 Extracted folderImagesData:', folderImagesData);
+            console.log('📁 folderImagesData length:', folderImagesData?.length);
+            
+            if (folderImagesData && folderImagesData.length > 0) {
+              const imageUrls = folderImagesData.map(img => {
+                console.log('📸 Processing image:', img.name, img.image_url);
+                return img.image_url;
+              }).filter(url => {
+                const isValid = url && url.length > 0;
+                console.log('🔍 Image URL valid:', isValid, url);
+                return isValid;
+              });
+              
+              console.log('🖼️ Found folder images:', imageUrls.length, imageUrls);
+              setFolderImages(folderImagesData); // Store full image data with IDs
+              setAdditionalMediaPreviews(imageUrls);
+            } else {
+              console.log('📁 No images found in folder');
+              setFolderImages([]);
+              setAdditionalMediaPreviews([]);
+            }
+          } catch (error) {
+            console.error('❌ Error loading folder images:', error);
+            setFolderImages([]);
+            // Fallback to additional_media_urls if folder images fail
+            setAdditionalMediaPreviews(mediaItem.additional_media_urls || mediaItem.additionalMediaUrls || []);
+          }
+        } else {
+          console.log('📁 Not a folder or no ID - skipping folder image loading');
+          console.log('📁 Type check:', mediaItem.type === 'folder');
+          console.log('📁 ID check:', !!mediaItem.id);
+          // For non-folder items, use additional_media_urls
+          setFolderImages([]);
+          setAdditionalMediaPreviews(mediaItem.additional_media_urls || mediaItem.additionalMediaUrls || []);
+        }
+      } else {
+        // Reset form for new item
+        setFormData({
+          name: '',
+          subtitle: '',
+          content: '',
+          type: 'image',
+          event: '',
+          date: '',
+          coverImage: null,
+          coverImageUrl: '',
+          themeColor: defaultColors[0].value,
+          keywords: [],
+          additionalMedia: [],
+          status: 'draft',
+          itemsCount: undefined,
+        });
+        setCoverPreview(null);
+        setKeywordInput('');
+        setAdditionalMediaPreviews([]);
+        setFolderImages([]);
+      }
+    };
+
+    loadMediaItem();
   }, [mediaItem]);
 
   const handleChange = (e) => {
@@ -155,7 +212,27 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
     }
   };
 
-  const removeAdditionalMedia = (index) => {
+  const removeAdditionalMedia = async (index) => {
+    // Check if this is a folder image that needs to be deleted from database
+    if (formData.type === 'folder' && folderImages.length > 0 && index < folderImages.length) {
+      const imageToDelete = folderImages[index];
+      if (imageToDelete && imageToDelete.id) {
+        try {
+          console.log('🗑️ Deleting folder image:', imageToDelete.id);
+          await mediaService.deleteImageFromFolder(formData.id || mediaItem?.id, imageToDelete.id);
+          console.log('✅ Folder image deleted successfully');
+          
+          // Remove from folderImages array
+          setFolderImages(prev => prev.filter((_, i) => i !== index));
+        } catch (error) {
+          console.error('❌ Error deleting folder image:', error);
+          setError('ไม่สามารถลบรูปภาพได้ กรุณาลองใหม่อีกครั้ง');
+          return; // Don't remove from preview if deletion failed
+        }
+      }
+    }
+
+    // Remove from form data and previews
     setFormData(prev => ({
       ...prev,
       additionalMedia: prev.additionalMedia.filter((_, i) => i !== index)
@@ -200,19 +277,44 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
       // Upload additional media files
       if (formData.additionalMedia && formData.additionalMedia.length > 0) {
         console.log('📤 Uploading additional media files...');
-        const uploadResults = await uploadMultipleFiles(formData.additionalMedia);
-        console.log('📤 Multiple upload results:', uploadResults);
         
-        if (!uploadResults || !Array.isArray(uploadResults)) {
-          throw new Error('Multiple upload failed: Invalid response from server');
-        }
-        
-        additionalMediaUrls = uploadResults.map((result, index) => {
-          if (!result || !result.fileUrl) {
-            throw new Error(`Upload failed for file ${index + 1}: Invalid response`);
+        // For existing folders, use the new folder upload endpoint
+        if (formData.type === 'folder' && (formData.id || mediaItem?.id)) {
+          const folderId = formData.id || mediaItem?.id;
+          console.log('📁 Using folder upload for existing folder:', folderId);
+          
+          const uploadResults = await mediaService.uploadFilesToFolder(folderId, formData.additionalMedia);
+          console.log('📁 Folder upload results:', uploadResults);
+          
+          if (!uploadResults || !uploadResults.success) {
+            throw new Error('Folder upload failed: ' + (uploadResults?.error || 'Unknown error'));
           }
-          return result.fileUrl;
-        });
+          
+          // For folder uploads, images are saved directly to folder_images table
+          // No need to set additionalMediaUrls as they're managed separately
+          additionalMediaUrls = [];
+          
+        } else if (formData.type === 'folder') {
+          // For new folders, skip upload here - will upload after folder creation
+          console.log('📁 New folder - will upload files after creation');
+          additionalMediaUrls = [];
+          
+        } else {
+          // For non-folder items, use the old multiple upload endpoint
+          const uploadResults = await uploadMultipleFiles(formData.additionalMedia);
+          console.log('📤 Multiple upload results:', uploadResults);
+          
+          if (!uploadResults || !Array.isArray(uploadResults)) {
+            throw new Error('Multiple upload failed: Invalid response from server');
+          }
+          
+          additionalMediaUrls = uploadResults.map((result, index) => {
+            if (!result || !result.fileUrl) {
+              throw new Error(`Upload failed for file ${index + 1}: Invalid response`);
+            }
+            return result.fileUrl;
+          });
+        }
       }
 
       // Prepare data for API
@@ -240,6 +342,24 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
         // Create new media
         result = await createMedia(mediaData);
         console.log('✅ Media created successfully:', result.name);
+        
+        // For new folders with additional media, upload files after creation
+        if (formData.type === 'folder' && formData.additionalMedia && formData.additionalMedia.length > 0) {
+          console.log('📁 Uploading files to newly created folder:', result.id);
+          
+          try {
+            const uploadResults = await mediaService.uploadFilesToFolder(result.id, formData.additionalMedia);
+            console.log('📁 New folder upload results:', uploadResults);
+            
+            if (!uploadResults || !uploadResults.success) {
+              console.warn('⚠️ Folder created but file upload failed:', uploadResults?.error);
+              // Don't throw error - folder is created, just warn about upload
+            }
+          } catch (uploadError) {
+            console.warn('⚠️ Folder created but file upload failed:', uploadError);
+            // Don't throw error - folder is created successfully
+          }
+        }
       }
 
       // Call parent onSubmit with result

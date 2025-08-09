@@ -82,22 +82,48 @@ class MediaService {
   async getFolderImages(folderId) {
     try {
       console.log('📁 Fetching folder images from folder_images table:', folderId);
+      console.log('📁 API URL:', `${API_BASE_URL}/folders/${folderId}/images`);
       
-      const response = await fetch(`${API_BASE_URL}/folders/${folderId}/images`);
+      const response = await fetch(`${API_BASE_URL}/folders/${folderId}/images`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      
+      console.log('📁 Response status:', response.status);
+      console.log('📁 Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error('❌ HTTP error response:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('❌ Error response body:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();
+      console.log('📁 Raw API response:', data);
+      console.log('📁 Response structure check:', {
+        hasSuccess: 'success' in data,
+        success: data.success,
+        hasData: 'data' in data,
+        dataType: typeof data.data,
+        hasFolder: data.data && 'folder' in data.data,
+        hasImages: data.data && 'images' in data.data,
+        imagesLength: data.data?.images?.length
+      });
       
       if (!data.success) {
+        console.error('❌ API returned error:', data.error);
         throw new Error(data.error || 'Failed to fetch folder images');
       }
       
+      console.log('📁 Returning data.data:', data.data);
       return data.data; // { folder: {...}, images: [...] }
     } catch (error) {
       console.error('❌ Error fetching folder images:', error);
+      console.error('❌ Error stack:', error.stack);
       throw error;
     }
   }
@@ -113,7 +139,11 @@ class MediaService {
       });
       
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for multiple files
+      // Dynamic timeout based on file count: 60s base + 2s per file (max 5 minutes)
+      const dynamicTimeout = Math.min(60000 + (files.length * 2000), 300000);
+      const timeoutId = setTimeout(() => controller.abort(), dynamicTimeout);
+      
+      console.log(`⏱️ Upload timeout set to ${dynamicTimeout/1000}s for ${files.length} files`);
       
       const response = await fetch(`${API_BASE_URL}/upload/folder/${folderId}`, {
         method: 'POST',

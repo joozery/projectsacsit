@@ -25,7 +25,6 @@ import Login from '@/pages/Login';
 import AgendaPage from '@/pages/Agenda/index';
 import AdminAgenda from '@/pages/Agenda/AdminAgenda';
 import SpeakersPage from '@/pages/Speakers/index';
-import PublicSpeakersPage from '@/pages/Speakers/PublicSpeakersPage';
 import AttendeesPage from '@/pages/Attendees/index';
 import CheckInPage from '@/pages/CheckIn/index';
 import Account from '@/pages/Account';
@@ -38,17 +37,13 @@ import News from '@/pages/News';
 import Exhibition from '@/pages/News/Exhibition';
 import CreativeWorks from '@/pages/CreativeWorks';
 import LacquerwarePage from '@/pages/CreativeWorks/LacquerwarePage';
-import MainExhibitionLacquerLegacy from '@/pages/CreativeWorks/MainExhibitionLacquerLegacy';
-import LiveExhibitionSlideshow from '@/pages/CreativeWorks/LiveExhibitionSlideshow';
 import HandicraftsPage from '@/pages/CreativeWorks/HandicraftsPage';
 import AppliedHandicraftsPage from '@/pages/CreativeWorks/AppliedHandicraftsPage';
 import LocalHandicraftsPage from '@/pages/CreativeWorks/LocalHandicraftsPage';
-import CollaborativePartners from '@/pages/CreativeWorks/CollaborativePartners';
-import WorksPage from '@/pages/CreativeWorks/WorksPage';
-import AdminWorksPage from '@/pages/Works/index';
 import Images from '@/pages/News/Images';
 import Videos from '@/pages/News/Videos';
 import Proceeding from '@/pages/News/Proceeding';
+import FolderDetail from '@/pages/FolderDetail';
 import Footer from '@/components/Footer';
 
 const AdminLayout = () => (
@@ -111,21 +106,16 @@ const AppWithNavbar = () => {
         <Route path="/sacit-symposium-en" element={<SacitSymposiumEN />} />
         <Route path="/sacit-symposium-th" element={<SacitSymposiumTH />} />
         <Route path="/agenda" element={<AgendaPage />} />
-        <Route path="/speakers" element={<PublicSpeakersPage />} />
-        <Route path="/speakers-admin" element={<SpeakersPage />} />
         <Route path="/news" element={<CreativeWorks />} />
         <Route path="/news-old" element={<News />} />
         <Route path="/exhibition" element={<Exhibition />} />
         <Route path="/creative-works" element={<CreativeWorks />} />
         <Route path="/creative-works/lacquerware" element={<LacquerwarePage />} />
-        <Route path="/creative-works/lacquer-legacy" element={<MainExhibitionLacquerLegacy />} />
-        <Route path="/creative-works/live-exhibition" element={<LiveExhibitionSlideshow />} />
         <Route path="/creative-works/handicrafts" element={<HandicraftsPage />} />
         <Route path="/creative-works/applied" element={<AppliedHandicraftsPage />} />
         <Route path="/creative-works/local" element={<LocalHandicraftsPage />} />
-        <Route path="/creative-works/partners" element={<CollaborativePartners />} />
-        <Route path="/creative-works/works" element={<WorksPage />} />
         <Route path="/images" element={<Images />} />
+        <Route path="/folder/:folderId" element={<FolderDetail />} />
         <Route path="/videos" element={<Videos />} />
         <Route path="/proceeding" element={<Proceeding />} />
         <Route path="/register" element={<Register />} />
@@ -145,7 +135,6 @@ const AppWithNavbar = () => {
           <Route path="speakers" element={<SpeakersPage />} />
           <Route path="exhibitions" element={<ExhibitionsPage />} />
           <Route path="attendees" element={<AttendeesPage />} />
-          <Route path="checkin" element={<CheckInPage />} />
           <Route path="certificates" element={<CertificatesPage />} />
           <Route path="google-analytics" element={<GoogleAnalytics />} />
           <Route path="multimedia" element={<MultimediaPage />} />
@@ -153,7 +142,6 @@ const AppWithNavbar = () => {
           <Route path="users" element={<UsersPage />} />
           <Route path="templates" element={<TemplatesPage />} />
           <Route path="ebooks" element={<EbooksPage />} />
-          <Route path="works" element={<AdminWorksPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Routes>
