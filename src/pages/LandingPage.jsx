@@ -14,6 +14,7 @@ import CookieConsent from '@/components/CookieConsent';
 import useSpeakers from '@/hooks/useSpeakers';
 import useExhibitions from '@/hooks/useExhibitions';
 import useGallery from '@/hooks/useGallery';
+import useCreativeWorks from '@/hooks/useCreativeWorks';
 
 import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
@@ -688,12 +689,19 @@ const LandingPage = () => {
         description: null
       })); // Show up to 12 fallback items
 
-  const newsItems = [
-    { title: 'ผาสาทแก้ว', description: 'ผ้าไหมทอลายโบราณ ผาสาทแก้ว', author: 'ครูณกรณ์ ตั้งหลัก', imgSrc: gallery01, type: 'ผลิตภัณฑ์', category: 'ผ้าทอพื้นเมือง' },
-    { title: 'หัตถกรรมจักสาน', description: 'ตะกร้าไม้ไผ่ลวดลายประณีต', author: 'กลุ่มแม่บ้านสร้างสรรค์', imgSrc: gallery02, type: 'บทความ', category: 'งานจักสาน' },
-    { title: 'Crafts Bangkok 2025', description: 'ประกาศรายชื่อผู้ผ่านการคัดเลือกเข้าร่วมจำหน่ายสินค้าในงาน Crafts Bangkok 2025', author: '', imgSrc: gallery03, type: 'ประกาศ', category: 'งานแสดงสินค้า' },
-    { title: 'เครื่องปั้นดินเผาลายคราม', description: 'ศิลปะเครื่องปั้นดินเผาแบบดั้งเดิม ลวดลายสีคราม', author: 'อาจารย์สมศรี วิจิตรศิลป์', imgSrc: gallery04, type: 'บทความ', category: 'เครื่องปั้นดินเผา' },
-  ];
+  // Use creative works data instead of static newsItems
+  const { creativeWorks, loading: creativeWorksLoading } = useCreativeWorks();
+  
+  // Transform creative works data to match newsItems format
+  const newsItems = creativeWorks.map(work => ({
+    title: work.name || work.title || 'ไม่ระบุชื่อ',
+    description: work.description || 'ไม่มีคำอธิบาย',
+    author: work.owner_name || work.author || 'ไม่ระบุผู้สร้าง',
+    imgSrc: work.photo_url || gallery01,
+    type: work.type || 'บทความ',
+    category: work.category || 'ไม่ระบุหมวดหมู่',
+    pageUrl: work.pageUrl || '/creative-works'
+  }));
 
   const lightboxImageData = [
     { alt: 'People at a conference registration desk', description: 'Attendees registering for SACIT event' },
@@ -1156,7 +1164,7 @@ const LandingPage = () => {
                 style={{
                   fontFamily: 'Prompt'
                 }}
-                onClick={handleFeatureClick}
+                onClick={() => navigate('/news')}
               >
                 all media and news
               </Button>
@@ -1177,7 +1185,13 @@ const LandingPage = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  onClick={handleFeatureClick}
+                  onClick={() => {
+                    if (item.pageUrl) {
+                      navigate(item.pageUrl);
+                    } else {
+                      handleFeatureClick();
+                    }
+                  }}
                 >
                   {/* Background Image */}
                   <div className="absolute inset-0">

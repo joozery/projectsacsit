@@ -156,7 +156,7 @@ const Navbar = ({
                   {/* Menu Items */}
                   <div className="py-2">
                     <DropdownMenuItem 
-                      onClick={() => navigate('/account')} 
+                      onClick={() => navigate('/my-account')} 
                       className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-purple-50 transition-all duration-300 mx-2 rounded-xl group"
                     >
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center flex-shrink-0 group-hover:from-purple-200 group-hover:to-purple-300 transition-all duration-300">
@@ -166,7 +166,7 @@ const Navbar = ({
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem 
-                      onClick={() => navigate('/certificates')} 
+                      onClick={() => navigate('/my-account?tab=certificates')} 
                       className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-amber-50 transition-all duration-300 mx-2 rounded-xl group"
                     >
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center flex-shrink-0 group-hover:from-amber-200 group-hover:to-amber-300 transition-all duration-300">
@@ -176,7 +176,7 @@ const Navbar = ({
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem 
-                      onClick={() => navigate('/submissions')} 
+                      onClick={() => navigate('/my-account?tab=submissions')} 
                       className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-blue-50 transition-all duration-300 mx-2 rounded-xl group"
                     >
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center flex-shrink-0 group-hover:from-blue-200 group-hover:to-blue-300 transition-all duration-300">
@@ -186,6 +186,7 @@ const Navbar = ({
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem 
+                      onClick={() => navigate('/my-account')} 
                       className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-green-50 transition-all duration-300 mx-2 rounded-xl group"
                     >
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center flex-shrink-0 group-hover:from-green-200 group-hover:to-green-300 transition-all duration-300">
@@ -195,6 +196,7 @@ const Navbar = ({
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem 
+                      onClick={() => window.open('https://symposium.sacit.or.th/help', '_blank')} 
                       className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-indigo-50 transition-all duration-300 mx-2 rounded-xl group"
                     >
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center flex-shrink-0 group-hover:from-indigo-200 group-hover:to-indigo-300 transition-all duration-300">

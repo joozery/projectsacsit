@@ -40,6 +40,10 @@ import LacquerwarePage from '@/pages/CreativeWorks/LacquerwarePage';
 import HandicraftsPage from '@/pages/CreativeWorks/HandicraftsPage';
 import AppliedHandicraftsPage from '@/pages/CreativeWorks/AppliedHandicraftsPage';
 import LocalHandicraftsPage from '@/pages/CreativeWorks/LocalHandicraftsPage';
+import MainExhibitionLacquerLegacy from '@/pages/CreativeWorks/MainExhibitionLacquerLegacy';
+import WorksPage from '@/pages/CreativeWorks/WorksPage';
+import PublicSpeakersPage from '@/pages/Speakers/PublicSpeakersPage';
+import CollaborativePartners from '@/pages/CreativeWorks/CollaborativePartners';
 import Images from '@/pages/News/Images';
 import Videos from '@/pages/News/Videos';
 import Proceeding from '@/pages/News/Proceeding';
@@ -106,10 +110,16 @@ const AppWithNavbar = () => {
         <Route path="/sacit-symposium-en" element={<SacitSymposiumEN />} />
         <Route path="/sacit-symposium-th" element={<SacitSymposiumTH />} />
         <Route path="/agenda" element={<AgendaPage />} />
+        <Route path="/speakers" element={<PublicSpeakersPage />} />
+        <Route path="/certificates" element={<CertificatesPage />} />
+        <Route path="/submissions" element={<SubmissionsReviewPage />} />
         <Route path="/news" element={<CreativeWorks />} />
         <Route path="/news-old" element={<News />} />
         <Route path="/exhibition" element={<Exhibition />} />
         <Route path="/creative-works" element={<CreativeWorks />} />
+        <Route path="/creative-works/lacquer-legacy" element={<MainExhibitionLacquerLegacy />} />
+        <Route path="/creative-works/works" element={<WorksPage />} />
+        <Route path="/creative-works/partners" element={<CollaborativePartners />} />
         <Route path="/creative-works/lacquerware" element={<LacquerwarePage />} />
         <Route path="/creative-works/handicrafts" element={<HandicraftsPage />} />
         <Route path="/creative-works/applied" element={<AppliedHandicraftsPage />} />
@@ -128,6 +138,7 @@ const AppWithNavbar = () => {
         {/* <Route path="/admin-login" element={<AdminLogin />} /> */}
         <Route path="/checkin" element={<CheckInPage />} />
         <Route path="/account" element={<Account />} />
+        <Route path="/my-account" element={<Account />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />

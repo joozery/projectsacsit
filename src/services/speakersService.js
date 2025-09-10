@@ -1,5 +1,5 @@
 // Simple fetch-based speakers service as fallback
-const API_BASE_URL = 'http://192.168.4.50:5000/api';
+const API_BASE_URL = '/api';
 
 export const speakersService = {
   async getSpeakers(params = {}) {
@@ -11,8 +11,7 @@ export const speakersService = {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
+          'Content-Type': 'application/json'
         },
         // Add timeout using AbortController
         signal: AbortSignal.timeout(5000) // 5 seconds timeout

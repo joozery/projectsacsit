@@ -4,7 +4,7 @@ import authService from '@/services/authService';
 import api from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Trophy, FileText, Settings, LogOut, Eye, EyeOff, Check, AlertCircle, Edit, Download } from 'lucide-react';
 
 const menuItems = [
@@ -17,6 +17,7 @@ const menuItems = [
 const Account = () => {
   const user = authService.getCurrentUser();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeMenu, setActiveMenu] = useState('การตั้งค่า');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -89,6 +90,18 @@ const Account = () => {
     if (!user) {
       navigate('/login');
     } else {
+      // Check URL parameters for tab
+      const tab = searchParams.get('tab');
+      if (tab === 'certificates') {
+        setActiveMenu('ใบประกาศนียบัตร');
+      } else if (tab === 'submissions') {
+        setActiveMenu('ผลการตัดสิน');
+      } else if (tab === 'profile') {
+        setActiveMenu('โปรไฟล์');
+      } else if (tab === 'settings') {
+        setActiveMenu('การตั้งค่า');
+      }
+
       // แสดงข้อมูลจาก localStorage ทันทีก่อน
       if (user) {
         console.log('📋 Setting data from localStorage:', user);
@@ -116,7 +129,7 @@ const Account = () => {
       // Log current user data for debugging
       console.log('🔍 Current user from localStorage:', user);
     }
-  }, [user, navigate, activeMenu]);
+  }, [user, navigate, activeMenu, searchParams]);
 
   const loadPageData = async () => {
     // Only load data once per session to avoid rate limiting
