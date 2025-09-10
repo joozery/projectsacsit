@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // API Base URL
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://backendsacit-42f532a9097c.herokuapp.com') + '/api';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.50:5000') + '/api';
 
 // Create axios instance with default config
 export const api = axios.create({
@@ -9,7 +9,8 @@ export const api = axios.create({
   timeout: 10000, // 10 seconds timeout
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    'Accept': 'application/json',
+    'ngrok-skip-browser-warning': 'true'
   }
 });
 

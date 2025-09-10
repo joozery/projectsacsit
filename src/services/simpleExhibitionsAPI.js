@@ -1,5 +1,5 @@
 // Simple direct API calls without complex dependencies
-const API_URL = 'https://backendsacit-42f532a9097c.herokuapp.com/api/exhibitions';
+const API_URL = 'http://192.168.4.50:5000/api/exhibitions';
 
 export const simpleExhibitionsAPI = {
   async getAllExhibitions() {
@@ -10,7 +10,8 @@ export const simpleExhibitionsAPI = {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
         },
         mode: 'cors'
       });

@@ -134,7 +134,7 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'https://backendsacit-42f532a9097c.herokuapp.com/api';
+        const API_BASE_URL = 'https://8e10ca7a2261.ngrok-free.app/api';
         
         function showStatus(message, type = 'loading') {
             const statusDiv = document.getElementById('apiStatus');
@@ -181,7 +181,11 @@
             try {
                 showStatus('🔄 กำลังดึงข้อมูลผลงานสร้างสรรค์...', 'loading');
                 
-                const response = await fetch(`${API_BASE_URL}/works?status=active`);
+                const response = await fetch(`${API_BASE_URL}/works?status=active`, {
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
                 const result = await response.json();
                 
                 if (result.success) {
@@ -200,7 +204,11 @@
             try {
                 showStatus(`🔄 กำลังดึงข้อมูลผลงาน ID ${id}...`, 'loading');
                 
-                const response = await fetch(`${API_BASE_URL}/works/${id}`);
+                const response = await fetch(`${API_BASE_URL}/works/${id}`, {
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
                 const result = await response.json();
                 
                 if (result.success) {
@@ -228,6 +236,9 @@
                 
                 const response = await fetch(`${API_BASE_URL}/works`, {
                     method: 'POST',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: formData
                 });
                 

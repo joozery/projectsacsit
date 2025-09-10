@@ -94,7 +94,7 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'https://backendsacit-42f532a9097c.herokuapp.com/api';
+        const API_BASE_URL = 'https://8e10ca7a2261.ngrok-free.app/api';
         
         // Fallback speakers data (เหมือนใน LandingPage)
         const fallbackSpeakers = [
@@ -115,7 +115,11 @@
                 apiStatusDiv.innerHTML = '<div class="api-status">🔄 กำลังโหลดข้อมูลจาก API...</div>';
                 
                 // เรียก API
-                const response = await fetch(`${API_BASE_URL}/speakers?status=active`);
+                const response = await fetch(`${API_BASE_URL}/speakers?status=active`, {
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
                 const result = await response.json();
                 
                 if (result.success && result.data.length > 0) {

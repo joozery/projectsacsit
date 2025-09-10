@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://backendsacit-42f532a9097c.herokuapp.com/api';
+const API_BASE_URL = 'http://192.168.4.50:5000/api';
 
 const exhibitionsService = {
   async getExhibitions(params = {}) {

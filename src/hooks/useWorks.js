@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://backendsacit-42f532a9097c.herokuapp.com') + '/api';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.50:5000') + '/api';
 
 const useWorks = ({ 
   autoLoad = false, 
@@ -67,7 +67,11 @@ const useWorks = ({
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/works/${id}`);
+      const response = await fetch(`${API_BASE_URL}/works/${id}`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
       const data = await response.json();
 
       if (data.success) {
@@ -111,6 +115,9 @@ const useWorks = ({
 
       const response = await fetch(`${API_BASE_URL}/works`, {
         method: 'POST',
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
         body: formData
       });
 
@@ -159,6 +166,9 @@ const useWorks = ({
 
       const response = await fetch(`${API_BASE_URL}/works/${id}`, {
         method: 'PUT',
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
         body: formData
       });
 
@@ -187,7 +197,10 @@ const useWorks = ({
 
     try {
       const response = await fetch(`${API_BASE_URL}/works/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
       });
 
       const data = await response.json();
@@ -215,7 +228,10 @@ const useWorks = ({
 
     try {
       const response = await fetch(`${API_BASE_URL}/works/${id}/permanent`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
       });
 
       const data = await response.json();

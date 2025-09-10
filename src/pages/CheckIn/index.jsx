@@ -43,7 +43,7 @@ const CheckInPage = () => {
     
     try {
       console.log('🔍 Fetching attendees data for year:', year);
-      console.log('🌐 API Base URL:', import.meta.env.VITE_API_BASE_URL || 'https://backendsacit-42f532a9097c.herokuapp.com');
+      console.log('🌐 API Base URL:', import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.50:5000');
       
       // Test API connection first
       try {

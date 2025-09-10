@@ -64,7 +64,7 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'https://backendsacit-42f532a9097c.herokuapp.com/api';
+        const API_BASE_URL = 'https://8e10ca7a2261.ngrok-free.app/api';
         
         function log(message, type = 'info') {
             const results = document.getElementById('results');
@@ -132,7 +132,11 @@
             log(`🔍 Testing Direct API Call`);
             
             try {
-                const response = await fetch(`${API_BASE_URL}/folders/22/images`);
+                const response = await fetch(`${API_BASE_URL}/folders/22/images`, {
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
                 const data = await response.json();
                 
                 log(`📊 Direct API Result: ${JSON.stringify({

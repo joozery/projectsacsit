@@ -1,7 +1,7 @@
 # Production Environment Variables สำหรับ Heroku
 # สร้างไฟล์ .env ด้วยค่าเหล่านี้
 
-VITE_API_BASE_URL=https://backendsacit-42f532a9097c.herokuapp.com
+VITE_API_BASE_URL=http://192.168.4.50:5000
 
 # Application Settings
 VITE_APP_NAME=SACIT Exhibition Management

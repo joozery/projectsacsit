@@ -1,7 +1,18 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backendsacit-42f532a9097c.herokuapp.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.4.50:5000/api';
 
 // Debug API URL
 console.log('🔗 API Base URL:', API_BASE_URL);
+
+// Helper function to add ngrok header to fetch options
+const addNgrokHeader = (options = {}) => {
+  return {
+    ...options,
+    headers: {
+      'ngrok-skip-browser-warning': 'true',
+      ...options.headers
+    }
+  };
+};
 
 class MediaService {
   // Get all media with optional filters
@@ -58,7 +69,7 @@ class MediaService {
     try {
       console.log('🔍 Fetching media by ID:', id);
       
-      const response = await fetch(`${API_BASE_URL}/media/${id}`);
+      const response = await fetch(`${API_BASE_URL}/media/${id}`, addNgrokHeader());
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -84,13 +95,13 @@ class MediaService {
       console.log('📁 Fetching folder images from folder_images table:', folderId);
       console.log('📁 API URL:', `${API_BASE_URL}/folders/${folderId}/images`);
       
-      const response = await fetch(`${API_BASE_URL}/folders/${folderId}/images`, {
+      const response = await fetch(`${API_BASE_URL}/folders/${folderId}/images`, addNgrokHeader({
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         }
-      });
+      }));
       
       console.log('📁 Response status:', response.status);
       console.log('📁 Response headers:', Object.fromEntries(response.headers.entries()));
@@ -145,11 +156,11 @@ class MediaService {
       
       console.log(`⏱️ Upload timeout set to ${dynamicTimeout/1000}s for ${files.length} files`);
       
-      const response = await fetch(`${API_BASE_URL}/upload/folder/${folderId}`, {
+      const response = await fetch(`${API_BASE_URL}/upload/folder/${folderId}`, addNgrokHeader({
         method: 'POST',
         body: formData,
         signal: controller.signal
-      });
+      }));
       
       clearTimeout(timeoutId);
       
@@ -178,13 +189,13 @@ class MediaService {
     try {
       console.log('📸 Adding image to folder:', { folderId, imageName: imageData.name });
       
-      const response = await fetch(`${API_BASE_URL}/folders/${folderId}/images`, {
+      const response = await fetch(`${API_BASE_URL}/folders/${folderId}/images`, addNgrokHeader({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(imageData)
-      });
+      }));
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -208,9 +219,9 @@ class MediaService {
     try {
       console.log('🗑️ Deleting image from folder:', { folderId, imageId });
       
-      const response = await fetch(`${API_BASE_URL}/folders/${folderId}/images/${imageId}`, {
+      const response = await fetch(`${API_BASE_URL}/folders/${folderId}/images/${imageId}`, addNgrokHeader({
         method: 'DELETE'
-      });
+      }));
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -234,13 +245,13 @@ class MediaService {
     try {
       console.log('📦 Batch creating media items:', mediaItems.length);
       
-      const response = await fetch(`${API_BASE_URL}/media/batch`, {
+      const response = await fetch(`${API_BASE_URL}/media/batch`, addNgrokHeader({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ mediaItems })
-      });
+      }));
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -264,13 +275,13 @@ class MediaService {
     try {
       console.log('📝 Creating media:', mediaData);
       
-      const response = await fetch(`${API_BASE_URL}/media`, {
+      const response = await fetch(`${API_BASE_URL}/media`, addNgrokHeader({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(mediaData),
-      });
+      }));
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -295,13 +306,13 @@ class MediaService {
     try {
       console.log('📝 Updating media:', id, mediaData);
       
-      const response = await fetch(`${API_BASE_URL}/media/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/media/${id}`, addNgrokHeader({
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(mediaData),
-      });
+      }));
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -326,9 +337,9 @@ class MediaService {
     try {
       console.log('🗑️ Deleting media:', id);
       
-      const response = await fetch(`${API_BASE_URL}/media/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/media/${id}`, addNgrokHeader({
         method: 'DELETE',
-      });
+      }));
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -353,13 +364,13 @@ class MediaService {
     try {
       console.log('📝 Updating media status:', id, status);
       
-      const response = await fetch(`${API_BASE_URL}/media/${id}/status`, {
+      const response = await fetch(`${API_BASE_URL}/media/${id}/status`, addNgrokHeader({
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ status }),
-      });
+      }));
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -384,7 +395,7 @@ class MediaService {
     try {
       console.log('📊 Fetching media statistics');
       
-      const response = await fetch(`${API_BASE_URL}/media/stats`);
+      const response = await fetch(`${API_BASE_URL}/media/stats`, addNgrokHeader());
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -408,7 +419,7 @@ class MediaService {
     try {
       console.log('📅 Fetching events');
       
-      const response = await fetch(`${API_BASE_URL}/media/events`);
+      const response = await fetch(`${API_BASE_URL}/media/events`, addNgrokHeader());
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -432,7 +443,7 @@ class MediaService {
     try {
       console.log('🏷️ Fetching popular keywords');
       
-      const response = await fetch(`${API_BASE_URL}/media/keywords`);
+      const response = await fetch(`${API_BASE_URL}/media/keywords`, addNgrokHeader());
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -459,10 +470,10 @@ class MediaService {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${API_BASE_URL}/upload`, {
+      const response = await fetch(`${API_BASE_URL}/upload`, addNgrokHeader({
         method: 'POST',
         body: formData,
-      });
+      }));
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -502,10 +513,10 @@ class MediaService {
         formData.append('files', file);
       });
       
-      const response = await fetch(`${API_BASE_URL}/upload/multiple`, {
+      const response = await fetch(`${API_BASE_URL}/upload/multiple`, addNgrokHeader({
         method: 'POST',
         body: formData,
-      });
+      }));
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
