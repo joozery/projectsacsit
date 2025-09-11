@@ -62,7 +62,7 @@ const CertificateTemplateEditor = ({
         x: 400,
         y: 100,
         fontSize: 48,
-        fontFamily: 'PromptP-Bold',
+        fontFamily: 'Prompt',
         color: '#533193',
         alignment: 'center'
       },
@@ -73,7 +73,7 @@ const CertificateTemplateEditor = ({
         x: 400,
         y: 250,
         fontSize: 36,
-        fontFamily: 'PromptP-Regular',
+        fontFamily: 'Prompt',
         color: '#2D3748',
         alignment: 'center',
         placeholder: 'ชื่อผู้รับ'
@@ -85,7 +85,7 @@ const CertificateTemplateEditor = ({
         x: 400,
         y: 350,
         fontSize: 24,
-        fontFamily: 'PromptP-Regular',
+        fontFamily: 'Prompt',
         color: '#4A5568',
         alignment: 'center'
       },
@@ -96,7 +96,7 @@ const CertificateTemplateEditor = ({
         x: 400,
         y: 400,
         fontSize: 18,
-        fontFamily: 'PromptP-Regular',
+        fontFamily: 'Prompt',
         color: '#718096',
         alignment: 'center',
         placeholder: 'วันที่'
@@ -108,7 +108,7 @@ const CertificateTemplateEditor = ({
         x: 400,
         y: 500,
         fontSize: 16,
-        fontFamily: 'PromptP-Regular',
+        fontFamily: 'Prompt',
         color: '#718096',
         alignment: 'center'
       }
@@ -120,12 +120,12 @@ const CertificateTemplateEditor = ({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   const fontOptions = [
-    { value: 'PromptP-Regular', label: 'PromptP Regular' },
-    { value: 'PromptP-Bold', label: 'PromptP Bold' },
-    { value: 'PromptP-Light', label: 'PromptP Light' },
-    { value: 'AWConqueror Std Didot', label: 'AWConqueror Didot' },
-    { value: 'AWConqueror Std Didot Bold', label: 'AWConqueror Didot Bold' },
-    { value: 'AWConqueror Std Didot Light', label: 'AWConqueror Didot Light' }
+    { value: 'Prompt', label: 'Prompt Regular' },
+    { value: 'Prompt-Bold', label: 'Prompt Bold' },
+    { value: 'Prompt-Light', label: 'Prompt Light' },
+    { value: 'Arial', label: 'Arial' },
+    { value: 'Times New Roman', label: 'Times New Roman' },
+    { value: 'Georgia', label: 'Georgia' }
   ];
 
   const colorOptions = [
@@ -151,7 +151,7 @@ const CertificateTemplateEditor = ({
 
     // Draw background
     if (templateData.backgroundUrl) {
-      const img = new Image();
+      const img = document.createElement('img');
       img.onload = () => {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         drawElements(ctx);
@@ -167,7 +167,15 @@ const CertificateTemplateEditor = ({
 
   const drawElements = (ctx) => {
     templateData.elements.forEach(element => {
-      ctx.font = `${element.fontSize}px ${element.fontFamily}`;
+      // Use fallback fonts for better compatibility
+      let fontFamily;
+      if (element.fontFamily === 'Prompt' || element.fontFamily === 'Prompt-Bold' || element.fontFamily === 'Prompt-Light') {
+        fontFamily = 'Prompt, "Noto Sans Thai", Arial, sans-serif';
+      } else {
+        fontFamily = `${element.fontFamily}, Arial, sans-serif`;
+      }
+      
+      ctx.font = `${element.fontSize}px ${fontFamily}`;
       ctx.fillStyle = element.color;
       ctx.textAlign = element.alignment;
       ctx.textBaseline = 'middle';
@@ -281,6 +289,7 @@ const CertificateTemplateEditor = ({
       reader.onload = (e) => {
         setTemplateData(prev => ({
           ...prev,
+          backgroundImage: file,
           backgroundUrl: e.target.result
         }));
       };
@@ -289,7 +298,9 @@ const CertificateTemplateEditor = ({
   };
 
   const handleSave = () => {
-    onSave(templateData);
+    // Separate backgroundImage from templateData
+    const { backgroundImage, ...templateDataWithoutImage } = templateData;
+    onSave(templateDataWithoutImage, backgroundImage);
     toast({
       title: "บันทึกสำเร็จ!",
       description: `เทมเพลต "${templateData.name}" ถูกบันทึกแล้ว`

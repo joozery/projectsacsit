@@ -38,11 +38,11 @@
 
 /* CSS Variables for PromptP */
 :root {
-  --font-promptp: 'PromptP', 'Prompt', 'Noto Sans Thai', sans-serif;
-  --font-promptp-light: 'PromptP', 'Prompt', 'Noto Sans Thai', sans-serif;
-  --font-promptp-regular: 'PromptP', 'Prompt', 'Noto Sans Thai', sans-serif;
-  --font-promptp-medium: 'PromptP', 'Prompt', 'Noto Sans Thai', sans-serif;
-  --font-promptp-bold: 'PromptP', 'Prompt', 'Noto Sans Thai', sans-serif;
+  --font-promptp: 'Prompt', 'Noto Sans Thai', sans-serif;
+  --font-promptp-light: 'Prompt', 'Noto Sans Thai', sans-serif;
+  --font-promptp-regular: 'Prompt', 'Noto Sans Thai', sans-serif;
+  --font-promptp-medium: 'Prompt', 'Noto Sans Thai', sans-serif;
+  --font-promptp-bold: 'Prompt', 'Noto Sans Thai', sans-serif;
 }
 
 /* Utility Classes for PromptP */

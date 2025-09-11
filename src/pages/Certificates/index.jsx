@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Plus, Search, Palette, Eye, Download, Edit3, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { certificateService } from '@/services/certificateService';
 import {
   Dialog,
   DialogContent,
@@ -296,6 +297,7 @@ const CertificatesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDesignerOpen, setIsDesignerOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -304,15 +306,40 @@ const CertificatesPage = () => {
   const [previewCertificate, setPreviewCertificate] = useState(null);
   const [deletingCertificate, setDeletingCertificate] = useState(null);
 
+  // Load certificates from API
   useEffect(() => {
-    const savedCertificates = localStorage.getItem(CERTIFICATES_STORAGE_KEY);
-    if (savedCertificates) {
-      setCertificates(JSON.parse(savedCertificates));
-    } else {
-      setCertificates(initialCertificates);
-      localStorage.setItem(CERTIFICATES_STORAGE_KEY, JSON.stringify(initialCertificates));
-    }
+    loadCertificates();
   }, []);
+
+  const loadCertificates = async () => {
+    try {
+      setLoading(true);
+      const response = await certificateService.getTemplates();
+      
+      if (response.success) {
+        setCertificates(response.data);
+      } else {
+        throw new Error(response.message || 'Failed to load certificates');
+      }
+    } catch (error) {
+      console.error('Error loading certificates:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดข้อมูลใบประกาศได้",
+        variant: "destructive",
+      });
+      
+      // Fallback to localStorage if API fails
+      const savedCertificates = localStorage.getItem(CERTIFICATES_STORAGE_KEY);
+      if (savedCertificates) {
+        setCertificates(JSON.parse(savedCertificates));
+      } else {
+        setCertificates(initialCertificates);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const saveCertificates = (updatedCertificates) => {
     setCertificates(updatedCertificates);
@@ -343,12 +370,32 @@ const CertificatesPage = () => {
     setDeletingCertificate(certificate);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deletingCertificate) {
-      const updatedCertificates = certificates.filter(c => c.id !== deletingCertificate.id);
-      saveCertificates(updatedCertificates);
-      toast({ title: "ลบสำเร็จ!", description: `ใบประกาศ "${deletingCertificate.name}" ถูกลบแล้ว`, variant: "destructive" });
-      setDeletingCertificate(null);
+      try {
+        const response = await certificateService.deleteTemplate(deletingCertificate.id);
+        
+        if (response.success) {
+          const updatedCertificates = certificates.filter(c => c.id !== deletingCertificate.id);
+          setCertificates(updatedCertificates);
+          toast({ 
+            title: "ลบสำเร็จ!", 
+            description: `ใบประกาศ "${deletingCertificate.name}" ถูกลบแล้ว`, 
+            variant: "destructive" 
+          });
+        } else {
+          throw new Error(response.message || 'Failed to delete certificate');
+        }
+      } catch (error) {
+        console.error('Error deleting certificate:', error);
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถลบใบประกาศได้",
+          variant: "destructive",
+        });
+      } finally {
+        setDeletingCertificate(null);
+      }
     }
   };
   
@@ -440,7 +487,7 @@ const CertificatesPage = () => {
           }
         ]
       };
-      saveCertificates([...certificates, newCertificate]);
+      setCertificates([newCertificate, ...certificates]);
       toast({ title: "เพิ่มสำเร็จ!", description: `ใบประกาศ "${newCertificate.name}" ถูกเพิ่มแล้ว` });
     }
     setIsFormOpen(false);

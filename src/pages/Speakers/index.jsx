@@ -76,9 +76,11 @@ const SpeakersPage = () => {
     }
   };
   
-  const filteredSpeakers = speakers.filter(s =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSpeakers = (speakers || []).filter((s) => {
+    const candidateName = (s && (s.name ?? s.fullName ?? s.fullname ?? s.title ?? ''));
+    const name = typeof candidateName === 'string' ? candidateName : String(candidateName || '');
+    return name.toLowerCase().includes((searchTerm || '').toLowerCase());
+  });
 
   return (
     <>

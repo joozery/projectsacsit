@@ -9,6 +9,7 @@ import logoWhite from '@/assets/logow.svg';
 import symposiumText from '@/assets/symposiam.svg';
 import authService from '@/services/authService';
 import registrationService from '@/services/registrationService';
+import analytics from '@/services/analytics';
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -150,6 +151,8 @@ const RegisterForm = () => {
       });
 
       if (res.data.success) {
+        // Track successful registration
+        analytics.trackRegistration(location.state.registrationType);
         navigate('/register/success');
       }
     } catch (err) {

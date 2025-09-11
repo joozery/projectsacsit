@@ -689,19 +689,33 @@ const LandingPage = () => {
         description: null
       })); // Show up to 12 fallback items
 
-  // Use creative works data instead of static newsItems
+  // Use creative works data and gallery images to build Media & News section
   const { creativeWorks, loading: creativeWorksLoading } = useCreativeWorks();
-  
-  // Transform creative works data to match newsItems format
-  const newsItems = creativeWorks.map(work => ({
+
+  // Pick 2 images from gallery for Media & News cards
+  const imageNewsItems = (displayGalleryImages || []).slice(0, 2).map((img) => ({
+    title: img.name || 'ภาพกิจกรรม',
+    description: img.subtitle || img.description || 'ภาพจากแกลเลอรี่',
+    author: img.event || '',
+    imgSrc: img.url,
+    type: 'ภาพ',
+    category: 'แกลเลอรี่',
+    pageUrl: '/images'
+  }));
+
+  // Pick 2 creative works
+  const worksNewsItems = (creativeWorks || []).slice(0, 2).map((work) => ({
     title: work.name || work.title || 'ไม่ระบุชื่อ',
     description: work.description || 'ไม่มีคำอธิบาย',
     author: work.owner_name || work.author || 'ไม่ระบุผู้สร้าง',
     imgSrc: work.photo_url || gallery01,
-    type: work.type || 'บทความ',
-    category: work.category || 'ไม่ระบุหมวดหมู่',
-    pageUrl: work.pageUrl || '/creative-works'
+    type: work.type || 'ผลงาน',
+    category: work.category || 'ผลงานสร้างสรรค์',
+    pageUrl: '/creative-works'
   }));
+
+  // Combine to show 4 cards total
+  const newsItems = [...imageNewsItems, ...worksNewsItems];
 
   const lightboxImageData = [
     { alt: 'People at a conference registration desk', description: 'Attendees registering for SACIT event' },

@@ -21,6 +21,99 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 
+// Simple Chart Components
+const BarChart = ({ data, title }) => {
+  const maxValue = Math.max(...data.map(item => item.value));
+  
+  return (
+    <div className="space-y-3">
+      <h4 className="text-sm font-medium text-gray-700">{title}</h4>
+      <div className="space-y-2">
+        {data.map((item, index) => (
+          <div key={index} className="flex items-center space-x-2">
+            <div className="w-16 text-xs text-gray-600 truncate">{item.label}</div>
+            <div className="flex-1 bg-gray-200 rounded-full h-3 relative">
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-1000"
+                style={{ width: `${(item.value / maxValue) * 100}%` }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
+                {item.value}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const PieChartComponent = ({ data, title }) => {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  let cumulativePercentage = 0;
+  
+  return (
+    <div className="space-y-3">
+      <h4 className="text-sm font-medium text-gray-700">{title}</h4>
+      <div className="flex items-center justify-center">
+        <div className="relative w-32 h-32">
+          <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+            {data.map((item, index) => {
+              const percentage = (item.value / total) * 100;
+              const startAngle = cumulativePercentage * 3.6;
+              const endAngle = (cumulativePercentage + percentage) * 3.6;
+              cumulativePercentage += percentage;
+              
+              const x1 = 50 + 35 * Math.cos((startAngle * Math.PI) / 180);
+              const y1 = 50 + 35 * Math.sin((startAngle * Math.PI) / 180);
+              const x2 = 50 + 35 * Math.cos((endAngle * Math.PI) / 180);
+              const y2 = 50 + 35 * Math.sin((endAngle * Math.PI) / 180);
+              
+              const largeArcFlag = percentage > 50 ? 1 : 0;
+              const pathData = [
+                `M 50 50`,
+                `L ${x1} ${y1}`,
+                `A 35 35 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+                'Z'
+              ].join(' ');
+              
+              return (
+                <path
+                  key={index}
+                  d={pathData}
+                  fill={item.color}
+                  stroke="white"
+                  strokeWidth="0.5"
+                />
+              );
+            })}
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-lg font-bold text-gray-800">{total}</div>
+              <div className="text-xs text-gray-600">ทั้งหมด</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="space-y-1">
+        {data.map((item, index) => (
+          <div key={index} className="flex items-center space-x-2">
+            <div 
+              className="w-2 h-2 rounded-full" 
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="text-xs text-gray-600">{item.label}</span>
+            <span className="text-xs font-medium text-gray-800 ml-auto">
+              {item.value} ({((item.value / total) * 100).toFixed(1)}%)
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -75,6 +168,24 @@ const Dashboard = () => {
       description: 'กิจกรรมในงาน Symposium',
       color: 'bg-gradient-to-r from-orange-500 to-orange-600'
     }
+  ];
+
+  // Sample data for charts
+  const registrationData = [
+    { label: 'ม.ค.', value: 120 },
+    { label: 'ก.พ.', value: 180 },
+    { label: 'มี.ค.', value: 250 },
+    { label: 'เม.ย.', value: 320 },
+    { label: 'พ.ค.', value: 280 },
+    { label: 'มิ.ย.', value: 350 }
+  ];
+
+  const workTypeData = [
+    { label: 'งานวิจัย', value: 45, color: '#3B82F6' },
+    { label: 'งานสร้างสรรค์', value: 32, color: '#10B981' },
+    { label: 'งานศิลปะ', value: 28, color: '#F59E0B' },
+    { label: 'งานหัตถกรรม', value: 15, color: '#EF4444' },
+    { label: 'อื่นๆ', value: 8, color: '#8B5CF6' }
   ];
 
   // Sample data for recent activities
@@ -201,12 +312,8 @@ const Dashboard = () => {
               <BarChart3 className="w-5 h-5 text-gray-500" />
             </Button>
           </div>
-          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-            <div className="text-center text-gray-500">
-              <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>แผนภูมิจะแสดงที่นี่</p>
-              <p className="text-sm">🚧 กำลังพัฒนา</p>
-            </div>
+          <div className="h-64 p-2 overflow-hidden">
+            <BarChart data={registrationData} title="จำนวนผู้ลงทะเบียนรายเดือน" />
           </div>
         </motion.div>
 
@@ -227,12 +334,8 @@ const Dashboard = () => {
               <PieChart className="w-5 h-5 text-gray-500" />
             </Button>
           </div>
-          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-            <div className="text-center text-gray-500">
-              <PieChart className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>แผนภูมิวงกลมจะแสดงที่นี่</p>
-              <p className="text-sm">🚧 กำลังพัฒนา</p>
-            </div>
+          <div className="h-64 p-2 overflow-hidden">
+            <PieChartComponent data={workTypeData} title="สัดส่วนประเภทผลงาน" />
           </div>
         </motion.div>
       </div>

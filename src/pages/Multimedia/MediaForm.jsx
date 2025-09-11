@@ -180,6 +180,10 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
 
   const handleCoverImageChange = (e) => {
     const file = e.target.files[0];
+    processCoverImage(file);
+  };
+
+  const processCoverImage = (file) => {
     if (file) {
       // Validate file type
       if (!file.type.startsWith('image/')) {
@@ -202,14 +206,132 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
       setError(null);
     }
   };
+
+  const handleCoverDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleCoverDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleCoverDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleCoverDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      processCoverImage(files[0]); // Only take the first file for cover image
+    }
+  };
   
   const handleAdditionalMediaChange = (e) => {
     const files = Array.from(e.target.files);
+    processFiles(files);
+  };
+
+  const processFiles = (files) => {
     if (files.length > 0) {
+      // Validate file count limit
+      const maxFiles = 100; // Maximum 100 files
+      if (files.length > maxFiles) {
+        setError(`จำนวนไฟล์เกินขีดจำกัด (${files.length} ไฟล์). สามารถอัปโหลดได้สูงสุด ${maxFiles} ไฟล์ต่อครั้ง`);
+        return;
+      }
+      
+      // Validate file sizes
+      const maxSize = 10 * 1024 * 1024; // 10MB per file
+      const oversizedFiles = files.filter(file => file.size > maxSize);
+      
+      if (oversizedFiles.length > 0) {
+        // Show detailed error with file sizes and suggestions
+        const oversizedDetails = oversizedFiles.map(f => 
+          `${f.name} (${(f.size / 1024 / 1024).toFixed(2)}MB)`
+        ).join(', ');
+        
+        setError(`ไฟล์บางไฟล์ใหญ่เกินไป: ${oversizedDetails}. ขนาดไฟล์ต้องไม่เกิน 10MB ต่อไฟล์. กรุณาลดขนาดไฟล์หรือเลือกไฟล์อื่น`);
+        return;
+      }
+      
+      // Check total size limit (increased for large batches)
+      const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+      const maxTotalSize = 500 * 1024 * 1024; // 500MB total (increased from 50MB)
+      
+      if (totalSize > maxTotalSize) {
+        setError(`ขนาดไฟล์รวมใหญ่เกินไป (${Math.round(totalSize / 1024 / 1024)}MB). ขนาดรวมต้องไม่เกิน 500MB`);
+        return;
+      }
+      
+      // Check existing files + new files
+      const currentFiles = formData.additionalMedia || [];
+      const totalFilesCount = currentFiles.length + files.length;
+      
+      if (totalFilesCount > maxFiles) {
+        setError(`จำนวนไฟล์รวมเกินขีดจำกัด (${totalFilesCount} ไฟล์). สามารถอัปโหลดได้สูงสุด ${maxFiles} ไฟล์`);
+        return;
+      }
+      
       setFormData((prev) => ({ ...prev, additionalMedia: [...prev.additionalMedia, ...files] }));
       const newPreviews = files.map(file => URL.createObjectURL(file));
       setAdditionalMediaPreviews(prev => [...prev, ...newPreviews]);
     }
+  };
+
+  // Helper function to compress image
+  const compressImage = (file, maxWidth = 1920, quality = 0.8) => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calculate new dimensions
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(resolve, 'image/jpeg', quality);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const files = Array.from(e.dataTransfer.files);
+    processFiles(files);
   };
 
   const removeAdditionalMedia = async (index) => {
@@ -256,6 +378,8 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+    
+    console.log('🚀 FORM SUBMIT STARTED - NEW VERSION 2.0');
 
     try {
       let coverImageUrl = formData.coverImageUrl;
@@ -290,33 +414,33 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
             throw new Error('Folder upload failed: ' + (uploadResults?.error || 'Unknown error'));
           }
           
-          // For folder uploads, images are saved directly to folder_images table
-          // No need to set additionalMediaUrls as they're managed separately
-          additionalMediaUrls = [];
-          
-        } else if (formData.type === 'folder') {
-          // For new folders, skip upload here - will upload after folder creation
-          console.log('📁 New folder - will upload files after creation');
-          additionalMediaUrls = [];
-          
         } else {
-          // For non-folder items, use the old multiple upload endpoint
-          const uploadResults = await uploadMultipleFiles(formData.additionalMedia);
-          console.log('📤 Multiple upload results:', uploadResults);
+          // Upload additional files for all types including folders
+          console.log('🔍 DEBUG - About to upload files:', formData.additionalMedia.length);
+          const multipleUploadResults = await uploadMultipleFiles(formData.additionalMedia);
+          console.log('📤 Multiple upload results:', multipleUploadResults);
           
-          if (!uploadResults || !Array.isArray(uploadResults)) {
+          if (!multipleUploadResults || !Array.isArray(multipleUploadResults)) {
+            console.error('❌ Multiple upload failed - Invalid response:', multipleUploadResults);
             throw new Error('Multiple upload failed: Invalid response from server');
           }
           
-          additionalMediaUrls = uploadResults.map((result, index) => {
+          console.log('🔍 DEBUG - Processing upload results, count:', multipleUploadResults.length);
+          additionalMediaUrls = multipleUploadResults.map((result, index) => {
+            console.log(`🔍 DEBUG - Processing result ${index + 1}:`, result);
             if (!result || !result.fileUrl) {
               throw new Error(`Upload failed for file ${index + 1}: Invalid response`);
             }
             return result.fileUrl;
           });
+          console.log('🔍 DEBUG - Final additionalMediaUrls after mapping:', additionalMediaUrls);
         }
       }
 
+      // Debug: Check additionalMediaUrls before sending
+      console.log('🔍 DEBUG - additionalMediaUrls before sending:', additionalMediaUrls);
+      console.log('🔍 DEBUG - additionalMediaUrls length:', additionalMediaUrls.length);
+      
       // Prepare data for API
       const mediaData = {
         name: formData.name,
@@ -332,6 +456,8 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
         status: formData.status,
         items_count: formData.type === 'folder' ? parseInt(formData.itemsCount) || 0 : null,
       };
+      
+      console.log('🔍 DEBUG - Final mediaData:', mediaData);
 
       let result;
       if (mediaItem) {
@@ -408,7 +534,13 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
       )}
       <div>
         <Label htmlFor="coverImage" className="text-gray-700 font-medium">หน้าปก</Label>
-        <div className="mt-2 flex justify-center items-center w-full h-48 rounded-lg border-2 border-dashed border-gray-300 hover:border-violet-500 transition-colors bg-gray-50 relative group">
+        <div 
+          className="mt-2 flex justify-center items-center w-full h-48 rounded-lg border-2 border-dashed border-gray-300 hover:border-violet-500 transition-colors bg-gray-50 relative group"
+          onDragOver={handleCoverDragOver}
+          onDragEnter={handleCoverDragEnter}
+          onDragLeave={handleCoverDragLeave}
+          onDrop={handleCoverDrop}
+        >
           {coverPreview ? (
             <div className="relative h-full w-full">
               <img 
@@ -440,7 +572,7 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
           ) : (
             <div className="text-center">
               <UploadCloud className="mx-auto h-10 w-10 text-gray-400 group-hover:text-violet-500" />
-              <p className="mt-1 text-sm text-gray-600 group-hover:text-violet-600">คลิกเพื่ออัปโหลดรูปภาพ</p>
+              <p className="mt-1 text-sm text-gray-600 group-hover:text-violet-600">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
               <p className="text-xs text-gray-500">PNG, JPG, GIF ขนาดไม่เกิน 10MB</p>
             </div>
           )}
@@ -545,47 +677,76 @@ const MediaForm = ({ mediaItem, onSubmit, onCancel }) => {
 
       <div>
         <Label htmlFor="additionalMedia" className="text-gray-700 font-medium">สื่อหรือภาพประกอบ</Label>
-        <div className="mt-2 flex justify-center items-center w-full min-h-[6rem] p-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-violet-500 transition-colors bg-gray-50 relative group">
+        <div 
+          className="mt-2 flex justify-center items-center w-full min-h-[6rem] p-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-violet-500 transition-colors bg-gray-50 relative group"
+          onDragOver={handleDragOver}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           {additionalMediaPreviews.length === 0 ? (
             <div className="text-center">
               <ImageIcon className="mx-auto h-8 w-8 text-gray-400 group-hover:text-violet-500" />
-              <p className="mt-1 text-xs text-gray-600 group-hover:text-violet-600">อัปโหลดภาพหรือวิดีโอเพิ่มเติม</p>
+              <p className="mt-1 text-xs text-gray-600 group-hover:text-violet-600">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+              <p className="text-xs text-gray-500 mt-1">รองรับ: รูปภาพ, วิดีโอ (สูงสุด 100 ไฟล์, 10MB ต่อไฟล์, 500MB รวม)</p>
+              <p className="text-xs text-orange-600 mt-1">💡 หากไฟล์ใหญ่เกิน 10MB กรุณาลดขนาดไฟล์ก่อนอัปโหลด</p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-              {additionalMediaPreviews.map((previewUrl, index) => (
-                <div key={index} className="relative aspect-square group/item">
-                  <img 
-                    src={previewUrl} 
-                    alt={`Preview ${index + 1}`} 
-                    className="h-full w-full object-cover rounded-md border border-gray-200" 
-                  />
-                  {/* Upload Progress for Individual Files */}
-                  {(isSubmitting || loading) && uploadProgress > 0 && (
-                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-md">
-                      <div className="text-center text-white">
-                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mx-auto mb-1"></div>
-                        <p className="text-xs">อัปโหลด...</p>
+            <div className="space-y-4">
+              {/* File Count Info */}
+              <div className="text-center text-sm text-gray-600">
+                <p>📁 ไฟล์ที่เลือก: {additionalMediaPreviews.length} ไฟล์</p>
+                <p className="text-xs text-gray-500">สามารถเพิ่มได้อีก {Math.max(0, 100 - additionalMediaPreviews.length)} ไฟล์</p>
+              </div>
+              
+              {/* Grid of Files */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 max-h-64 overflow-y-auto">
+                {additionalMediaPreviews.map((previewUrl, index) => (
+                  <div key={index} className="relative aspect-square group/item">
+                    <img 
+                      src={previewUrl} 
+                      alt={`Preview ${index + 1}`} 
+                      className="h-full w-full object-cover rounded-md border border-gray-200" 
+                    />
+                    {/* Upload Progress for Individual Files */}
+                    {(isSubmitting || loading) && uploadProgress > 0 && (
+                      <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-md">
+                        <div className="text-center text-white">
+                          <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mx-auto mb-1"></div>
+                          <p className="text-xs">อัปโหลด...</p>
+                        </div>
                       </div>
+                    )}
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-5 w-5 p-0 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                      onClick={() => removeAdditionalMedia(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                    {/* File Number Badge */}
+                    <div className="absolute bottom-1 left-1 bg-black bg-opacity-70 text-white text-xs px-1 rounded">
+                      {index + 1}
                     </div>
-                  )}
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-1 right-1 h-5 w-5 p-0 opacity-0 group-hover/item:opacity-100 transition-opacity"
-                    onClick={() => removeAdditionalMedia(index)}
+                  </div>
+                ))}
+                {/* Add More Button */}
+                {additionalMediaPreviews.length < 100 && (
+                  <div 
+                    className="aspect-square flex items-center justify-center border-2 border-dashed border-gray-300 rounded-md hover:border-violet-500 transition-colors cursor-pointer"
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
                   >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))}
-              {/* Add More Button */}
-              <div className="aspect-square flex items-center justify-center border-2 border-dashed border-gray-300 rounded-md hover:border-violet-500 transition-colors cursor-pointer">
-                <div className="text-center">
-                  <UploadCloud className="mx-auto h-6 w-6 text-gray-400" />
-                  <p className="text-xs text-gray-500 mt-1">เพิ่ม</p>
-                </div>
+                    <div className="text-center">
+                      <UploadCloud className="mx-auto h-6 w-6 text-gray-400" />
+                      <p className="text-xs text-gray-500 mt-1">เพิ่ม</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

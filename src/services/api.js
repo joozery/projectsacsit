@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// API Base URL
-const API_BASE_URL = '/api';
+// API Base URL (use direct backend URL; Vite proxy is disabled)
+const API_BASE_URL = 'http://localhost:5001/api';
 
 // Create axios instance with default config
 export const api = axios.create({

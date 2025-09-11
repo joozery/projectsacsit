@@ -15,8 +15,7 @@ const WorkForm = ({ work, onSubmit, onCancel }) => {
     owner_name: '', 
     description: '', 
     category: '', 
-    technique: '',
-    display_order: 0
+    technique: ''
   });
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
@@ -32,8 +31,7 @@ const WorkForm = ({ work, onSubmit, onCancel }) => {
         owner_name: work.owner_name || '', 
         description: work.description || '', 
         category: work.category || '', 
-        technique: work.technique || '',
-        display_order: work.display_order || 0
+        technique: work.technique || ''
       });
       setPhotoPreview(work.photo_url || null);
       setPdfFileName(work.pdf_filename || '');
@@ -43,8 +41,7 @@ const WorkForm = ({ work, onSubmit, onCancel }) => {
         owner_name: '', 
         description: '', 
         category: '', 
-        technique: '',
-        display_order: 0
+        technique: ''
       });
       setPhotoPreview(null);
       setPhotoFile(null);
@@ -156,14 +153,10 @@ const WorkForm = ({ work, onSubmit, onCancel }) => {
   };
 
   const categoryOptions = [
-    { value: 'หัตถศิลป์', label: 'หัตถศิลป์' },
-    { value: 'ประณีตศิลป์', label: 'ประณีตศิลป์' },
-    { value: 'จิตรกรรม', label: 'จิตรกรรม' },
-    { value: 'ประติมากรรม', label: 'ประติมากรรม' },
-    { value: 'สถาปัตยกรรม', label: 'สถาปัตยกรรม' },
-    { value: 'ศิลปะดิจิทัล', label: 'ศิลปะดิจิทัล' },
-    { value: 'ศิลปะการแสดง', label: 'ศิลปะการแสดง' },
-    { value: 'อื่นๆ', label: 'อื่นๆ' }
+    { value: '01 เครื่องรัก เครื่องเขิน', label: '01 เครื่องรัก เครื่องเขิน' },
+    { value: '02 งานหัตถศิลป์และประณีตศิลป์', label: '02 งานหัตถศิลป์และประณีตศิลป์' },
+    { value: '03 งานหัตถกรรมเชิงประยุกต์', label: '03 งานหัตถกรรมเชิงประยุกต์' },
+    { value: '04 งานหัตถกรรมพื้นถิ่น และอื่น ๆ', label: '04 งานหัตถกรรมพื้นถิ่น และอื่น ๆ' }
   ];
 
   return (
@@ -175,7 +168,7 @@ const WorkForm = ({ work, onSubmit, onCancel }) => {
       )}
 
       {/* Basic Information */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">ชื่อผลงานสร้างสรรค์ *</Label>
           <Input
@@ -189,13 +182,13 @@ const WorkForm = ({ work, onSubmit, onCancel }) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="owner_name">ชื่อเจ้าของผลงาน *</Label>
+          <Label htmlFor="owner_name">ชื่อ-นามสกุล *</Label>
           <Input
             id="owner_name"
             name="owner_name"
             value={formData.owner_name}
             onChange={handleChange}
-            placeholder="ชื่อเจ้าของผลงาน"
+            placeholder="ชื่อ-นามสกุล"
             required
           />
         </div>
@@ -242,22 +235,10 @@ const WorkForm = ({ work, onSubmit, onCancel }) => {
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="display_order">ลำดับการแสดงผล</Label>
-        <Input
-          id="display_order"
-          name="display_order"
-          type="number"
-          value={formData.display_order}
-          onChange={handleChange}
-          placeholder="0"
-          min="0"
-        />
-      </div>
 
       {/* Photo Upload */}
       <div className="space-y-4">
-        <Label>รูปภาพผลงาน</Label>
+        <Label>รูปภาพนิทรรศการ</Label>
         <div className="flex items-center gap-4">
           <div className="relative">
             <Avatar className="w-20 h-20">
@@ -301,7 +282,7 @@ const WorkForm = ({ work, onSubmit, onCancel }) => {
 
       {/* PDF Upload */}
       <div className="space-y-4">
-        <Label>ไฟล์ PDF (เอกสารเพิ่มเติม)</Label>
+        <Label>เอกสารประกอบ (PDF)</Label>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 p-3 border rounded-lg bg-gray-50">
             <FileText className="w-5 h-5 text-gray-600" />

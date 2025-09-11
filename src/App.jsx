@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from 'react-router-dom';
+import analytics from '@/services/analytics';
 import Layout from '@/components/Layout';
 // import AdminAuthGuard from '@/components/AdminAuthGuard';
 import Navbar from '@/components/Navbar';
@@ -13,6 +14,7 @@ import TemplatesPage from '@/pages/Templates/index';
 import EbooksPage from '@/pages/Ebooks/index';
 import SettingsPage from '@/pages/Settings/index';
 import ExhibitionsPage from '@/pages/Exhibitions/index';
+import WorksPage from '@/pages/Works/index';
 import LandingPage from '@/pages/LandingPage';
 import Register from '@/pages/Register';
 import RegisterTerms from '@/pages/RegisterTerms';
@@ -21,7 +23,7 @@ import RegisterResearch from '@/pages/RegisterResearch';
 import RegisterCreative from '@/pages/RegisterCreative';
 import RegisterSuccess from '@/pages/RegisterSuccess';
 import Login from '@/pages/Login';
-// import AdminLogin from '@/pages/AdminLogin';
+import AdminLogin from '@/pages/AdminLogin';
 import AgendaPage from '@/pages/Agenda/index';
 import AdminAgenda from '@/pages/Agenda/AdminAgenda';
 import SpeakersPage from '@/pages/Speakers/index';
@@ -41,7 +43,6 @@ import HandicraftsPage from '@/pages/CreativeWorks/HandicraftsPage';
 import AppliedHandicraftsPage from '@/pages/CreativeWorks/AppliedHandicraftsPage';
 import LocalHandicraftsPage from '@/pages/CreativeWorks/LocalHandicraftsPage';
 import MainExhibitionLacquerLegacy from '@/pages/CreativeWorks/MainExhibitionLacquerLegacy';
-import WorksPage from '@/pages/CreativeWorks/WorksPage';
 import PublicSpeakersPage from '@/pages/Speakers/PublicSpeakersPage';
 import CollaborativePartners from '@/pages/CreativeWorks/CollaborativePartners';
 import Images from '@/pages/News/Images';
@@ -59,6 +60,11 @@ const AdminLayout = () => (
 // Component to handle navbar logic
 const AppWithNavbar = () => {
   const location = useLocation();
+
+  // Track page views when location changes
+  useEffect(() => {
+    analytics.trackPageView(location.pathname, document.title);
+  }, [location]);
   
   // Determine navbar configuration based on route
   const getNavbarConfig = () => {
@@ -135,7 +141,7 @@ const AppWithNavbar = () => {
         <Route path="/register/creative" element={<RegisterCreative />} />
         <Route path="/register/success" element={<RegisterSuccess />} />
         <Route path="/login" element={<Login />} />
-        {/* <Route path="/admin-login" element={<AdminLogin />} /> */}
+        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/checkin" element={<CheckInPage />} />
         <Route path="/account" element={<Account />} />
         <Route path="/my-account" element={<Account />} />
@@ -145,6 +151,7 @@ const AppWithNavbar = () => {
           <Route path="agenda" element={<AdminAgenda />} />
           <Route path="speakers" element={<SpeakersPage />} />
           <Route path="exhibitions" element={<ExhibitionsPage />} />
+          <Route path="works" element={<WorksPage />} />
           <Route path="attendees" element={<AttendeesPage />} />
           <Route path="certificates" element={<CertificatesPage />} />
           <Route path="google-analytics" element={<GoogleAnalytics />} />
@@ -173,6 +180,12 @@ const ConditionalFooter = () => {
 };
 
 function App() {
+  useEffect(() => {
+    // Initialize Google Analytics
+    analytics.init();
+    console.log('🚀 Google Analytics initialized with ID:', analytics.getMeasurementId());
+  }, []);
+
   return (
     <>
       <Router>

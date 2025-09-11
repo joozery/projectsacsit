@@ -90,8 +90,8 @@ const WorksPage = () => {
       <div className="space-y-6 admin-panel" data-admin="true">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">ผลงานสร้างสรรค์</h1>
-            <p className="text-gray-600 mt-1">จัดการข้อมูลผลงานสร้างสรรค์สำหรับงาน Symposium</p>
+            <h1 className="text-3xl font-bold text-gray-800">ผลงานสร้างสรรค์ (Creative Works)</h1>
+            <p className="text-gray-600 mt-1">จัดการข้อมูลผลงานสร้างสรรค์และพื้นที่สาธิตสำหรับงาน Symposium</p>
           </div>
           <div className="flex gap-2">
             <Button 
@@ -109,10 +109,10 @@ const WorksPage = () => {
                   <Plus className="w-5 h-5 mr-2" />เพิ่มผลงาน
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{editingWork ? 'แก้ไขข้อมูลผลงานสร้างสรรค์' : 'เพิ่มผลงานสร้างสรรค์ใหม่'}</DialogTitle>
-                  <DialogDescription>กรอกข้อมูลผลงานสร้างสรรค์ให้ครบถ้วน</DialogDescription>
+                  <DialogDescription>กรอกข้อมูลผลงานสร้างสรรค์ให้ครบถ้วน สามารถอัปโหลดรูปภาพและไฟล์ PDF ได้</DialogDescription>
                 </DialogHeader>
                 <WorkForm work={editingWork} onSubmit={handleFormSubmit} onCancel={() => setIsFormOpen(false)} />
               </DialogContent>
@@ -156,7 +156,7 @@ const WorksPage = () => {
 
         {/* Works Grid */}
         {!loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <AnimatePresence>
               {filteredWorks.map(work => (
                 <WorkCard 
@@ -171,29 +171,16 @@ const WorksPage = () => {
         )}
 
         {/* Empty State */}
-        {!loading && filteredWorks.length === 0 && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }} 
-            animate={{ opacity: 1, scale: 1 }} 
-            className="text-center py-12"
-          >
+        {!loading && filteredWorks.length === 0 && !error && (
+          <div className="text-center py-12 text-gray-500 bg-white rounded-xl shadow-lg">
             <Palette className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">
-              {searchTerm ? 'ไม่พบผลงานที่ค้นหา' : 'ยังไม่มีผลงานสร้างสรรค์'}
-            </h3>
-            <p className="text-gray-500 mb-4">
-              {searchTerm 
-                ? 'ลองเปลี่ยนคำค้นหาหรือล้างการค้นหา' 
-                : 'เริ่มต้นโดยการเพิ่มผลงานสร้างสรรค์ใหม่'
-              }
+            <p className="text-lg">
+              {searchTerm ? 'ไม่พบผลงานที่ค้นหา' : 'ไม่มีข้อมูลผลงานสร้างสรรค์'}
             </p>
-            {!searchTerm && (
-              <Button onClick={() => setIsFormOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                เพิ่มผลงานแรก
-              </Button>
-            )}
-          </motion.div>
+            <p className="text-sm mt-1">
+              {searchTerm ? 'ลองค้นหาด้วยคำอื่น' : 'เพิ่มข้อมูลผลงานสร้างสรรค์แรกของคุณ!'}
+            </p>
+          </div>
         )}
 
         {/* Delete Confirmation Dialog */}

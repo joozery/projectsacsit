@@ -116,9 +116,9 @@ const MediaGrid = ({ mediaItems, onEdit, onDelete, onPreview }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       <AnimatePresence>
-        {mediaItems.map((item, index) => (
+        {(mediaItems || []).map((item, index) => (
           <motion.div
-            key={item.id}
+            key={item?.id ?? item?._id ?? `${item?.type || 'item'}-${index}`}
             layout
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -174,10 +174,10 @@ const MediaGrid = ({ mediaItems, onEdit, onDelete, onPreview }) => {
                   </p>
                 )}
                 <div className="mt-2 mb-3">{getStatusBadge(item.status)}</div>
-                {item.keywords && item.keywords.length > 0 && (
+                {item?.keywords && item.keywords.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
-                    {item.keywords.slice(0, 3).map(kw => (
-                      <span key={kw} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{kw}</span>
+                    {item.keywords.slice(0, 3).map((kw, i) => (
+                      <span key={`${item?.id ?? index}-kw-${i}`} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{kw}</span>
                     ))}
                   </div>
                 )}

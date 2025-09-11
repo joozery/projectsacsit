@@ -4,6 +4,7 @@ import { X, Download, FileText, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import analytics from '@/services/analytics';
 import {
   Dialog,
   DialogContent,
@@ -89,6 +90,9 @@ const CertificatePreviewModal = ({
   };
 
   const handleDownload = () => {
+    // Track certificate download
+    analytics.trackCertificateDownload(certificate.name);
+    
     // TODO: Implement download functionality
     console.log('Download certificate:', certificate.name);
   };

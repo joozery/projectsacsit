@@ -6,12 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
+import { certificateService } from '@/services/certificateService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import Lightbox from '@/components/Lightbox';
 import CertificateTemplateEditor from './CertificateTemplateEditor';
-
-const CERTIFICATE_TEMPLATES_STORAGE_KEY = 'certificate_templates_editable_v1';
 
 const initialCertificateTemplates = [
   {
@@ -80,16 +79,27 @@ const AdminTemplates = () => {
   const [deletingTemplate, setDeletingTemplate] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
   const [editingCertificateTemplate, setEditingCertificateTemplate] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const loadCertificateTemplates = async () => {
+    try {
+      setLoading(true);
+      const response = await certificateService.getTemplates();
+      if (response.success) {
+        setCertificateTemplates(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading certificate templates:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const savedCertificateTemplates = localStorage.getItem(CERTIFICATE_TEMPLATES_STORAGE_KEY);
-    setCertificateTemplates(savedCertificateTemplates ? JSON.parse(savedCertificateTemplates) : initialCertificateTemplates);
+    // Load templates from API instead of localStorage
+    loadCertificateTemplates();
   }, []);
 
-  const saveCertificateTemplates = (updatedTemplates) => {
-    setCertificateTemplates(updatedTemplates);
-    localStorage.setItem(CERTIFICATE_TEMPLATES_STORAGE_KEY, JSON.stringify(updatedTemplates));
-  };
 
   // Certificate template functions
   const handleCreateCertificateTemplate = () => {
@@ -102,32 +112,55 @@ const AdminTemplates = () => {
     setShowEditor(true);
   };
 
-  const handleSaveCertificateTemplate = (templateData) => {
-    if (editingCertificateTemplate) {
-      const updatedTemplates = certificateTemplates.map(t => 
-        t.id === editingCertificateTemplate.id ? templateData : t
-      );
-      saveCertificateTemplates(updatedTemplates);
-      toast({ title: "แก้ไขสำเร็จ!", description: `เทมเพลต "${templateData.name}" ได้รับการอัปเดตแล้ว` });
-    } else {
-      const newTemplate = { 
-        ...templateData, 
-        id: `cert_${Date.now()}`,
-        uploadDate: new Date().toISOString().slice(0, 10)
-      };
-      saveCertificateTemplates([...certificateTemplates, newTemplate]);
-      toast({ title: "สร้างสำเร็จ!", description: `เทมเพลต "${newTemplate.name}" ถูกสร้างแล้ว` });
+  const handleSaveCertificateTemplate = async (templateData, backgroundImage = null) => {
+    try {
+      if (editingCertificateTemplate) {
+        // Update existing template
+        await certificateService.updateTemplate(editingCertificateTemplate.id, templateData, backgroundImage);
+        toast({ title: "แก้ไขสำเร็จ!", description: `เทมเพลต "${templateData.name}" ได้รับการอัปเดตแล้ว` });
+      } else {
+        // Create new template  
+        await certificateService.createTemplate(templateData, backgroundImage);
+        toast({ title: "สร้างสำเร็จ!", description: `เทมเพลต "${templateData.name}" ถูกสร้างแล้ว` });
+      }
+      
+      // Reload templates from API
+      await loadCertificateTemplates();
+      
+      setShowEditor(false);
+      setEditingCertificateTemplate(null);
+    } catch (error) {
+      console.error('Error saving template:', error);
+      toast({ 
+        title: "เกิดข้อผิดพลาด", 
+        description: error.message || "ไม่สามารถบันทึกเทมเพลตได้",
+        variant: "destructive"
+      });
     }
-    setShowEditor(false);
-    setEditingCertificateTemplate(null);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deletingTemplate) {
-      const updatedTemplates = certificateTemplates.filter(t => t.id !== deletingTemplate.id);
-      saveCertificateTemplates(updatedTemplates);
-      toast({ title: "ลบสำเร็จ!", description: `เทมเพลต "${deletingTemplate.name}" ถูกลบแล้ว`, variant: "destructive" });
-      setDeletingTemplate(null);
+      try {
+        await certificateService.deleteTemplate(deletingTemplate.id);
+        toast({ 
+          title: "ลบสำเร็จ!", 
+          description: `เทมเพลต "${deletingTemplate.name}" ถูกลบแล้ว`, 
+          variant: "destructive" 
+        });
+        
+        // Reload templates from API
+        await loadCertificateTemplates();
+        
+        setDeletingTemplate(null);
+      } catch (error) {
+        console.error('Error deleting template:', error);
+        toast({ 
+          title: "เกิดข้อผิดพลาด", 
+          description: error.message || "ไม่สามารถลบเทมเพลตได้",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -204,11 +237,28 @@ const AdminTemplates = () => {
           onPreview={(previewData) => {
             console.log('Preview:', previewData);
           }}
-          onDelete={(template) => {
-            const updatedTemplates = certificateTemplates.filter(t => t.id !== template.id);
-            saveCertificateTemplates(updatedTemplates);
-            setShowEditor(false);
-            setEditingCertificateTemplate(null);
+          onDelete={async (template) => {
+            try {
+              await certificateService.deleteTemplate(template.id);
+              toast({ 
+                title: "ลบสำเร็จ!", 
+                description: `เทมเพลต "${template.name}" ถูกลบแล้ว`, 
+                variant: "destructive" 
+              });
+              
+              // Reload templates from API
+              await loadCertificateTemplates();
+              
+              setShowEditor(false);
+              setEditingCertificateTemplate(null);
+            } catch (error) {
+              console.error('Error deleting template:', error);
+              toast({ 
+                title: "เกิดข้อผิดพลาด", 
+                description: error.message || "ไม่สามารถลบเทมเพลตได้",
+                variant: "destructive"
+              });
+            }
           }}
         />
       )}

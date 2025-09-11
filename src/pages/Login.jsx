@@ -214,6 +214,16 @@ const Login = () => {
                   </p>
                 </div>
 
+                {/* Admin Login Link */}
+                <div className="text-center mt-4">
+                  <Link 
+                    to="/admin-login" 
+                    className="font-custom text-sm text-gray-500 hover:text-[#533193] transition-colors"
+                  >
+                    🔐 เข้าสู่ระบบแอดมิน
+                  </Link>
+                </div>
+
                 {/* Back to Home */}
                 <div className="text-center mt-6">
                   <Link 

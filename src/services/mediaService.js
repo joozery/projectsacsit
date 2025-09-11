@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:5001/api';
 
 // Debug API URL
 console.log('🔗 API Base URL:', API_BASE_URL);
@@ -96,9 +96,10 @@ class MediaService {
       console.log('📁 Fetching folder images from folder_images table:', folderId);
       console.log('📁 API URL:', `${API_BASE_URL}/folders/${folderId}/images`);
       
-      const response = await fetch(`${API_BASE_URL}/folders/${folderId}/images`, addHeaders({
-        method: 'GET'
-      }));
+      const response = await fetch(`${API_BASE_URL}/folders/${folderId}/images`, {
+        method: 'GET',
+        ...addHeaders()
+      });
       
       console.log('📁 Response status:', response.status);
       console.log('📁 Response headers:', Object.fromEntries(response.headers.entries()));
@@ -153,11 +154,12 @@ class MediaService {
       
       console.log(`⏱️ Upload timeout set to ${dynamicTimeout/1000}s for ${files.length} files`);
       
-      const response = await fetch(`${API_BASE_URL}/upload/folder/${folderId}`, addHeaders({
+      const response = await fetch(`${API_BASE_URL}/upload/folder/${folderId}`, {
         method: 'POST',
         body: formData,
         signal: controller.signal
-      }));
+        // Don't set Content-Type header for FormData - let browser set it with boundary
+      });
       
       clearTimeout(timeoutId);
       
@@ -452,13 +454,16 @@ class MediaService {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${API_BASE_URL}/upload`, addHeaders({
+      const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
         body: formData,
-      }));
+        // Don't set Content-Type header for FormData - let browser set it with boundary
+      });
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ Upload error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();
@@ -495,13 +500,16 @@ class MediaService {
         formData.append('files', file);
       });
       
-      const response = await fetch(`${API_BASE_URL}/upload/multiple`, addHeaders({
+      const response = await fetch(`${API_BASE_URL}/upload/multiple`, {
         method: 'POST',
         body: formData,
-      }));
+        // Don't set Content-Type header for FormData - let browser set it with boundary
+      });
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ Multiple upload error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();

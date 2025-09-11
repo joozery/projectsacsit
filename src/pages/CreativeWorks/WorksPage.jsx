@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 const WorksPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredCard, setHoveredCard] = useState(null);
-  const worksPerPage = 6;
+  const worksPerPage = 8;
 
   // ใช้ Works API
   const { works: apiWorks, loading: worksLoading } = useWorks({ 
@@ -190,8 +190,8 @@ const WorksPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Loading State */}
           {worksLoading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3, 4, 5, 6].map((index) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((index) => (
                 <motion.div 
                   key={index} 
                   className="bg-white rounded-lg shadow-lg overflow-hidden"
@@ -212,7 +212,7 @@ const WorksPage = () => {
           <AnimatePresence mode="wait">
             {!worksLoading && (
               <motion.div 
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

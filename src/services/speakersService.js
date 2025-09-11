@@ -1,5 +1,5 @@
 // Simple fetch-based speakers service as fallback
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:5001/api';
 
 export const speakersService = {
   async getSpeakers(params = {}) {

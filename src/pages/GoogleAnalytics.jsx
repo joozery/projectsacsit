@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
 import { BarChart, PieChart, Users, Download, ExternalLink, Search as SearchIcon, Calendar, MapPin, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import GoogleAnalyticsSetup from '@/components/GoogleAnalyticsSetup';
+import analytics from '@/services/analytics';
 
 const StatCard = ({ title, value, icon: Icon, change, changeType, bgColor = 'bg-white' }) => {
   return (
@@ -71,6 +73,36 @@ const KeywordSourceItem = ({ keyword, count, source }) => {
 
 const GoogleAnalytics = () => {
   const { toast } = useToast();
+  const [isConnected, setIsConnected] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState(null);
+
+  useEffect(() => {
+    // Check if Analytics is connected
+    const checkConnection = () => {
+      const connected = analytics.isWorking();
+      setIsConnected(connected);
+      
+      if (connected) {
+        // Load analytics data
+        loadAnalyticsData();
+      }
+    };
+
+    checkConnection();
+    
+    // Check every 5 seconds for connection changes
+    const interval = setInterval(checkConnection, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadAnalyticsData = async () => {
+    try {
+      const data = await analytics.getAnalyticsData();
+      setAnalyticsData(data);
+    } catch (error) {
+      console.error('Error loading analytics data:', error);
+    }
+  };
 
   const handleConnectAnalytics = () => {
     toast({
@@ -130,6 +162,9 @@ const GoogleAnalytics = () => {
             </Button>
           </div>
         </motion.div>
+
+        {/* Google Analytics Setup Component */}
+        <GoogleAnalyticsSetup />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard title="ผู้เข้าชมทั้งหมด" value="12,345" icon={Users} change="+15% vs last month" changeType="positive" />

@@ -13,9 +13,12 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { UploadCloud } from 'lucide-react';
+import { UploadCloud, X, Image } from 'lucide-react';
+import { certificateService } from '@/services/certificateService';
+import { useToast } from '@/components/ui/use-toast';
 
 const CertificateForm = ({ certificate, onSubmit, onCancel }) => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     type: '',
@@ -25,6 +28,7 @@ const CertificateForm = ({ certificate, onSubmit, onCancel }) => {
     backgroundUrl: '', 
   });
   const [previewImage, setPreviewImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (certificate) {
@@ -71,14 +75,79 @@ const CertificateForm = ({ certificate, onSubmit, onCancel }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const dataToSubmit = { ...formData };
-    if (formData.backgroundImage) {
-      dataToSubmit.backgroundUrl = previewImage;
+    
+    if (!formData.name.trim()) {
+      toast({
+        title: "ข้อมูลไม่ครบถ้วน",
+        description: "กรุณาใส่ชื่อใบประกาศ",
+        variant: "destructive",
+      });
+      return;
     }
-    delete dataToSubmit.backgroundImage; 
-    onSubmit(dataToSubmit);
+
+    if (!formData.type.trim()) {
+      toast({
+        title: "ข้อมูลไม่ครบถ้วน",
+        description: "กรุณาเลือกประเภทใบประกาศ",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      let response;
+      if (certificate) {
+        // Update existing certificate
+        response = await certificateService.updateTemplate(
+          certificate.id,
+          {
+            name: formData.name,
+            type: formData.type,
+            event_date: formData.eventDate || null,
+            status: formData.status
+          },
+          formData.backgroundImage,
+          false // removeBackground
+        );
+      } else {
+        // Create new certificate
+        response = await certificateService.createTemplate(
+          {
+            name: formData.name,
+            type: formData.type,
+            event_date: formData.eventDate || null,
+            status: formData.status
+          },
+          formData.backgroundImage
+        );
+      }
+
+      if (response.success) {
+        toast({
+          title: certificate ? "อัพเดตสำเร็จ!" : "สร้างสำเร็จ!",
+          description: certificate ? "ข้อมูลใบประกาศถูกอัพเดตแล้ว" : "ใบประกาศใหม่ถูกสร้างแล้ว",
+        });
+        
+        if (onSubmit) {
+          onSubmit(response.data);
+        }
+      } else {
+        throw new Error(response.message || 'Failed to save certificate');
+      }
+    } catch (error) {
+      console.error('Error saving certificate:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: error.message || "ไม่สามารถบันทึกข้อมูลได้",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -132,10 +201,17 @@ const CertificateForm = ({ certificate, onSubmit, onCancel }) => {
       </div>
       <DialogFooter>
         <DialogClose asChild>
-          <Button type="button" variant="outline" onClick={onCancel}>ยกเลิก</Button>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={uploading}>ยกเลิก</Button>
         </DialogClose>
-        <Button type="submit" className="bg-violet-600 hover:bg-violet-700 text-white">
-          {certificate ? 'บันทึกการเปลี่ยนแปลง' : 'เพิ่มใบประกาศ'}
+        <Button type="submit" className="bg-violet-600 hover:bg-violet-700 text-white" disabled={uploading}>
+          {uploading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              {certificate ? 'กำลังอัพเดต...' : 'กำลังสร้าง...'}
+            </>
+          ) : (
+            certificate ? 'บันทึกการเปลี่ยนแปลง' : 'เพิ่มใบประกาศ'
+          )}
         </Button>
       </DialogFooter>
     </form>
